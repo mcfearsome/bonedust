@@ -93,7 +93,7 @@ class AppAttest
       public_key = chain.first.public_key
       verify_key_id!(key_id, public_key)
       verify_rp_id!(auth_data[:rp_id_hash])
-      verify_aaguid!(auth_data[:raw])
+      verify_aaguid!(auth_data[:raw], expected: true)
 
       digger.update!(
         attest_key_id: key_id,
@@ -197,9 +197,19 @@ class AppAttest
       raise Failure, "relying party mismatch" unless secure_equal?(rp_id_hash, expected)
     end
 
-    def verify_aaguid!(bytes)
-      # Only an attestation carries attestedCredentialData; an assertion does not.
-      return if bytes.bytesize < 53
+    # `expected` says whether the caller requires attestedCredentialData to be present.
+    #
+    # An assertion legitimately has none, so it passes false. A registration must have it,
+    # and passes true — otherwise truncated authenticator data would skip this check
+    # silently, which is the same fail-open shape as the relying-party hole and worth
+    # closing even though Apple's nonce extension already binds the real authData to the
+    # certificate and makes truncation unusable in practice.
+    def verify_aaguid!(bytes, expected: false)
+      if bytes.bytesize < 53
+        raise Failure, "attestation carries no credential data" if expected
+
+        return
+      end
 
       aaguid = bytes[37, 16].b
       case aaguid

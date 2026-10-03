@@ -251,3 +251,18 @@ RSpec.describe AppAttest, "configuration" do
     end
   end
 end
+
+RSpec.describe AppAttest, "truncated authenticator data" do
+  it "refuses an attestation that carries no credential data" do
+    # The same fail-open shape as the relying-party hole: skipping a check because the
+    # input was too short to run it.
+    short = (("\x11" * 32) + [0x40].pack("C") + [1].pack("N")).b
+    expect { described_class.send(:verify_aaguid!, short, expected: true) }
+      .to raise_error(described_class::Failure, /no credential data/)
+  end
+
+  it "still allows an assertion, which has none by design" do
+    short = (("\x11" * 32) + [0x40].pack("C") + [1].pack("N")).b
+    expect { described_class.send(:verify_aaguid!, short, expected: false) }.not_to raise_error
+  end
+end
