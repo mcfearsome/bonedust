@@ -416,31 +416,16 @@ public enum EconomySimulator {
         catalog: ContentCatalog = .shared,
         tuning: SimTuning = .standard
     ) -> [TierReport] {
-        let lock = NSLock()
-        var runs = [Int](repeating: 0, count: maxTier + 1)
-        var wins = [Int](repeating: 0, count: maxTier + 1)
-        var earned = [Int](repeating: 0, count: maxTier + 1)
-        var exposure = [Double](repeating: 0, count: maxTier + 1)
-        var intact = [Double](repeating: 0, count: maxTier + 1)
-        var slabTotal = [Int](repeating: 0, count: maxTier + 1)
-        var slabCount = [Int](repeating: 0, count: maxTier + 1)
+        let tally = TierTally(tiers: maxTier)
 
         DispatchQueue.concurrentPerform(iterations: count) { career in
             var meta = MetaProgress()
-            var localRuns = [Int](repeating: 0, count: maxTier + 1)
-            var localWins = [Int](repeating: 0, count: maxTier + 1)
-            var localEarned = [Int](repeating: 0, count: maxTier + 1)
-            var localExposure = [Double](repeating: 0, count: maxTier + 1)
-            var localIntact = [Double](repeating: 0, count: maxTier + 1)
-            var localSlabTotal = [Int](repeating: 0, count: maxTier + 1)
-            var localSlabCount = [Int](repeating: 0, count: maxTier + 1)
-
             while meta.nextTier <= maxTier {
                 let tier = meta.nextTier
                 // A player digs the best site they have earned, not the first one. Held
-                // fixed, the sweep measured a career that never progresses, which made
-                // the installment ramp look unwinnable when it is the map that is meant
-                // to keep up with it.
+                // fixed, the sweep measured a career that never progresses, which made the
+                // installment ramp look unwinnable when it is the map that is meant to
+                // keep up with it.
                 let site = richestUnlockedSite(
                     reputation: meta.reputation, fallback: siteID, catalog: catalog
                 )
@@ -452,46 +437,14 @@ public enum EconomySimulator {
                     catalog: catalog, tuning: tuning,
                     toolIDs: meta.carriedToolIDs, charmIDs: meta.carriedCharmIDs
                 )
-                var won = false
-                if case .succeeded = run.phase { won = true }
-                localRuns[tier] += 1
-                if won { localWins[tier] += 1 }
-                localEarned[tier] += run.totalEarned
-                localExposure[tier] += run.slabs.reduce(0.0) { $0 + Double($1.payout.exposure) }
-                localIntact[tier] += run.slabs.reduce(0.0) { $0 + Double($1.payout.intact) }
-                localSlabTotal[tier] += run.slabs.reduce(0) { $0 + $1.payout.total }
-                localSlabCount[tier] += run.slabs.count
+                tally.record(tier: tier, run: run)
                 meta.absorb(run)
-                if !won { break }
+                if case .succeeded = run.phase { continue }
+                break
             }
-
-            lock.lock()
-            for tier in 0...maxTier {
-                runs[tier] += localRuns[tier]
-                wins[tier] += localWins[tier]
-                earned[tier] += localEarned[tier]
-                exposure[tier] += localExposure[tier]
-                intact[tier] += localIntact[tier]
-                slabTotal[tier] += localSlabTotal[tier]
-                slabCount[tier] += localSlabCount[tier]
-            }
-            lock.unlock()
         }
 
-        return (1...maxTier).compactMap { tier in
-            guard runs[tier] > 0 else { return nil }
-            return TierReport(
-                tier: tier,
-                installment: Installments.amount(tier: tier),
-                runs: runs[tier],
-                wins: wins[tier],
-                meanEarned: Double(earned[tier]) / Double(runs[tier]),
-                meanExposure: slabCount[tier] == 0 ? 0 : exposure[tier] / Double(slabCount[tier]),
-                meanIntact: slabCount[tier] == 0 ? 0 : intact[tier] / Double(slabCount[tier]),
-                meanSlabPayout: slabCount[tier] == 0 ? 0
-                    : Double(slabTotal[tier]) / Double(slabCount[tier])
-            )
-        }
+        return tally.reports(tiers: 1...maxTier)
     }
 
     /// Highest-paying site the given Reputation has unlocked.
@@ -535,15 +488,9 @@ public enum EconomySimulator {
         catalog: ContentCatalog = .shared,
         tuning: SimTuning = .standard
     ) -> [TierReport] {
-        tiers.map { tier in
-            let lock = NSLock()
-            var wins = 0
-            var earned = 0
-            var exposure = 0.0
-            var intact = 0.0
-            var slabTotal = 0
-            var slabCount = 0
+        let tally = TierTally(tiers: tiers.upperBound)
 
+        for tier in tiers {
             DispatchQueue.concurrentPerform(iterations: runsPerTier) { index in
                 let runSeed = seed
                     ^ (UInt64(tier) &* 0x9E37_79B9_7F4A_7C15)
@@ -552,32 +499,81 @@ public enum EconomySimulator {
                     seed: runSeed, siteID: siteID, tier: tier,
                     policy: policy, catalog: catalog, tuning: tuning
                 )
-                var won = false
-                if case .succeeded = run.phase { won = true }
-                let localExposure = run.slabs.reduce(0.0) { $0 + Double($1.payout.exposure) }
-                let localIntact = run.slabs.reduce(0.0) { $0 + Double($1.payout.intact) }
-                let localTotal = run.slabs.reduce(0) { $0 + $1.payout.total }
-
-                lock.lock()
-                if won { wins += 1 }
-                earned += run.totalEarned
-                exposure += localExposure
-                intact += localIntact
-                slabTotal += localTotal
-                slabCount += run.slabs.count
-                lock.unlock()
+                tally.record(tier: tier, run: run)
             }
+        }
 
-            return TierReport(
-                tier: tier,
-                installment: Installments.amount(tier: tier),
-                runs: runsPerTier,
-                wins: wins,
-                meanEarned: Double(earned) / Double(runsPerTier),
-                meanExposure: slabCount == 0 ? 0 : exposure / Double(slabCount),
-                meanIntact: slabCount == 0 ? 0 : intact / Double(slabCount),
-                meanSlabPayout: slabCount == 0 ? 0 : Double(slabTotal) / Double(slabCount)
-            )
+        return tally.reports(tiers: tiers)
+    }
+}
+
+/// Accumulates sweep results across threads.
+///
+/// A type that owns its lock, rather than a handful of `var`s captured by a concurrent
+/// closure. The previous version was correct — every mutation sat between `lock.lock()` and
+/// `lock.unlock()` — but the compiler could not see that, and Swift 6.2 says so. "Correct
+/// but unprovable" is how a later edit adds a mutation outside the lock and nothing
+/// notices. Here the state is private and the only way to touch it is a method that takes
+/// the lock first, so the invariant is structural instead of remembered.
+private final class TierTally: @unchecked Sendable {
+    private let lock = NSLock()
+    private var runs: [Int]
+    private var wins: [Int]
+    private var earned: [Int]
+    private var exposure: [Double]
+    private var intact: [Double]
+    private var slabTotal: [Int]
+    private var slabCount: [Int]
+
+    init(tiers: Int) {
+        let size = max(1, tiers + 1)
+        runs = Array(repeating: 0, count: size)
+        wins = Array(repeating: 0, count: size)
+        earned = Array(repeating: 0, count: size)
+        exposure = Array(repeating: 0, count: size)
+        intact = Array(repeating: 0, count: size)
+        slabTotal = Array(repeating: 0, count: size)
+        slabCount = Array(repeating: 0, count: size)
+    }
+
+    /// Folds one finished run in.
+    func record(tier: Int, run: RunState) {
+        guard runs.indices.contains(tier) else { return }
+        var won = false
+        if case .succeeded = run.phase { won = true }
+        let runExposure = run.slabs.reduce(0.0) { $0 + Double($1.payout.exposure) }
+        let runIntact = run.slabs.reduce(0.0) { $0 + Double($1.payout.intact) }
+        let runSlabTotal = run.slabs.reduce(0) { $0 + $1.payout.total }
+
+        lock.withLock {
+            runs[tier] += 1
+            if won { wins[tier] += 1 }
+            earned[tier] += run.totalEarned
+            exposure[tier] += runExposure
+            intact[tier] += runIntact
+            slabTotal[tier] += runSlabTotal
+            slabCount[tier] += run.slabs.count
+        }
+    }
+
+    func reports(tiers: ClosedRange<Int>) -> [TierReport] {
+        lock.withLock {
+            tiers.compactMap { tier in
+                guard runs.indices.contains(tier), runs[tier] > 0 else { return nil }
+                return TierReport(
+                    tier: tier,
+                    installment: Installments.amount(tier: tier),
+                    runs: runs[tier],
+                    wins: wins[tier],
+                    meanEarned: Double(earned[tier]) / Double(runs[tier]),
+                    meanExposure: slabCount[tier] == 0 ? 0
+                        : exposure[tier] / Double(slabCount[tier]),
+                    meanIntact: slabCount[tier] == 0 ? 0
+                        : intact[tier] / Double(slabCount[tier]),
+                    meanSlabPayout: slabCount[tier] == 0 ? 0
+                        : Double(slabTotal[tier]) / Double(slabCount[tier])
+                )
+            }
         }
     }
 }
