@@ -1,7 +1,12 @@
-import BonedustCore
 import Foundation
 
 /// Turns the cell grid into a 96x128 RGBA buffer.
+///
+/// Lives in the package rather than the app because it imports nothing but Foundation —
+/// which means `bonedust-tool render` can produce actual slab images headlessly. Being
+/// able to *look* at the output is worth more than any assertion about it: the palette, the
+/// depth-1 bone tell and the edge shading are all judgements the eye makes and a test
+/// cannot.
 ///
 /// The buffer is CPU-side and persistent: only cells inside the dirty rectangle are
 /// recomputed, then the whole 48 KB is memcpy'd into the SpriteKit texture. Copying
@@ -11,22 +16,22 @@ import Foundation
 /// All colour decisions live here and all colour *values* live in `SlabPalette`,
 /// which is content data. This file decides how layers blend; the site decides what
 /// colour its clay is.
-struct SlabRenderer {
+public struct SlabRenderer {
 
-    static let width = SlabGrid.width
-    static let height = SlabGrid.height
-    static let bytesPerPixel = 4
+    public static let width = SlabGrid.width
+    public static let height = SlabGrid.height
+    public static let bytesPerPixel = 4
 
-    var palette: SlabPalette
-    var tuning: SimTuning
+    public var palette: SlabPalette
+    public var tuning: SimTuning
     /// Night digs dim everything. 1.0 is full daylight.
-    var lightLevel: Float = 1
+    public var lightLevel: Float = 1
     /// X-ray goggles: shows buried bone through the matrix for a few seconds.
-    var revealBuriedBone = false
+    public var revealBuriedBone = false
 
-    private(set) var pixels: [UInt8]
+    public private(set) var pixels: [UInt8]
 
-    init(palette: SlabPalette = .standard, tuning: SimTuning = .standard) {
+    public init(palette: SlabPalette = .standard, tuning: SimTuning = .standard) {
         self.palette = palette
         self.tuning = tuning
         self.pixels = [UInt8](
@@ -62,7 +67,7 @@ struct SlabRenderer {
     /// The inflation is not paranoia: bone edge shading reads the cells above and
     /// below, so clearing cell *y* changes the appearance of *y-1* and *y+1* too.
     /// Without it, digging leaves a one-pixel stale seam along every edge.
-    mutating func redraw(_ grid: SlabGrid, region: DirtyRegion) {
+    public mutating func redraw(_ grid: SlabGrid, region: DirtyRegion) {
         guard !region.isEmpty else { return }
         let x0 = max(0, region.minX - 1)
         let x1 = min(SlabRenderer.width - 1, region.maxX + 1)
@@ -85,7 +90,7 @@ struct SlabRenderer {
         }
     }
 
-    mutating func redrawEverything(_ grid: SlabGrid) {
+    public mutating func redrawEverything(_ grid: SlabGrid) {
         redraw(grid, region: .everything)
     }
 
@@ -115,8 +120,14 @@ struct SlabRenderer {
             let boneAbove = y > 0 && grid.isBone(SlabGrid.index(x, y - 1))
             let boneBelow = y < SlabRenderer.height - 1
                 && grid.isBone(SlabGrid.index(x, y + 1))
-            if !boneAbove { result = result.scaled(1.12) }
-            if !boneBelow { result = result.scaled(0.86) }
+            // A cell with bone on neither side is a one-cell-wide feature, not an edge.
+            // Applying both adjustments to it multiplied out to 0.963 — slightly *darker*
+            // than plain bone — which is exactly the fine ribs of a Knightia and the veins
+            // of a leaf, the two most fragile things in the game, rendered at their least
+            // visible on the darkest site. Shading needs a surface to shade.
+            if boneAbove != boneBelow {
+                result = result.scaled(boneAbove ? 0.86 : 1.12)
+            }
         }
 
         if style.revealBuriedBone, cell.depth > 0, cell.flags & SlabGrid.Flag.bone != 0 {
@@ -162,7 +173,7 @@ struct SlabRenderer {
     }
 
     /// Dust colour for the layer currently being removed.
-    func dustColour(forLayer depth: UInt8) -> RGB8 {
+    public func dustColour(forLayer depth: UInt8) -> RGB8 {
         palette.layerColor(depth: depth).scaled(lightLevel)
     }
 }

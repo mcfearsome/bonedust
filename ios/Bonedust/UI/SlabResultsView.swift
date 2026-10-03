@@ -43,7 +43,7 @@ struct SlabResultsView: View {
                         .font(Typography.ui(.headline, weight: .bold))
                         .foregroundStyle(Ink.ground)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 54)
+                        .scaledControlHeight(54)
                         .background(Ink.accent)
                         .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
                 }

@@ -160,6 +160,16 @@ public struct SlabSimulation: Sendable {
 
     public mutating func markEverythingDirty() { dirty = .everything }
 
+    /// Sets a cell's depth directly. Only for rendering reference frames, where the point
+    /// is to see a specific layer rather than to simulate reaching it.
+    public mutating func setDepthForRendering(_ index: Int, depth: UInt8) {
+        guard grid.cells.indices.contains(index) else { return }
+        grid.cells[index].depth = depth
+        grid.cells[index].wear = 0
+        dirty = .everything
+        recountMetrics()
+    }
+
     // MARK: - Input
 
     /// Finger down. Applies one step's worth of brushing so that a tap does

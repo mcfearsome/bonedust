@@ -8,7 +8,7 @@ SIM ?= platform=iOS Simulator,name=iPhone 16
 CORE := ios/BonedustCore
 
 .PHONY: all project test test-core test-app bench simulate constants golden content app \
-	server-test server-golden server-load server-setup clean
+	server-test server-golden server-load server-setup render clean
 
 all: test
 
@@ -60,6 +60,20 @@ server-load:
 
 server-setup:
 	cd server && bundle install && bin/rails db:prepare && bin/rails db:seed
+
+# Renders slabs to PNG, headlessly. The source of App Store screenshots (§9) and the only
+# way to actually look at the rendering without a device.
+RENDER_OUT ?= build/render
+RENDER_SCALE ?= 4
+render:
+	cd $(CORE) && swift build -c release
+	mkdir -p $(RENDER_OUT)
+	$(CORE)/.build/release/bonedust-tool render $(RENDER_OUT) $(RENDER_SCALE)
+	for f in $(RENDER_OUT)/*.ppm; do \
+		sips -s format png "$$f" --out "$${f%.ppm}.png" >/dev/null; \
+	done
+	rm -f $(RENDER_OUT)/*.ppm
+	@echo "wrote $$(ls $(RENDER_OUT)/*.png | wc -l | tr -d ' ') frames to $(RENDER_OUT)"
 
 content:
 	cd $(CORE) && swift run bonedust-tool content-check

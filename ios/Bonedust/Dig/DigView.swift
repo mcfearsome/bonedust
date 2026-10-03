@@ -262,7 +262,7 @@ struct DigView: View {
                 .font(Typography.ui(.headline, weight: .bold))
                 .foregroundStyle(Ink.ground)
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
+                .scaledControlHeight(52)
                 .background(Ink.accent)
                 .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
         }
@@ -278,7 +278,7 @@ struct DigView: View {
         scene.audio = audio
         scene.reducedMotion = reduceMotion
         scene.trail = trail
-        scene.onFirstCrack = showCrackHint
+        scene.onCrack = showCrackHint
         scene.configureRenderer()
         haptics.isEnabled = settings.hapticsEnabled
         audio.isEnabled = settings.soundEnabled
@@ -292,6 +292,11 @@ struct DigView: View {
     }
 
     private func showCrackHint() {
+        // §7: crack feedback must not rely on colour alone. There is already a haptic and
+        // a speed meter whose fill crosses a notch, but a player using VoiceOver gets
+        // neither — so the crack is spoken. Announced on every crack, not just the first,
+        // because it is the only channel that player has.
+        AccessibilityNotification.Announcement("Bone cracked. Slow down.").post()
         guard !hintHasBeenShown else { return }
         hintHasBeenShown = true
         withAnimation(.easeOut(duration: 0.2)) { showHint = true }
@@ -336,7 +341,7 @@ struct ToolButton: View {
             }
             .foregroundStyle(isSelected ? Ink.ground : Ink.muted)
             .frame(maxWidth: .infinity)
-            .frame(height: 52)
+            .scaledControlHeight(52)
             .background(isSelected ? Ink.ivory : Ink.raised)
             .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
             .overlay(

@@ -168,7 +168,7 @@ struct TitleView: View {
                 .font(Typography.ui(.headline, weight: .bold))
                 .foregroundStyle(Ink.ground)
                 .frame(maxWidth: .infinity)
-                .frame(height: 54)
+                .scaledControlHeight(54)
                 .background(Ink.accent)
                 .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
         }
@@ -180,7 +180,7 @@ struct TitleView: View {
                 .font(Typography.ui(.subheadline, weight: .semibold))
                 .foregroundStyle(Ink.ivory)
                 .frame(maxWidth: .infinity)
-                .frame(height: 48)
+                .scaledControlHeight(48)
                 .background(Ink.raised)
                 .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
                 .overlay(
@@ -225,7 +225,7 @@ struct SiteSelectView: View {
                         .font(Typography.ui(.subheadline, weight: .semibold))
                         .foregroundStyle(Ink.muted)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 46)
+                        .scaledControlHeight(46)
                 }
             }
             .padding(.horizontal, Measure.gutter)

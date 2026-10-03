@@ -32,6 +32,34 @@ enum Measure {
     static let gutter: CGFloat = 16
     static let cardRadius: CGFloat = 4
     static let hairline: CGFloat = 1
+    /// Apple's minimum comfortable target. Nothing tappable goes below it.
+    static let minimumTarget: CGFloat = 44
+}
+
+/// A control height that grows with the player's text size.
+///
+/// §7 requires Dynamic Type everywhere outside the slab, and a button pinned to 54 points
+/// clips its own label at the accessibility sizes — which is worse than a button that is
+/// simply large, because the text that disappears is the one telling you what it does.
+struct ScaledControlHeight: ViewModifier {
+    // Needs a declared default even though `init` replaces it; the property wrapper
+    // cannot be declared without a wrapped value.
+    @ScaledMetric(relativeTo: .headline) private var height: CGFloat = 54
+
+    init(_ base: CGFloat) {
+        _height = ScaledMetric(wrappedValue: base, relativeTo: .headline)
+    }
+
+    func body(content: Content) -> some View {
+        content.frame(minHeight: max(Measure.minimumTarget, height))
+    }
+}
+
+extension View {
+    /// Replaces a fixed `.frame(height:)` on a control.
+    func scaledControlHeight(_ base: CGFloat) -> some View {
+        modifier(ScaledControlHeight(base))
+    }
 }
 
 /// Three faces, each with one job.

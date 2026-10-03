@@ -37,7 +37,7 @@ struct CrewLedgerView: View {
                     .font(Typography.ui(.headline, weight: .bold))
                     .foregroundStyle(Ink.ground)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
+                    .scaledControlHeight(50)
                     .background(Ink.accent)
                     .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
             }

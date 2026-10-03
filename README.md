@@ -43,6 +43,7 @@ make server-test   # 67 examples: plausibility, idempotency, attestation, boards
 make server-golden # the cross-language check alone. No bundler, no database.
 make server-load   # 500 concurrent payments; needs a running server.
 make golden        # regenerate the fixture after a content or tuning change.
+make render        # slab PNGs, headlessly. Screenshots, and a way to see the game.
 ```
 
 `make test` runs the core suite *and* the cross-language golden check, because a tuning
@@ -80,7 +81,10 @@ Xcode supports — see **Toolchain** in `DECISIONS.md` if `xcodebuild` reports
   server-side plausibility ceiling with a cross-language golden test, the durable payment
   queue, cached milestone unlocks and the Crew Ledger screen. 67 server examples; 500
   concurrent payments lose nothing.
-- M6 polish: not started.
+- **M6 — polish: in progress.** Crack and gem particles, a VoiceOver announcement on every
+  crack, Dynamic Type-safe control heights, and `make render` — which writes slab PNGs
+  headlessly and is both the App Store screenshot pipeline and the only way to look at the
+  game without a device.
 
 179 core tests pass. App-layer tests compile but cannot be *run* here — see
 **Toolchain** in `DECISIONS.md`.

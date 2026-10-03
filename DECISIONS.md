@@ -370,3 +370,32 @@ Fixed three ways, because one of them is a config file somebody will get wrong:
 
 The lesson worth keeping: "unset in development" is a reason to branch on the *environment*,
 never a reason to skip a security check. The branch belongs on `required?`.
+
+## M6: looking at the game for the first time
+
+`SlabRenderer` imported only Foundation, so it moved into the package and
+`bonedust-tool render` now writes slab PNGs headlessly. That is the first time anybody has
+seen Bonedust, and it is also §9's App Store screenshot pipeline — reproducible from a seed
+rather than captured by hand.
+
+What looking at it settled, which no test could:
+
+- **The depth-1 tell works.** A crinoid under sandstone reads as a chain of pale ovals:
+  subtle enough that you have to look, unmistakable once you know. Careful play is possible,
+  which is the whole of pillar 2.
+- **Cracked bone reads as ruined.** Dark brown shot through with surviving white fragments.
+  No explanation needed.
+- **Night digs are readable at 0.55 light.** The fossil still reads as a bright lens and
+  gems still read as teal. The obvious way to make a site unplayable, avoided.
+- **Rock nodules read as stone, not as holes.**
+
+And one real bug it exposed. Bone edge shading lightens a cell with no bone above it and
+darkens one with no bone below. A cell with bone on *neither* side got both, multiplying out
+to 0.963 — slightly **darker** than plain bone. That is precisely the one-cell-wide ribs of a
+Knightia and the veins of a fossil leaf: the two most fragile things in the game, rendered at
+their least visible, on the darkest site. Shading now applies only where there is a surface
+to shade, and a test covers the hairline case.
+
+The test that found it first asserted the wrong threshold, and probing the actual pixel
+values rather than guessing is what turned "my assertion was too strict" into "and here is a
+genuine rendering bug underneath it".

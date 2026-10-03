@@ -25,8 +25,10 @@ final class DigScene: SKScene {
     /// any earned trail overrides that with its own colour, which is the whole point of
     /// having chosen it.
     var trail: BrushTrail = .natural
-    /// Fires the first time a crack happens, for the single diegetic hint in §9.
-    var onFirstCrack: (() -> Void)?
+    /// Fires on every crack. The view shows §9's one diegetic hint only the first time,
+    /// but a VoiceOver announcement has to happen every time, because it is the only
+    /// channel a player who cannot see the meter has.
+    var onCrack: (() -> Void)?
 
     private var renderer = SlabRenderer()
     private var slabNode: SKSpriteNode?
@@ -216,11 +218,11 @@ final class DigScene: SKScene {
         if result.cracksStarted > 0 {
             haptics?.crack()
             audio?.playCrack()
-            if !hasReportedCrack {
-                hasReportedCrack = true
-                onFirstCrack?()
-            }
+            hasReportedCrack = true
+            onCrack?()
+            if let cell = result.firstCrackCell { emitCrackBurst(at: cell) }
         }
+        if result.gemsCompleted > 0 { emitGemSparkle(at: point) }
         if result.gemsCompleted > 0 {
             haptics?.gemFreed()
             audio?.playGem()
@@ -260,6 +262,74 @@ final class DigScene: SKScene {
         // Birth rate follows how much material actually came off, so a stroke over
         // bare matrix throws dust and a stroke over bone barely does.
         emitter.particleBirthRate = min(260, CGFloat(result.layersRemoved) * 9)
+    }
+
+    /// A short, sharp burst where bone broke.
+    ///
+    /// Separate from the dust emitter rather than a louder version of it: dust follows the
+    /// finger continuously, and a crack is an event somewhere specific. Reusing one emitter
+    /// would mean the burst drags along behind the brush.
+    private func emitCrackBurst(at cellIndex: Int) {
+        guard !reducedMotion, let node = slabNode else { return }
+        let x = cellIndex % SlabGrid.width
+        let y = cellIndex / SlabGrid.width
+        let burst = SKEmitterNode()
+        burst.particleTexture = DigScene.dustTexture
+        burst.particleBirthRate = 900
+        burst.numParticlesToEmit = 14
+        burst.particleLifetime = 0.34
+        burst.particleSpeed = 72
+        burst.particleSpeedRange = 40
+        burst.emissionAngleRange = .pi * 2
+        burst.particleAlpha = 0.85
+        burst.particleAlphaSpeed = -2.6
+        burst.particleScale = 0.07
+        burst.particleScaleSpeed = -0.12
+        burst.particleColorBlendFactor = 1
+        let tint = renderer.palette.crackedBone
+        burst.particleColor = SKColor(
+            red: CGFloat(tint.r) / 255, green: CGFloat(tint.g) / 255,
+            blue: CGFloat(tint.b) / 255, alpha: 1
+        )
+        burst.position = CGPoint(
+            x: (CGFloat(x) / CGFloat(SlabGrid.width) - 0.5) * node.size.width,
+            y: (0.5 - CGFloat(y) / CGFloat(SlabGrid.height)) * node.size.height
+        )
+        burst.zPosition = 2
+        burst.targetNode = self
+        node.addChild(burst)
+        burst.run(.sequence([.wait(forDuration: 0.9), .removeFromParent()]))
+    }
+
+    /// A gem coming free. Teal, and the only place that colour is ever used (§7).
+    private func emitGemSparkle(at point: Vec2) {
+        guard !reducedMotion, let node = slabNode else { return }
+        let sparkle = SKEmitterNode()
+        sparkle.particleTexture = DigScene.dustTexture
+        sparkle.particleBirthRate = 600
+        sparkle.numParticlesToEmit = 20
+        sparkle.particleLifetime = 0.6
+        sparkle.particleSpeed = 46
+        sparkle.particleSpeedRange = 30
+        sparkle.emissionAngleRange = .pi * 2
+        sparkle.particleAlpha = 0.95
+        sparkle.particleAlphaSpeed = -1.5
+        sparkle.particleScale = 0.055
+        sparkle.particleScaleSpeed = -0.05
+        sparkle.particleColorBlendFactor = 1
+        let tint = renderer.palette.gem
+        sparkle.particleColor = SKColor(
+            red: CGFloat(tint.r) / 255, green: CGFloat(tint.g) / 255,
+            blue: CGFloat(tint.b) / 255, alpha: 1
+        )
+        sparkle.position = CGPoint(
+            x: (CGFloat(point.x) / CGFloat(SlabGrid.width) - 0.5) * node.size.width,
+            y: (0.5 - CGFloat(point.y) / CGFloat(SlabGrid.height)) * node.size.height
+        )
+        sparkle.zPosition = 2
+        sparkle.targetNode = self
+        node.addChild(sparkle)
+        sparkle.run(.sequence([.wait(forDuration: 1.2), .removeFromParent()]))
     }
 
     private func makeDust() -> SKEmitterNode {

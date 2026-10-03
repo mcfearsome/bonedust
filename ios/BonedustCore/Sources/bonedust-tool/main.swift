@@ -241,6 +241,111 @@ case "golden":
         Data("wrote \(derivations.count) derivations to \(path)\n".utf8)
     )
 
+case "render":
+    // Renders slabs to PNG, headlessly.
+    //
+    // This exists so the rendering can be *looked at*. The palette, the depth-1 bone tell
+    // and the bone edge shading are judgements the eye makes; a unit test can only confirm
+    // that some pixel got brighter. It doubles as the source of App Store screenshots
+    // (§9), which are then reproducible from a seed rather than captured by hand.
+    let outDir = arguments.count > 1 ? arguments[1] : "build/render"
+    try FileManager.default.createDirectory(
+        at: URL(fileURLWithPath: outDir), withIntermediateDirectories: true
+    )
+    let scale = Int(arguments.count > 2 ? arguments[2] : "4") ?? 4
+
+    /// Writes a scaled PPM. Nearest-neighbour, because that is what the game does and a
+    /// smoothed screenshot would misrepresent it.
+    func writePPM(_ pixels: [UInt8], to path: String, scale: Int) throws {
+        let w = SlabGrid.width, h = SlabGrid.height
+        var out = Data("P6\n\(w * scale) \(h * scale)\n255\n".utf8)
+        out.reserveCapacity(out.count + w * scale * h * scale * 3)
+        for y in 0..<(h * scale) {
+            let sourceY = y / scale
+            for x in 0..<(w * scale) {
+                let offset = (sourceY * w + x / scale) * 4
+                out.append(pixels[offset])
+                out.append(pixels[offset + 1])
+                out.append(pixels[offset + 2])
+            }
+        }
+        try out.write(to: URL(fileURLWithPath: path))
+    }
+
+    /// Sweeps the slab, optionally fast enough to wreck it.
+    func dig(_ sim: inout SlabSimulation, tool: BrushTool, passes: Int, cellsPerSample: Float) {
+        let rowStep = max(1.2, tool.radius * 0.85)
+        sim.beginStroke(at: Vec2(3, 3), tool: tool)
+        for _ in 0..<passes {
+            var y: Float = 3
+            var row = 0
+            while y < Float(SlabGrid.height) - 3 {
+                let forward = row % 2 == 0
+                let xs = forward
+                    ? stride(from: Float(3), through: Float(SlabGrid.width) - 3, by: cellsPerSample)
+                    : stride(from: Float(SlabGrid.width) - 3, through: 3, by: -cellsPerSample)
+                for x in xs {
+                    sim.moveStroke(to: Vec2(x, y), deltaMillis: 16.67, tool: tool)
+                }
+                y += rowStep
+                row += 1
+                // Lift between passes rather than dragging back across the slab.
+                sim.endStroke()
+                sim.beginStroke(at: Vec2(forward ? Float(SlabGrid.width) - 3 : 3, y), tool: tool)
+            }
+        }
+        sim.endStroke()
+    }
+
+    var written: [String] = []
+    for site in ContentCatalog.shared.sites {
+        // A seed per site that turns up a recognisable fossil.
+        let seed: UInt64 = 0x5CE_0000 ^ UInt64(abs(site.id.hashValue % 9_973))
+        let states: [(String, (inout SlabSimulation) -> Void)] = [
+            ("1-untouched", { _ in }),
+            ("2-started", { dig(&$0, tool: .brush, passes: 1, cellsPerSample: 2.0) }),
+            ("3-exposed", { dig(&$0, tool: .fineBrush, passes: 9, cellsPerSample: 1.0) }),
+            ("4-wrecked", { dig(&$0, tool: .airBlower, passes: 6, cellsPerSample: 14) }),
+            // Cleared to sandstone and no further. This is the only state in which §3's
+            // tell is doing its job, and the only way to know whether a player can
+            // actually see bone coming is to look at it.
+            ("5-tell", { sim in
+                for index in 0..<SlabGrid.cellCount {
+                    sim.setDepthForRendering(index, depth: 1)
+                }
+            }),
+        ]
+        for (label, action) in states {
+            var sim = SlabSimulation(seed: seed, site: site)
+            sim.crackMultiplier = site.modifiers.crackMultiplier
+            action(&sim)
+            var renderer = SlabRenderer(palette: site.palette)
+            renderer.lightLevel = site.modifiers.lightLevel
+            renderer.redrawEverything(sim.grid)
+            let name = "\(site.id)-\(label)"
+            try writePPM(renderer.pixels, to: "\(outDir)/\(name).ppm", scale: scale)
+            written.append(name)
+            print(name.padding(toLength: 26, withPad: " ", startingAt: 0)
+                + sim.layout.fossilID.padding(toLength: 20, withPad: " ", startingAt: 0)
+                + String(format: "exposure %.2f  intact %.2f", sim.exposure, sim.intact))
+        }
+    }
+
+    // An X-ray view, to check the reveal tint reads at all.
+    if let site = ContentCatalog.shared.site("charmouth") {
+        var sim = SlabSimulation(seed: 0x5CE_0000, site: site)
+        var renderer = SlabRenderer(palette: site.palette)
+        renderer.revealBuriedBone = true
+        renderer.redrawEverything(sim.grid)
+        try writePPM(renderer.pixels, to: "\(outDir)/charmouth-5-xray.ppm", scale: scale)
+        written.append("charmouth-5-xray")
+        _ = sim
+    }
+
+    FileHandle.standardError.write(
+        Data("wrote \(written.count) frames to \(outDir)\n".utf8)
+    )
+
 case "content-check":
     let problems = ContentCatalog.shared.validate()
     if problems.isEmpty {

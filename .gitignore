@@ -3,7 +3,9 @@
 *.xcodeproj/project.xcworkspace/xcuserdata/
 *.xcworkspace/xcuserdata/
 .build/
+/build/render/
 build/
+/build/render/
 DerivedData/
 .swiftpm/
 ios/Bonedust.xcodeproj/
