@@ -6,25 +6,40 @@ public struct ContentCatalog: Sendable, Codable {
     public var fossils: [Fossil]
     public var sites: [Site]
     public var sets: [SkeletonSet]
+    public var tools: [Tool]
+    public var charms: [Charm]
 
     /// Built once in `init`, because the dig loop looks fossils up by id on every
     /// slab and a linear scan over nineteen entries inside generation is waste.
     public let fossilsByID: [String: Fossil]
     public let sitesByID: [String: Site]
     public let setsByID: [String: SkeletonSet]
+    public let toolsByID: [String: Tool]
+    public let charmsByID: [String: Charm]
 
     private enum CodingKeys: String, CodingKey {
-        case version, fossils, sites, sets
+        case version, fossils, sites, sets, tools, charms
     }
 
-    public init(version: Int, fossils: [Fossil], sites: [Site], sets: [SkeletonSet]) {
+    public init(
+        version: Int,
+        fossils: [Fossil],
+        sites: [Site],
+        sets: [SkeletonSet],
+        tools: [Tool] = [],
+        charms: [Charm] = []
+    ) {
         self.version = version
         self.fossils = fossils
         self.sites = sites
         self.sets = sets
+        self.tools = tools
+        self.charms = charms
         self.fossilsByID = Dictionary(uniqueKeysWithValues: fossils.map { ($0.id, $0) })
         self.sitesByID = Dictionary(uniqueKeysWithValues: sites.map { ($0.id, $0) })
         self.setsByID = Dictionary(uniqueKeysWithValues: sets.map { ($0.id, $0) })
+        self.toolsByID = Dictionary(uniqueKeysWithValues: tools.map { ($0.id, $0) })
+        self.charmsByID = Dictionary(uniqueKeysWithValues: charms.map { ($0.id, $0) })
     }
 
     public init(from decoder: any Decoder) throws {
@@ -33,12 +48,34 @@ public struct ContentCatalog: Sendable, Codable {
             version: try c.decode(Int.self, forKey: .version),
             fossils: try c.decode([Fossil].self, forKey: .fossils),
             sites: try c.decode([Site].self, forKey: .sites),
-            sets: try c.decode([SkeletonSet].self, forKey: .sets)
+            sets: try c.decode([SkeletonSet].self, forKey: .sets),
+            tools: try c.decodeIfPresent([Tool].self, forKey: .tools) ?? [],
+            charms: try c.decodeIfPresent([Charm].self, forKey: .charms) ?? []
         )
     }
 
     public func fossil(_ id: String) -> Fossil? { fossilsByID[id] }
     public func site(_ id: String) -> Site? { sitesByID[id] }
+    public func tool(_ id: String) -> Tool? { toolsByID[id] }
+    public func charm(_ id: String) -> Charm? { charmsByID[id] }
+
+    /// The tool every run starts with.
+    public var startingTool: Tool {
+        toolsByID[BrushTool.brush.id]
+            ?? Tool(
+                id: BrushTool.brush.id, name: BrushTool.brush.name,
+                blurb: "", price: 0, brush: .brush
+            )
+    }
+
+    /// Items the supply tent may offer, given progress.
+    public func purchasableTools(reputation: Int, pools: Set<ItemPool>) -> [Tool] {
+        tools.filter { $0.price > 0 && $0.reputationRequired <= reputation }
+    }
+
+    public func purchasableCharms(reputation: Int, pools: Set<ItemPool>) -> [Charm] {
+        charms.filter { pools.contains($0.pool) && $0.reputationRequired <= reputation }
+    }
 
     public func fossils(forSite siteID: String) -> [Fossil] {
         guard let site = sitesByID[siteID] else { return [] }
@@ -93,6 +130,29 @@ public struct ContentCatalog: Sendable, Codable {
                 problems.append("set \(set.id) perk references unknown site \(siteID)")
             }
         }
+        if toolsByID[BrushTool.brush.id] == nil {
+            problems.append("the starting brush is missing from the tool list")
+        }
+        for tool in tools {
+            if tool.isBrush, tool.brush?.id != tool.id {
+                problems.append("tool \(tool.id) wraps a brush with a different id")
+            }
+            if !tool.isBrush, tool.modifiers == ModifierSet() {
+                problems.append("passive tool \(tool.id) does nothing")
+            }
+        }
+        for charm in charms {
+            if charm.price <= 0 { problems.append("charm \(charm.id) is free") }
+            if charm.modifiers == ModifierSet(), charm.scaling == nil, charm.slabRule == nil {
+                problems.append("charm \(charm.id) does nothing")
+            }
+            if let rule = charm.slabRule, sitesByID[rule.siteID] == nil {
+                problems.append("charm \(charm.id) points at unknown site \(rule.siteID)")
+            }
+        }
+        if Set(tools.map(\.id)).count != tools.count { problems.append("duplicate tool id") }
+        if Set(charms.map(\.id)).count != charms.count { problems.append("duplicate charm id") }
+
         let unreachable = Set(fossils.map(\.id))
             .subtracting(sites.flatMap { $0.fossilWeights.keys })
         for id in unreachable.sorted() {

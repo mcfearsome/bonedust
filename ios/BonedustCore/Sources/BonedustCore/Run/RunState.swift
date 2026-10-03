@@ -41,6 +41,8 @@ public enum RunPhase: Sendable, Codable, Equatable {
     case digging(day: Int)
     /// The slab is done and the results card is up.
     case results(day: Int)
+    /// Between slabs, in the supply tent. Carries the day just finished.
+    case supplyTent(day: Int)
     /// Day five paid the installment.
     case succeeded(reputationEarned: Int, leftover: Int)
     /// Day five did not.
@@ -48,7 +50,7 @@ public enum RunPhase: Sendable, Codable, Equatable {
 
     public var day: Int? {
         switch self {
-        case .digging(let day), .results(let day): return day
+        case .digging(let day), .results(let day), .supplyTent(let day): return day
         case .succeeded, .failed: return nil
         }
     }
@@ -56,7 +58,7 @@ public enum RunPhase: Sendable, Codable, Equatable {
     public var isOver: Bool {
         switch self {
         case .succeeded, .failed: return true
-        case .digging, .results: return false
+        case .digging, .results, .supplyTent: return false
         }
     }
 }
@@ -85,6 +87,9 @@ public struct RunState: Sendable, Codable, Equatable {
     public var toolIDs: [String]
     /// Charm ids the player owns. Four slots (§4).
     public var charmIDs: [String]
+    /// What the tent is offering on this visit. Part of the save so a relaunch cannot
+    /// be used as a free reroll.
+    public var shop: ShopStock
     public var startedAt: Date
 
     public static let toolSlots = 3
@@ -110,6 +115,7 @@ public struct RunState: Sendable, Codable, Equatable {
         self.phase = .digging(day: 1)
         self.toolIDs = toolIDs
         self.charmIDs = charmIDs
+        self.shop = ShopStock()
         self.startedAt = startedAt
     }
 
@@ -155,14 +161,140 @@ public struct RunState: Sendable, Codable, Equatable {
         phase = .results(day: day)
     }
 
-    /// Leaves the results card: on to the next day, or settle up.
+    /// Leaves the results card: into the tent, or settle up.
+    ///
+    /// There is no tent after day five. The installment falls due the moment the last
+    /// slab is bagged, so letting the player shop first would just be a way to convert
+    /// cash they owe into tools they are about to lose.
     public mutating func advance() {
         guard case .results(let day) = phase else { return }
         if day < totalDays {
-            phase = .digging(day: day + 1)
+            phase = .supplyTent(day: day)
         } else {
             settle()
         }
+    }
+
+    /// Leaves the tent for the next day's slab.
+    public mutating func leaveShop() {
+        guard case .supplyTent(let day) = phase else { return }
+        shop = ShopStock()
+        phase = .digging(day: day + 1)
+    }
+
+    // MARK: Shopping
+
+    public enum PurchaseFailure: Error, Equatable {
+        case notOffered
+        case alreadyOwned
+        case noSlot
+        case tooExpensive(price: Int, cash: Int)
+        case notShopping
+    }
+
+    public var hasToolSlot: Bool { toolIDs.count < RunState.toolSlots }
+    public var hasCharmSlot: Bool { charmIDs.count < RunState.charmSlots }
+
+    /// Rolls the tent's stock for this visit, if it has not been rolled yet.
+    public mutating func openShop(reputation: Int, pools: Set<ItemPool> = [.shop],
+                                  catalog: ContentCatalog = .shared) {
+        guard case .supplyTent(let day) = phase, shop.isEmpty else { return }
+        shop = Shop.stock(
+            runSeed: seed, day: day, restocks: 0,
+            ownedToolIDs: toolIDs, ownedCharmIDs: charmIDs,
+            reputation: reputation, pools: pools, catalog: catalog
+        )
+    }
+
+    public mutating func restock(reputation: Int, pools: Set<ItemPool> = [.shop],
+                                 catalog: ContentCatalog = .shared) throws {
+        guard case .supplyTent(let day) = phase else { throw PurchaseFailure.notShopping }
+        guard cash >= Shop.restockPrice else {
+            throw PurchaseFailure.tooExpensive(price: Shop.restockPrice, cash: cash)
+        }
+        cash -= Shop.restockPrice
+        shop = Shop.stock(
+            runSeed: seed, day: day, restocks: shop.restocks + 1,
+            ownedToolIDs: toolIDs, ownedCharmIDs: charmIDs,
+            reputation: reputation, pools: pools, catalog: catalog
+        )
+    }
+
+    public mutating func buyTool(_ id: String, catalog: ContentCatalog = .shared) throws {
+        guard case .supplyTent = phase else { throw PurchaseFailure.notShopping }
+        guard shop.toolIDs.contains(id) else { throw PurchaseFailure.notOffered }
+        guard !toolIDs.contains(id) else { throw PurchaseFailure.alreadyOwned }
+        guard hasToolSlot else { throw PurchaseFailure.noSlot }
+        guard let tool = catalog.tool(id) else { throw PurchaseFailure.notOffered }
+        guard cash >= tool.price else {
+            throw PurchaseFailure.tooExpensive(price: tool.price, cash: cash)
+        }
+        cash -= tool.price
+        toolIDs.append(id)
+        shop.toolIDs.removeAll { $0 == id }
+    }
+
+    public mutating func buyCharm(_ id: String, catalog: ContentCatalog = .shared) throws {
+        guard case .supplyTent = phase else { throw PurchaseFailure.notShopping }
+        guard shop.charmIDs.contains(id) else { throw PurchaseFailure.notOffered }
+        guard !charmIDs.contains(id) else { throw PurchaseFailure.alreadyOwned }
+        guard hasCharmSlot else { throw PurchaseFailure.noSlot }
+        guard let charm = catalog.charm(id) else { throw PurchaseFailure.notOffered }
+        guard cash >= charm.price else {
+            throw PurchaseFailure.tooExpensive(price: charm.price, cash: cash)
+        }
+        cash -= charm.price
+        charmIDs.append(id)
+        shop.charmIDs.removeAll { $0 == id }
+    }
+
+    /// Selling returns half price (§4). The starting brush cannot be sold, because a
+    /// run with no brush is a run you cannot play.
+    @discardableResult
+    public mutating func sellTool(_ id: String, catalog: ContentCatalog = .shared) -> Int {
+        guard id != BrushTool.brush.id, let tool = catalog.tool(id),
+              toolIDs.contains(id) else { return 0 }
+        toolIDs.removeAll { $0 == id }
+        cash += tool.resaleValue
+        return tool.resaleValue
+    }
+
+    @discardableResult
+    public mutating func sellCharm(_ id: String, catalog: ContentCatalog = .shared) -> Int {
+        guard let charm = catalog.charm(id), charmIDs.contains(id) else { return 0 }
+        charmIDs.removeAll { $0 == id }
+        cash += charm.resaleValue
+        return charm.resaleValue
+    }
+
+    /// The loadout, resolved from ids.
+    public func loadout(catalog: ContentCatalog = .shared) -> Loadout {
+        Loadout.resolve(toolIDs: toolIDs, charmIDs: charmIDs, catalog: catalog)
+    }
+
+    /// Everything the player's kit and the site contribute, for a given day.
+    public func modifiers(
+        forDay day: Int, extra: ModifierSet = ModifierSet(), catalog: ContentCatalog = .shared
+    ) -> ModifierSet {
+        let context = CharmContext(
+            day: day,
+            siteID: siteID,
+            tier: tier,
+            bankedGems: slabs.reduce(0) { $0 + $1.wholeGems }
+        )
+        var sets = [loadout(catalog: catalog).modifiers(context: context), extra]
+        if let site = catalog.site(siteForSlab(onDay: day, catalog: catalog)) {
+            sets.append(site.modifiers.modifierSet)
+        }
+        return ModifierSet.combining(sets)
+    }
+
+    /// Which site a given day's slab comes from, honouring a charm override.
+    public func siteForSlab(onDay day: Int, catalog: ContentCatalog = .shared) -> String {
+        guard let override = loadout(catalog: catalog).siteOverride(onDay: day),
+              catalog.site(override) != nil
+        else { return siteID }
+        return override
     }
 
     /// Day five is done. Either the Collector is paid or he is not.
@@ -175,7 +307,9 @@ public struct RunState: Sendable, Codable, Equatable {
             let leftover = cash - installment
             cash = 0
             phase = .succeeded(
-                reputationEarned: Installments.reputation(fromLeftoverCash: leftover),
+                reputationEarned: Installments.reputation(
+                    fromLeftoverCash: leftover, tier: tier
+                ),
                 leftover: leftover
             )
         } else {
@@ -207,6 +341,14 @@ public struct MetaProgress: Sendable, Codable, Equatable {
     public var bestSlabPayout: Int
     /// Lifetime dollars contributed to the crew debt.
     public var lifetimeContribution: Int
+    /// The kit the next run starts with.
+    ///
+    /// §4 says the Collector takes your tools as interest *when you fail*, which means
+    /// they survive when you do not. Without this the installment ramp is unwinnable by
+    /// construction: every run would begin with the starting brush, so income could
+    /// never grow while the amount owed did.
+    public var carriedToolIDs: [String]
+    public var carriedCharmIDs: [String]
 
     public init() {
         self.schema = MetaProgress.currentSchema
@@ -218,6 +360,8 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         self.longestStreak = 0
         self.bestSlabPayout = 0
         self.lifetimeContribution = 0
+        self.carriedToolIDs = [BrushTool.brush.id]
+        self.carriedCharmIDs = []
     }
 
     /// Folds a finished run in.
@@ -236,11 +380,16 @@ public struct MetaProgress: Sendable, Codable, Equatable {
             currentStreak += 1
             longestStreak = max(longestStreak, currentStreak)
             nextTier = run.tier + 1
+            carriedToolIDs = run.toolIDs
+            carriedCharmIDs = run.charmIDs
         case .failed:
             runsFailed += 1
             currentStreak = 0
             nextTier = 1
-        case .digging, .results:
+            // "The Collector takes your tools as interest."
+            carriedToolIDs = [BrushTool.brush.id]
+            carriedCharmIDs = []
+        case .digging, .results, .supplyTent:
             break
         }
     }

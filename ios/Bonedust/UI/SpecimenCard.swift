@@ -60,7 +60,9 @@ struct SpecimenCard: View {
                     : breakdown.intact >= 0.6 ? Ink.accent : Ink.danger)
             // "$84 of $90" makes the exposure and intact penalty concrete in money,
             // which is the only unit the player is actually budgeting in.
-            row("Fossil", "$\(breakdown.fossil) of $\(baseValue)")
+            // The base shown is the instance-adjusted one: three brachiopods really are
+            // worth three brachiopods, and the card has to agree with the arithmetic.
+            row("Fossil", "$\(breakdown.fossil) of $\(max(baseValue, breakdown.baseValue))")
             if gems > 0 {
                 row(gems == 1 ? "Gem" : "Gems", "$\(breakdown.gems)", tint: Ink.gem)
             }

@@ -29,6 +29,8 @@ public struct SlabSimulation: Sendable {
     public var crackMultiplier: Float = 1
     /// Multiplies every tool's safe speed. "Steady hands" sets this to 1.25.
     public var safeSpeedMultiplier: Float = 1
+    /// Multiplies rock hardness. The dental pick sets this to 0.33.
+    public var rockHardnessMultiplier: Float = 1
 
     // MARK: Live metrics (maintained incrementally)
 
@@ -249,7 +251,7 @@ public struct SlabSimulation: Sendable {
         let height = SlabGrid.height
         let offsets = kernel.offsets
         let hardness = tuning.layerHardness
-        let rockHardness = tuning.rockHardnessMultiplier
+        let rockHardness = tuning.rockHardnessMultiplier * rockHardnessMultiplier
         let rate = tuning.removalRate
         let strength = tool.strength
         let crackRate = tuning.crackRate

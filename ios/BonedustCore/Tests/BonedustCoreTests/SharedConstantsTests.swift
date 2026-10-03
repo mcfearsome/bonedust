@@ -36,16 +36,30 @@ final class SharedConstantsTests: XCTestCase {
         let live = SharedConstants(tuning: .standard, catalog: .shared)
 
         XCTAssertEqual(onDisk.schema, live.schema)
-        XCTAssertEqual(onDisk.tuning, live.tuning, "tuning drifted. Run `make constants`.")
-        XCTAssertEqual(onDisk.installments, live.installments)
-        XCTAssertEqual(onDisk.installmentGrowth, live.installmentGrowth)
-        XCTAssertEqual(onDisk.tools, live.tools, "tools drifted. Run `make constants`.")
-        XCTAssertEqual(
-            onDisk.fossils.map(\.id), live.fossils.map(\.id),
-            "fossil list drifted. Run `make constants`."
-        )
-        XCTAssertEqual(onDisk.fossils, live.fossils, "fossil data drifted. Run `make constants`.")
-        XCTAssertEqual(onDisk.sites, live.sites, "site data drifted. Run `make constants`.")
+
+        // Field-by-field with short messages rather than XCTAssertEqual on whole
+        // arrays: comparing nineteen fossils or five sites as values dumps thousands of
+        // characters of struct description into the log, which tells you that something
+        // drifted but not what.
+        func check(_ name: String, _ matched: Bool) {
+            XCTAssertTrue(matched, "\(name) drifted. Run `make constants`.")
+        }
+        check("tuning", onDisk.tuning == live.tuning)
+        check("installment table", onDisk.installments == live.installments)
+        check("installment growth", onDisk.installmentGrowth == live.installmentGrowth)
+        check("tool list", onDisk.tools.map(\.id) == live.tools.map(\.id))
+        check("tool data", onDisk.tools == live.tools)
+        check("fossil list", onDisk.fossils.map(\.id) == live.fossils.map(\.id))
+        check("fossil data", onDisk.fossils == live.fossils)
+        check("site list", onDisk.sites.map(\.id) == live.sites.map(\.id))
+        for (disk, now) in zip(onDisk.sites, live.sites) where disk != now {
+            // Name the site, so a one-site change does not print all five.
+            check("site \(now.id)", false)
+        }
+        check("charm list", onDisk.charms.map(\.id) == live.charms.map(\.id))
+        for (disk, now) in zip(onDisk.charms, live.charms) where disk != now {
+            check("charm \(now.id)", false)
+        }
     }
 
     func testConstantsRoundTrip() throws {

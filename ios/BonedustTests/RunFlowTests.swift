@@ -14,6 +14,12 @@ final class RunCoordinatorTests: XCTestCase {
         return (RunCoordinator(settings: settings, store: store), store, settings)
     }
 
+    /// Advances past the results card, and out of the supply tent if one appears.
+    private func leaveResults(_ coordinator: RunCoordinator) {
+        coordinator.continueFromResults()
+        if coordinator.screen == .supplyTent { coordinator.leaveShop() }
+    }
+
     /// Finishes whatever slab is on screen by running the daylight out.
     private func burnThroughSlab(_ coordinator: RunCoordinator) {
         guard let engine = coordinator.digEngine else { return XCTFail("no dig on screen") }
@@ -57,7 +63,7 @@ final class RunCoordinatorTests: XCTestCase {
             XCTAssertEqual(coordinator.run?.currentDay, day)
             burnThroughSlab(coordinator)
             XCTAssertEqual(coordinator.screen, .slabResults, "day \(day)")
-            coordinator.continueFromResults()
+            leaveResults(coordinator)
         }
         XCTAssertEqual(coordinator.screen, .runEnd)
         XCTAssertEqual(coordinator.run?.slabs.count, 5)
@@ -71,7 +77,7 @@ final class RunCoordinatorTests: XCTestCase {
         for _ in 1...5 {
             seeds.append(coordinator.digEngine?.layout.seed ?? 0)
             burnThroughSlab(coordinator)
-            coordinator.continueFromResults()
+            leaveResults(coordinator)
         }
         XCTAssertEqual(Set(seeds).count, 5, "two days dug the same slab")
     }
@@ -81,7 +87,7 @@ final class RunCoordinatorTests: XCTestCase {
         coordinator.startRun(siteID: "charmouth")
         for _ in 1...5 {
             burnThroughSlab(coordinator)
-            coordinator.continueFromResults()
+            leaveResults(coordinator)
         }
         XCTAssertGreaterThan(coordinator.meta.lifetimeContribution, 0)
         XCTAssertNil(store.loadRun(), "a settled run must not be resumable")
@@ -166,11 +172,125 @@ final class RunCoordinatorTests: XCTestCase {
         let (coordinator, _, _) = makeCoordinator()
         coordinator.startRun(siteID: "charmouth")
         burnThroughSlab(coordinator)
-        coordinator.continueFromResults()
+        leaveResults(coordinator)
         coordinator.abandonRun()
         XCTAssertEqual(coordinator.screen, .runEnd)
         XCTAssertEqual(coordinator.meta.runsFailed, 1)
         XCTAssertEqual(coordinator.meta.nextTier, 1)
+    }
+
+    func testTheTentOpensBetweenSlabs() {
+        let (coordinator, _, _) = makeCoordinator()
+        coordinator.startRun(siteID: "charmouth")
+        burnThroughSlab(coordinator)
+        coordinator.continueFromResults()
+        XCTAssertEqual(coordinator.screen, .supplyTent)
+        XCTAssertFalse(coordinator.run?.shop.isEmpty ?? true, "the tent had nothing in it")
+        XCTAssertNil(coordinator.digEngine, "the finished slab should be let go of")
+        coordinator.leaveShop()
+        XCTAssertEqual(coordinator.screen, .dig)
+        XCTAssertEqual(coordinator.run?.currentDay, 2)
+    }
+
+    func testThereIsNoTentAfterTheLastSlab() {
+        let (coordinator, _, _) = makeCoordinator()
+        coordinator.startRun(siteID: "charmouth")
+        for day in 1...5 {
+            burnThroughSlab(coordinator)
+            coordinator.continueFromResults()
+            if day < 5 {
+                XCTAssertEqual(coordinator.screen, .supplyTent, "day \(day)")
+                coordinator.leaveShop()
+            }
+        }
+        XCTAssertEqual(coordinator.screen, .runEnd)
+    }
+
+    func testBuyingInTheTentPersistsImmediately() {
+        // A crash between buying and digging must not hand the cash back.
+        let (coordinator, store, _) = makeCoordinator()
+        coordinator.startRun(siteID: "charmouth")
+        burnThroughSlab(coordinator)
+        coordinator.continueFromResults()
+        guard var run = coordinator.run, let offered = run.shop.charmIDs.first,
+              let charm = ContentCatalog.shared.charm(offered)
+        else { return XCTFail("nothing offered") }
+
+        // Give the run enough cash for the test to be about persistence, not poverty.
+        run.cash = 500
+        coordinator.buyCharm(offered)
+        guard let after = coordinator.run else { return XCTFail() }
+        if after.charmIDs.contains(offered) {
+            XCTAssertEqual(store.loadRun()?.charmIDs, after.charmIDs)
+            XCTAssertEqual(after.cash, coordinator.run!.cash)
+        } else {
+            // Could not afford it; the shop must be unchanged either way.
+            XCTAssertTrue(after.shop.charmIDs.contains(offered))
+            XCTAssertLessThan(after.cash, charm.price)
+        }
+    }
+
+    func testAPurchasedToolReachesTheNextSlabsTray() {
+        let (coordinator, _, _) = makeCoordinator()
+        coordinator.startRun(siteID: "charmouth")
+        XCTAssertEqual(coordinator.digEngine?.availableBrushes.count, 1)
+        burnThroughSlab(coordinator)
+        coordinator.continueFromResults()
+
+        // Force a known affordable brush into the kit rather than depending on the roll.
+        coordinator.debugGrantTool("fine_brush")
+        coordinator.leaveShop()
+        let brushes = coordinator.digEngine?.availableBrushes.map(\.id) ?? []
+        XCTAssertTrue(brushes.contains("fine_brush"), "got \(brushes)")
+        XCTAssertEqual(brushes.count, 2)
+    }
+
+    func testPassiveToolsChangeTheSlabRatherThanTheTray() {
+        let (coordinator, _, _) = makeCoordinator()
+        coordinator.startRun(siteID: "charmouth")
+        let before = coordinator.digEngine?.totalDaylight ?? 0
+        burnThroughSlab(coordinator)
+        coordinator.continueFromResults()
+        coordinator.debugGrantTool("headlamp")
+        coordinator.leaveShop()
+        guard let engine = coordinator.digEngine else { return XCTFail() }
+        XCTAssertEqual(engine.availableBrushes.count, 1, "a headlamp is not a brush")
+        XCTAssertEqual(engine.passiveTools.map(\.id), ["headlamp"])
+        XCTAssertEqual(engine.totalDaylight, before + 10, accuracy: 0.01)
+    }
+
+    func testXRayGogglesRevealThenExpire() {
+        let (coordinator, _, _) = makeCoordinator()
+        coordinator.startRun(siteID: "charmouth")
+        burnThroughSlab(coordinator)
+        coordinator.continueFromResults()
+        coordinator.debugGrantTool("xray_goggles")
+        coordinator.leaveShop()
+        guard let engine = coordinator.digEngine else { return XCTFail() }
+        XCTAssertTrue(engine.isRevealing)
+        // The reveal only burns while digging, so looking before the first touch is free.
+        engine.tick(delta: 5)
+        XCTAssertTrue(engine.isRevealing)
+        engine.brushBegan(at: Vec2(48, 64))
+        engine.tick(delta: 4)
+        XCTAssertFalse(engine.isRevealing)
+    }
+
+    func testAKitSurvivesASuccessfulRunAndIsSeizedAfterAFailure() {
+        let (coordinator, _, _) = makeCoordinator()
+        coordinator.startRun(siteID: "charmouth")
+        coordinator.debugGrantTool("fine_brush")
+        // Force a win, then check the tool carries.
+        coordinator.debugSettleRun(succeed: true)
+        XCTAssertTrue(coordinator.meta.carriedToolIDs.contains("fine_brush"))
+        coordinator.acknowledgeRunEnd()
+
+        coordinator.startRun(siteID: "charmouth")
+        XCTAssertTrue(coordinator.run?.toolIDs.contains("fine_brush") ?? false,
+                      "a successful run should keep its kit")
+        coordinator.debugSettleRun(succeed: false)
+        XCTAssertEqual(coordinator.meta.carriedToolIDs, [BrushTool.brush.id],
+                       "the Collector takes your tools as interest")
     }
 
     func testGentleModeReachesTheDig() {

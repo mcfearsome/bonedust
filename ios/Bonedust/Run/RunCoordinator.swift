@@ -17,6 +17,7 @@ final class RunCoordinator {
         case siteSelect
         case dig
         case slabResults
+        case supplyTent
         case runEnd
     }
 
@@ -82,7 +83,12 @@ final class RunCoordinator {
         var fresh = RunState(
             seed: UInt64.random(in: 1...(UInt64.max >> 2)),
             siteID: siteID,
-            tier: meta.nextTier
+            tier: meta.nextTier,
+            // The kit survives a successful run and is seized after a failed one, so it
+            // comes from meta rather than starting from the brush every time. Without
+            // this the installment ramp is unwinnable by construction.
+            toolIDs: meta.carriedToolIDs,
+            charmIDs: meta.carriedCharmIDs
         )
         fresh.phase = .digging(day: 1)
         run = fresh
@@ -94,27 +100,39 @@ final class RunCoordinator {
     /// Resumes from the autosave slot, including a part-dug slab.
     func continueRun() {
         guard let run else { return }
-        guard case .digging(let day) = run.phase else {
+        switch run.phase {
+        case .digging(let day):
+            openDig(day: day, restoring: true)
+        case .results(let day):
             // Saved mid-results: show the card again rather than skipping it.
-            if case .results(let day) = run.phase, let record = run.record(forDay: day) {
+            if let record = run.record(forDay: day) {
                 lastRecord = record
                 screen = .slabResults
             } else {
                 screen = .title
             }
-            return
+        case .supplyTent:
+            openShop()
+        case .succeeded, .failed:
+            screen = .runEnd
         }
-        openDig(day: day, restoring: true)
     }
 
     private func openDig(day: Int, restoring: Bool) {
-        guard let run, let site = catalog.site(run.siteID) else { return }
+        guard let run else { return }
+        // A charm can send this day's slab to another site entirely, so the site is
+        // resolved per day rather than taken from the run.
+        let siteID = run.siteForSlab(onDay: day, catalog: catalog)
+        guard let site = catalog.site(siteID) else { return }
         let extra = settings.gentleModeModifiers
+        let loadout = run.loadout(catalog: catalog)
 
         if restoring, let snapshot = store.loadSlab(), snapshot.day == day {
             do {
                 let restored = try snapshot.restore(catalog: catalog, tuning: .standard)
-                digEngine = DigEngine(restored: restored, site: site, extraModifiers: extra)
+                digEngine = DigEngine(
+                    restored: restored, site: site, loadout: loadout, extraModifiers: extra
+                )
                 resumeProblem = nil
                 screen = .dig
                 return
@@ -129,6 +147,8 @@ final class RunCoordinator {
         digEngine = DigEngine(
             seed: run.slabSeed(forDay: day),
             site: site,
+            day: day,
+            loadout: loadout,
             catalog: catalog,
             extraModifiers: extra
         )
@@ -165,11 +185,17 @@ final class RunCoordinator {
         screen = .slabResults
     }
 
-    /// Leaves the results card.
+    /// Leaves the results card: into the tent, or settle up.
     func continueFromResults() {
         guard var current = run else { return }
         current.advance()
         run = current
+
+        if case .supplyTent = current.phase {
+            store.save(run: current)
+            openShop()
+            return
+        }
 
         if current.isOver {
             meta.absorb(current)
@@ -187,6 +213,49 @@ final class RunCoordinator {
         if case .digging(let day) = current.phase {
             openDig(day: day, restoring: false)
         }
+    }
+
+    // MARK: Supply tent
+
+    private func openShop() {
+        guard var current = run, case .supplyTent = current.phase else { return }
+        current.openShop(reputation: meta.reputation, pools: unlockedPools, catalog: catalog)
+        run = current
+        store.save(run: current)
+        digEngine = nil
+        screen = .supplyTent
+    }
+
+    /// Which item pools are open. The vault is a crew milestone, and the ledger client
+    /// arrives at M5, so for now only the shop pool is available.
+    private var unlockedPools: Set<ItemPool> { [.shop] }
+
+    func buyTool(_ id: String) { mutateRun { try? $0.buyTool(id, catalog: catalog) } }
+    func buyCharm(_ id: String) { mutateRun { try? $0.buyCharm(id, catalog: catalog) } }
+    func sellTool(_ id: String) { mutateRun { $0.sellTool(id, catalog: catalog) } }
+    func sellCharm(_ id: String) { mutateRun { $0.sellCharm(id, catalog: catalog) } }
+
+    func restock() {
+        mutateRun {
+            try? $0.restock(reputation: meta.reputation, pools: unlockedPools, catalog: catalog)
+        }
+    }
+
+    func leaveShop() {
+        guard var current = run, case .supplyTent(let day) = current.phase else { return }
+        current.leaveShop()
+        run = current
+        store.save(run: current)
+        openDig(day: day + 1, restoring: false)
+    }
+
+    /// Applies a change to the run and persists it. Purchases are saved immediately
+    /// because a crash between buying and digging must not hand back the cash.
+    private func mutateRun(_ change: (inout RunState) -> Void) {
+        guard var current = run else { return }
+        change(&current)
+        run = current
+        store.save(run: current)
     }
 
     /// Clears the finished run and returns to the title.
@@ -219,5 +288,37 @@ final class RunCoordinator {
         engine.pause()
         store.save(run: run)
         store.save(slab: engine.snapshot(day: day))
+    }
+}
+
+// MARK: - Test hooks
+
+extension RunCoordinator {
+    /// Puts an item in the kit without paying for it.
+    ///
+    /// Tests about *what a tool does* should not also depend on what the shop happened
+    /// to roll or on whether the run could afford it. Kept out of the shopping path so
+    /// it cannot be reached by accident.
+    func debugGrantTool(_ id: String) {
+        guard var current = run, !current.toolIDs.contains(id) else { return }
+        current.toolIDs.append(id)
+        current.shop.toolIDs.removeAll { $0 == id }
+        run = current
+    }
+
+    func debugGrantCharm(_ id: String) {
+        guard var current = run, !current.charmIDs.contains(id) else { return }
+        current.charmIDs.append(id)
+        current.shop.charmIDs.removeAll { $0 == id }
+        run = current
+    }
+
+    /// Ends the run as a success or a failure, without playing it.
+    func debugSettleRun(succeed: Bool) {
+        guard var current = run else { return }
+        current.cash = succeed ? current.installment + 100 : 0
+        current.phase = .results(day: current.totalDays)
+        run = current
+        continueFromResults()
     }
 }

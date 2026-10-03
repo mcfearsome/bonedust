@@ -36,8 +36,8 @@ final class PayoutTests: XCTestCase {
 
     func testCracksReduceValue() {
         XCTAssertEqual(Payout.evaluate(context(cracked: 0)).fossil, 100)
-        XCTAssertEqual(Payout.evaluate(context(cracked: 10)).fossil, 70)
-        XCTAssertEqual(Payout.evaluate(context(cracked: 34)).fossil, 0)
+        XCTAssertEqual(Payout.evaluate(context(cracked: 10)).fossil, 50)
+        XCTAssertEqual(Payout.evaluate(context(cracked: 20)).fossil, 0)
     }
 
     func testGemsPayTwentyEach() {
@@ -54,10 +54,10 @@ final class PayoutTests: XCTestCase {
     func testAuthenticDamageHalvesTheCostOfCracks() {
         var mods = ModifierSet()
         mods.crackedIntactCredit = 0.5
-        let plain = Payout.evaluate(context(cracked: 20)).fossil
-        let charmed = Payout.evaluate(context(cracked: 20, modifiers: mods)).fossil
-        XCTAssertEqual(plain, 40)
-        XCTAssertEqual(charmed, 70)
+        let plain = Payout.evaluate(context(cracked: 16)).fossil
+        let charmed = Payout.evaluate(context(cracked: 16, modifiers: mods)).fossil
+        XCTAssertEqual(plain, 20)
+        XCTAssertEqual(charmed, 60)
     }
 
     func testIntactCreditCannotExceedOne() {
@@ -158,9 +158,9 @@ final class PayoutTests: XCTestCase {
     func testInstallmentCurve() {
         XCTAssertEqual(Installments.amount(tier: 1), 350)
         XCTAssertEqual(Installments.amount(tier: 2), 450)
-        XCTAssertEqual(Installments.amount(tier: 3), 600)
-        XCTAssertEqual(Installments.amount(tier: 4), 800)
-        XCTAssertEqual(Installments.amount(tier: 5), 1050)
+        XCTAssertEqual(Installments.amount(tier: 3), 575)
+        XCTAssertEqual(Installments.amount(tier: 4), 725)
+        XCTAssertEqual(Installments.amount(tier: 5), 900)
         XCTAssertEqual(Installments.amount(tier: 0), 350, "tier is clamped at 1")
         // Keeps rising, in $25 steps, forever.
         var previous = 0
@@ -173,8 +173,12 @@ final class PayoutTests: XCTestCase {
     }
 
     func testReputationConversion() {
-        XCTAssertEqual(Installments.reputation(fromLeftoverCash: 1_000), 100)
-        XCTAssertEqual(Installments.reputation(fromLeftoverCash: 0), 0)
-        XCTAssertEqual(Installments.reputation(fromLeftoverCash: -50), 0)
+        // 10:1 on leftover cash, plus a flat 15 per tier for clearing the week at all.
+        // Without the flat part the site gates were unreachable; see DECISIONS.md.
+        XCTAssertEqual(Installments.reputation(fromLeftoverCash: 1_000, tier: 1), 115)
+        XCTAssertEqual(Installments.reputation(fromLeftoverCash: 0, tier: 1), 15)
+        XCTAssertEqual(Installments.reputation(fromLeftoverCash: -50, tier: 1), 15)
+        XCTAssertEqual(Installments.reputation(fromLeftoverCash: 0, tier: 4), 60,
+                       "surviving a harder week is what opens the map")
     }
 }

@@ -21,6 +21,7 @@ final class RunStateTests: XCTestCase {
         for day in 1...run.totalDays {
             run.completeSlab(record(day: day, total: perSlab))
             run.advance()
+            if case .supplyTent = run.phase { run.leaveShop() }
         }
         return run
     }
@@ -37,8 +38,8 @@ final class RunStateTests: XCTestCase {
     }
 
     func testInstallmentFollowsTheTier() {
-        XCTAssertEqual(RunState(seed: 1, siteID: "charmouth", tier: 3).installment, 600)
-        XCTAssertEqual(RunState(seed: 1, siteID: "charmouth", tier: 5).installment, 1050)
+        XCTAssertEqual(RunState(seed: 1, siteID: "charmouth", tier: 3).installment, 575)
+        XCTAssertEqual(RunState(seed: 1, siteID: "charmouth", tier: 5).installment, 900)
     }
 
     func testCompletingASlabBanksCashAndShowsResults() {
@@ -49,16 +50,33 @@ final class RunStateTests: XCTestCase {
         XCTAssertEqual(run.slabs.count, 1)
     }
 
-    func testAdvanceMovesToTheNextDay() {
+    func testAdvanceGoesToTheTentThenTheNextDay() {
         var run = RunState(seed: 1, siteID: "charmouth")
         run.completeSlab(record(day: 1, total: 50))
         run.advance()
+        XCTAssertEqual(run.phase, .supplyTent(day: 1))
+        run.leaveShop()
         XCTAssertEqual(run.phase, .digging(day: 2))
+    }
+
+    func testThereIsNoTentAfterTheLastSlab() {
+        // The installment falls due the moment the last slab is bagged. Shopping first
+        // would just be a way to convert cash you owe into tools you are about to lose.
+        var run = RunState(seed: 1, siteID: "charmouth")
+        for day in 1...5 {
+            run.completeSlab(record(day: day, total: 100))
+            run.advance()
+            if day < 5 {
+                XCTAssertEqual(run.phase, .supplyTent(day: day))
+                run.leaveShop()
+            }
+        }
+        XCTAssertEqual(run.phase, .succeeded(reputationEarned: 30, leftover: 150))
     }
 
     func testARunThatPaysTheInstallmentSucceeds() {
         let run = play(perSlab: 100)   // 500 against 350
-        XCTAssertEqual(run.phase, .succeeded(reputationEarned: 15, leftover: 150))
+        XCTAssertEqual(run.phase, .succeeded(reputationEarned: 30, leftover: 150))
         XCTAssertEqual(run.cash, 0, "all cash is consumed at settling")
         XCTAssertTrue(run.isOver)
     }
@@ -71,7 +89,8 @@ final class RunStateTests: XCTestCase {
 
     func testExactlyMakingTheInstallmentSucceedsWithNoReputation() {
         let run = play(perSlab: 70)    // 350 against 350
-        XCTAssertEqual(run.phase, .succeeded(reputationEarned: 0, leftover: 0))
+        XCTAssertEqual(run.phase, .succeeded(reputationEarned: 15, leftover: 0),
+                       "clearing the week earns Reputation even with nothing left over")
     }
 
     func testShortfallTracksProgressDuringTheRun() {
@@ -81,6 +100,7 @@ final class RunStateTests: XCTestCase {
         XCTAssertEqual(run.shortfall, 150)
         XCTAssertFalse(run.isInstallmentCovered)
         run.advance()
+        run.leaveShop()
         run.completeSlab(record(day: 2, total: 200))
         XCTAssertEqual(run.shortfall, 0)
         XCTAssertTrue(run.isInstallmentCovered)
@@ -91,6 +111,8 @@ final class RunStateTests: XCTestCase {
         var run = RunState(seed: 1, siteID: "charmouth")
         run.completeSlab(record(day: 1, total: 400))
         run.advance()
+        XCTAssertEqual(run.phase, .supplyTent(day: 1))
+        run.leaveShop()
         XCTAssertEqual(run.phase, .digging(day: 2))
         XCTAssertFalse(run.isOver)
     }
@@ -162,6 +184,7 @@ final class MetaProgressTests: XCTestCase {
                 durationMillis: 40_000, bagged: true, wholeGems: 0, daylightLeft: 10
             ))
             run.advance()
+            if case .supplyTent = run.phase { run.leaveShop() }
         }
         return run
     }
@@ -174,7 +197,7 @@ final class MetaProgressTests: XCTestCase {
         XCTAssertEqual(meta.nextInstallment, 450)
         XCTAssertEqual(meta.currentStreak, 1)
         XCTAssertEqual(meta.longestStreak, 1)
-        XCTAssertEqual(meta.reputation, 25, "600 earned, 350 paid, 250 left over")
+        XCTAssertEqual(meta.reputation, 40, "600 earned, 350 paid, 250 over, plus 15 flat")
         XCTAssertEqual(meta.lifetimeContribution, 600)
         XCTAssertEqual(meta.bestSlabPayout, 120)
     }
@@ -189,6 +212,8 @@ final class MetaProgressTests: XCTestCase {
 
         meta.absorb(finishedRun(perSlab: 10, tier: 3))    // fails
         XCTAssertEqual(meta.nextTier, 1, "the Collector took the tools")
+        XCTAssertEqual(meta.carriedToolIDs, [BrushTool.brush.id], "and they are gone")
+        XCTAssertTrue(meta.carriedCharmIDs.isEmpty)
         XCTAssertEqual(meta.currentStreak, 0)
         XCTAssertEqual(meta.longestStreak, 2, "the record stands")
         XCTAssertEqual(meta.reputation, earned, "Reputation survives a failed run")

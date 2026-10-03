@@ -39,7 +39,14 @@ public struct SimTuning: Sendable, Codable, Equatable {
 
     public var exposureExponent: Float = 1.5
     /// Each cracked cell costs this many cells' worth of `intact`.
-    public var intactCrackWeight: Float = 3.0
+    ///
+    /// Raised from the prototype's 3.0 after the M3 economy sweep. At 3.0 the payout
+    /// formula made care worthless: exposure is raised to 1.5 while intact stays
+    /// linear, so "clear fast and accept cracks" beat "go slow and stay whole" at every
+    /// site, and no brush was worth buying. At 5.0 a fifth of the fossil cracked makes
+    /// it worthless, the fine brush pays for itself, and §4's second pillar is a real
+    /// decision rather than a described one. See DECISIONS.md.
+    public var intactCrackWeight: Float = 5.0
     public var gemValue: Int = 20
     /// Exposure at which the specimen stops reading "Unidentified".
     public var identifyExposure: Float = 0.25

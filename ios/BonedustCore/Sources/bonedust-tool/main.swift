@@ -133,12 +133,14 @@ case "simulate":
     }
 
     let started = Date()
-    let reports = EconomySimulator.sweep(
-        runsPerTier: runsPerTier, siteID: siteID, policy: policy
+    // Careers, not independent runs: a tier 5 attempt made with nothing but the
+    // starting brush is not a situation any player is ever in.
+    let reports = EconomySimulator.careers(
+        count: runsPerTier, siteID: siteID, policy: policy
     )
     let elapsed = Date().timeIntervalSince(started)
 
-    print("site \(siteID), policy \(policyName), \(runsPerTier * 5) runs "
+    print("site \(siteID), policy \(policyName), \(runsPerTier) careers "
         + "in \(String(format: "%.1f", elapsed))s")
     print("")
     print("tier  owed   win%   target  mean $  mean slab  exposure  intact")
@@ -167,8 +169,58 @@ case "simulate":
     // measured once M3 lands.
     let tier1 = reports.first { $0.tier == 1 }?.winRate ?? 0
     let tier5 = reports.first { $0.tier == 5 }?.winRate ?? 0
-    print(String(format: "tier 1 %.0f%% -> tier 5 %.0f%% (no shop purchases)",
-                 tier1 * 100, tier5 * 100))
+    print(String(format: "tier 1 %.0f%% -> tier 5 %.0f%%", tier1 * 100, tier5 * 100))
+
+case "sites":
+    // Income per site for the same player and kit. The Reputation-gated sites have to
+    // actually be richer, or unlocking them is a downgrade and the installment ramp
+    // has nothing to keep up with it.
+    let seeds: [UInt64] = (0..<300).map { 0xD1A6_0000 + UInt64($0) * 7919 }
+    print("  site                income/slab  exposure  intact  instances  unlock")
+    for site in ContentCatalog.shared.sites {
+        var total = 0.0, exposure = 0.0, intact = 0.0, instances = 0.0
+        for seed in seeds {
+            let record = EconomySimulator.playSlab(
+                seed: seed, day: 1, site: site, policy: .average,
+                loadout: Loadout.resolve(toolIDs: ["brush"], charmIDs: [])
+            )
+            total += Double(record.payout.total)
+            exposure += Double(record.payout.exposure)
+            intact += Double(record.payout.intact)
+            instances += Double(SlabGenerator.generate(seed: seed, site: site).layout.instances)
+        }
+        let n = Double(seeds.count)
+        print("  " + site.id.padding(toLength: 18, withPad: " ", startingAt: 0)
+            + String(format: "    $%6.1f     %6.3f   %5.3f    %5.2f    ",
+                     total / n, exposure / n, intact / n, instances / n)
+            + site.unlock.label)
+    }
+
+case "speeds":
+    // What survey speed would a sensible person converge on? Defining the "average"
+    // player as a speed plucked out of the air is how a balance tool lies to you.
+    let site = ContentCatalog.shared.site(arguments.count > 1 ? arguments[1] : "charmouth")!
+    let seeds: [UInt64] = (0..<220).map { 0xD1A6_0000 + UInt64($0) * 7919 }
+    print("\(site.name) — survey speed vs income, starting brush only")
+    print("  cells/frame   exposure  intact   $/slab   s left")
+    for speed in [Float(1.2), 1.6, 2.0, 2.4, 2.8, 3.2, 4.0, 5.0] {
+        var policy = PlayerPolicy.average
+        policy.clearingSpeed = speed
+        var exposure = 0.0, intact = 0.0, total = 0.0, left = 0.0
+        for seed in seeds {
+            let record = EconomySimulator.playSlab(
+                seed: seed, day: 1, site: site, policy: policy,
+                loadout: Loadout.resolve(toolIDs: ["brush"], charmIDs: [])
+            )
+            exposure += Double(record.payout.exposure)
+            intact += Double(record.payout.intact)
+            total += Double(record.payout.total)
+            left += Double(record.daylightLeft)
+        }
+        let n = Double(seeds.count)
+        print(String(format: "  %11.1f   %6.3f   %5.3f   %6.1f   %5.1f",
+                     speed, exposure / n, intact / n, total / n, left / n))
+    }
 
 case "content-check":
     let problems = ContentCatalog.shared.validate()

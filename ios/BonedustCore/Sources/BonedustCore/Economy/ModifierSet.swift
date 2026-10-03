@@ -7,7 +7,7 @@
 /// deltas add, and both of those are commutative, so twenty charms in any order
 /// produce the same number. Anything that cannot be expressed here is a charm that
 /// needs redesigning, not a special case.
-public struct ModifierSet: Sendable, Equatable {
+public struct ModifierSet: Sendable, Codable, Equatable {
 
     // MARK: Brushing
 
@@ -75,5 +75,41 @@ public struct ModifierSet: Sendable, Equatable {
         var out = ModifierSet()
         for set in sets { out.combine(set) }
         return out
+    }
+}
+
+// MARK: - Coding
+
+extension ModifierSet {
+    public enum CodingKeys: String, CodingKey {
+        case crackMultiplier, safeSpeedMultiplier, rockHardnessMultiplier
+        case daylightDelta, identifyExposure, revealSeconds
+        case payoutMultiplier, gemMultiplier, crackedIntactCredit
+        case rockNodulePayout, flatBonus, rushMultiplier, rushThreshold
+    }
+
+    /// Absent keys fall back to the neutral default, so a charm's JSON names only what
+    /// it actually changes. A charm that had to spell out all thirteen fields would be
+    /// unreadable, and every unstated field would be a chance to typo a 1 into a 0.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let base = ModifierSet()
+        self.init()
+        func value<T: Decodable>(_ key: CodingKeys, _ fallback: T) throws -> T {
+            try container.decodeIfPresent(T.self, forKey: key) ?? fallback
+        }
+        crackMultiplier = try value(.crackMultiplier, base.crackMultiplier)
+        safeSpeedMultiplier = try value(.safeSpeedMultiplier, base.safeSpeedMultiplier)
+        rockHardnessMultiplier = try value(.rockHardnessMultiplier, base.rockHardnessMultiplier)
+        daylightDelta = try value(.daylightDelta, base.daylightDelta)
+        identifyExposure = try value(.identifyExposure, base.identifyExposure)
+        revealSeconds = try value(.revealSeconds, base.revealSeconds)
+        payoutMultiplier = try value(.payoutMultiplier, base.payoutMultiplier)
+        gemMultiplier = try value(.gemMultiplier, base.gemMultiplier)
+        crackedIntactCredit = try value(.crackedIntactCredit, base.crackedIntactCredit)
+        rockNodulePayout = try value(.rockNodulePayout, base.rockNodulePayout)
+        flatBonus = try value(.flatBonus, base.flatBonus)
+        rushMultiplier = try value(.rushMultiplier, base.rushMultiplier)
+        rushThreshold = try value(.rushThreshold, base.rushThreshold)
     }
 }

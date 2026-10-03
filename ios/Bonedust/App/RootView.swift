@@ -82,6 +82,23 @@ struct RootView: View {
                 recovery
             }
 
+        case .supplyTent:
+            if let run = coordinator.run, case .supplyTent(let day) = run.phase {
+                SupplyTentView(
+                    run: run,
+                    day: day,
+                    reputation: coordinator.meta.reputation,
+                    onBuyTool: { coordinator.buyTool($0) },
+                    onBuyCharm: { coordinator.buyCharm($0) },
+                    onSellTool: { coordinator.sellTool($0) },
+                    onSellCharm: { coordinator.sellCharm($0) },
+                    onRestock: { coordinator.restock() },
+                    onLeave: { coordinator.leaveShop() }
+                )
+            } else {
+                recovery
+            }
+
         case .runEnd:
             if let run = coordinator.run {
                 RunEndView(

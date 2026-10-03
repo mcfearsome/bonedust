@@ -3,6 +3,14 @@ import Foundation
 /// Everything the payout formula needs, and nothing else.
 public struct PayoutContext: Sendable, Equatable {
     public var baseValue: Int
+    /// How many copies of the fossil are on the slab.
+    ///
+    /// This multiplies the base value, and it has to: `exposure` is measured over the
+    /// union of every instance, so three brachiopods mean three times the bone to clear
+    /// in the same sixty seconds. Paying once for all of them made Wheeler Shale —
+    /// whose entire twist is "several specimens per slab" — strictly worse than every
+    /// other site.
+    public var instances: Int
     /// `exposedBoneCells / boneCells`.
     public var exposure: Float
     public var boneCells: Int
@@ -18,6 +26,7 @@ public struct PayoutContext: Sendable, Equatable {
 
     public init(
         baseValue: Int,
+        instances: Int = 1,
         exposure: Float,
         boneCells: Int,
         crackedCells: Int,
@@ -28,6 +37,7 @@ public struct PayoutContext: Sendable, Equatable {
         tuning: SimTuning = .standard
     ) {
         self.baseValue = baseValue
+        self.instances = max(1, instances)
         self.exposure = exposure
         self.boneCells = boneCells
         self.crackedCells = crackedCells
@@ -39,8 +49,16 @@ public struct PayoutContext: Sendable, Equatable {
     }
 }
 
+extension PayoutContext {
+    /// The base value actually used, after the instance count.
+    public var effectiveBaseValue: Int { baseValue * max(1, instances) }
+}
+
 /// What the results screen prints, line for line.
 public struct PayoutBreakdown: Sendable, Codable, Equatable {
+    /// The base the fossil money was computed against, after the instance count. The
+    /// results card shows "$84 of $120" against this, not against the species' value.
+    public var baseValue: Int
     public var exposure: Float
     public var intact: Float
     public var fossil: Int
@@ -53,9 +71,11 @@ public struct PayoutBreakdown: Sendable, Codable, Equatable {
     public var total: Int
 
     public init(
+        baseValue: Int = 0,
         exposure: Float, intact: Float, fossil: Int, gems: Int,
         bonuses: Int, multiplier: Float, rushApplied: Bool, total: Int
     ) {
+        self.baseValue = baseValue
         self.exposure = exposure
         self.intact = intact
         self.fossil = fossil
@@ -92,7 +112,7 @@ public enum Payout {
             tuning: tuning
         )
 
-        let fossilRaw = Float(context.baseValue)
+        let fossilRaw = Float(context.effectiveBaseValue)
             * pow(exposure, tuning.exposureExponent)
             * intact
         let fossilPay = Int(fossilRaw.rounded())
@@ -110,6 +130,7 @@ public enum Payout {
         let bonuses = context.clearedNodules * mods.rockNodulePayout + mods.flatBonus
 
         return PayoutBreakdown(
+            baseValue: context.effectiveBaseValue,
             exposure: exposure,
             intact: intact,
             fossil: fossilPay,
@@ -129,6 +150,7 @@ public enum Payout {
     /// client claiming more than this is lying about something.
     public static func maxPayout(
         baseValue: Int,
+        instances: Int = 1,
         gemCount: Int,
         clearedNodules: Int = 0,
         modifiers: ModifierSet = ModifierSet(),
@@ -139,6 +161,7 @@ public enum Payout {
         mods.rushThreshold = 0
         let context = PayoutContext(
             baseValue: baseValue,
+            instances: instances,
             exposure: 1,
             boneCells: max(1, 1),
             crackedCells: 0,

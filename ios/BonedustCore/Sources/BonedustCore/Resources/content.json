@@ -1,136 +1,795 @@
 {
   "version": 1,
   "fossils": [
-    { "id": "ammonite", "name": "Ammonite", "period": "Jurassic", "formation": "Blue Lias",
-      "baseValue": 90, "note": "Coiled and forgiving. The whorls hold together.",
-      "shape": { "kind": "spiral", "spanCells": 58, "params": { "turns": 2.6, "growth": 0.085, "thickness": 0.14 } } },
-
-    { "id": "belemnite", "name": "Belemnite", "period": "Jurassic", "formation": "Blue Lias",
-      "baseValue": 55, "crackMultiplier": 1.25, "note": "Thin as a pencil. Treat it like one.",
-      "shape": { "kind": "taper", "spanCells": 72, "params": { "taperFrom": 0.055, "taperTo": 0.008, "bend": 0.06 } } },
-
-    { "id": "ichthyo_vertebrae", "name": "Ichthyosaur vertebrae", "period": "Jurassic", "formation": "Blue Lias",
-      "baseValue": 140, "setID": "ichthyosaur", "note": "Scattered down the slab like dropped coins.",
-      "shape": { "kind": "discs", "spanCells": 80, "params": { "count": 6, "thickness": 0.17, "jitter": 0.22 } } },
-
-    { "id": "ichthyo_rib", "name": "Ichthyosaur rib", "period": "Jurassic", "formation": "Blue Lias",
-      "baseValue": 125, "setID": "ichthyosaur", "note": "A long curve. Easy to catch the end of.",
-      "shape": { "kind": "taper", "spanCells": 92, "params": { "taperFrom": 0.075, "taperTo": 0.02, "bend": 0.42 } } },
-
-    { "id": "ichthyo_paddle", "name": "Ichthyosaur paddle", "period": "Jurassic", "formation": "Blue Lias",
-      "baseValue": 155, "setID": "ichthyosaur", "note": "Phalanges packed like cobbles.",
-      "shape": { "kind": "fan", "spanCells": 54, "params": { "ribs": 6, "thickness": 0.075 } } },
-
-    { "id": "crinoid", "name": "Crinoid stem", "period": "Jurassic", "formation": "Blue Lias",
-      "baseValue": 70, "crackMultiplier": 1.15, "note": "A stack of tiny discs. Blow on it wrong and it is gravel.",
-      "shape": { "kind": "discs", "spanCells": 88, "params": { "count": 14, "thickness": 0.085, "jitter": 0.08 } } },
-
-    { "id": "trilobite", "name": "Trilobite", "period": "Cambrian", "formation": "Wheeler Shale",
-      "baseValue": 75, "note": "Segmented. The grooves are shale, not bone.",
-      "shape": { "kind": "segmentedBody", "spanCells": 50, "params": { "ribs": 8, "thickness": 0.075, "aspect": 0.4 } } },
-
-    { "id": "brachiopod", "name": "Brachiopod", "period": "Cambrian", "formation": "Wheeler Shale",
-      "baseValue": 40, "instancesMin": 2, "instancesMax": 3, "note": "Small. Rarely alone.",
-      "shape": { "kind": "fan", "spanCells": 26, "params": { "ribs": 7, "thickness": 0.09 } } },
-
-    { "id": "agnostid", "name": "Agnostid trilobite", "period": "Cambrian", "formation": "Wheeler Shale",
-      "baseValue": 65, "instancesMin": 2, "instancesMax": 4, "note": "Blind, tiny, everywhere.",
-      "shape": { "kind": "segmentedBody", "spanCells": 24, "params": { "ribs": 4, "thickness": 0.1, "aspect": 0.5 } } },
-
-    { "id": "hyolith", "name": "Hyolith", "period": "Cambrian", "formation": "Wheeler Shale",
-      "baseValue": 50, "instancesMin": 2, "instancesMax": 3, "note": "A cone nobody agrees about.",
-      "shape": { "kind": "taper", "spanCells": 30, "params": { "taperFrom": 0.12, "taperTo": 0.02 } } },
-
-    { "id": "knightia", "name": "Knightia", "period": "Eocene", "formation": "Green River",
-      "baseValue": 110, "crackMultiplier": 1.2, "note": "Ribs one cell wide. Breathe on them.",
-      "shape": { "kind": "fish", "spanCells": 68, "params": { "ribs": 11, "thickness": 0.07, "aspect": 0.3 } } },
-
-    { "id": "fossil_leaf", "name": "Fossil leaf", "period": "Eocene", "formation": "Green River",
-      "baseValue": 60, "crackMultiplier": 1.35, "note": "Thinner than the brush bristles.",
-      "shape": { "kind": "leaf", "spanCells": 60, "params": { "ribs": 7, "thickness": 0.06, "aspect": 0.3 } } },
-
-    { "id": "diplomystus", "name": "Diplomystus", "period": "Eocene", "formation": "Green River",
-      "baseValue": 135, "crackMultiplier": 1.2, "note": "The big herring. Worth the patience.",
-      "shape": { "kind": "fish", "spanCells": 86, "params": { "ribs": 14, "thickness": 0.075, "aspect": 0.34 } } },
-
-    { "id": "palm_frond", "name": "Palm frond", "period": "Eocene", "formation": "Green River",
-      "baseValue": 95, "crackMultiplier": 1.3, "note": "Every blade is its own chance to ruin it.",
-      "shape": { "kind": "fan", "spanCells": 78, "params": { "ribs": 13, "thickness": 0.05 } } },
-
-    { "id": "raptor_claw", "name": "Raptor claw", "period": "Late Cretaceous", "formation": "Hell Creek",
-      "baseValue": 170, "note": "A crescent with an opinion.",
-      "shape": { "kind": "crescent", "spanCells": 56, "params": { "bend": 1.7, "taperFrom": 0.17, "taperTo": 0.02 } } },
-
-    { "id": "trex_tooth", "name": "T. rex tooth", "period": "Late Cretaceous", "formation": "Hell Creek",
-      "baseValue": 200, "setID": "trex", "note": "Small, dense, and the reason you came.",
-      "shape": { "kind": "taper", "spanCells": 46, "params": { "taperFrom": 0.2, "taperTo": 0.03, "bend": 0.16 } } },
-
-    { "id": "trex_rib", "name": "T. rex rib", "period": "Late Cretaceous", "formation": "Hell Creek",
-      "baseValue": 185, "setID": "trex", "note": "Runs corner to corner. Budget your daylight.",
-      "shape": { "kind": "taper", "spanCells": 104, "params": { "taperFrom": 0.085, "taperTo": 0.025, "bend": 0.5 } } },
-
-    { "id": "trex_vertebra", "name": "T. rex vertebra", "period": "Late Cretaceous", "formation": "Hell Creek",
-      "baseValue": 215, "setID": "trex", "note": "Three fused drums of bone.",
-      "shape": { "kind": "discs", "spanCells": 58, "params": { "count": 3, "thickness": 0.3, "jitter": 0.12 } } },
-
-    { "id": "trike_horn", "name": "Triceratops horn", "period": "Late Cretaceous", "formation": "Hell Creek",
-      "baseValue": 260, "note": "Enormous, and buried in nodules.",
-      "shape": { "kind": "taper", "spanCells": 112, "params": { "taperFrom": 0.21, "taperTo": 0.025, "bend": 0.3 } } }
+    {
+      "id": "ammonite",
+      "name": "Ammonite",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 90,
+      "note": "Coiled and forgiving. The whorls hold together.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 58,
+        "params": {
+          "turns": 2.6,
+          "growth": 0.085,
+          "thickness": 0.14
+        }
+      }
+    },
+    {
+      "id": "belemnite",
+      "name": "Belemnite",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 55,
+      "crackMultiplier": 1.25,
+      "note": "Thin as a pencil. Treat it like one.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 72,
+        "params": {
+          "taperFrom": 0.055,
+          "taperTo": 0.008,
+          "bend": 0.06
+        }
+      }
+    },
+    {
+      "id": "ichthyo_vertebrae",
+      "name": "Ichthyosaur vertebrae",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 140,
+      "setID": "ichthyosaur",
+      "note": "Scattered down the slab like dropped coins.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 80,
+        "params": {
+          "count": 6,
+          "thickness": 0.17,
+          "jitter": 0.22
+        }
+      }
+    },
+    {
+      "id": "ichthyo_rib",
+      "name": "Ichthyosaur rib",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 125,
+      "setID": "ichthyosaur",
+      "note": "A long curve. Easy to catch the end of.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 92,
+        "params": {
+          "taperFrom": 0.075,
+          "taperTo": 0.02,
+          "bend": 0.42
+        }
+      }
+    },
+    {
+      "id": "ichthyo_paddle",
+      "name": "Ichthyosaur paddle",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 155,
+      "setID": "ichthyosaur",
+      "note": "Phalanges packed like cobbles.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 54,
+        "params": {
+          "ribs": 6,
+          "thickness": 0.075
+        }
+      }
+    },
+    {
+      "id": "crinoid",
+      "name": "Crinoid stem",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 70,
+      "crackMultiplier": 1.15,
+      "note": "A stack of tiny discs. Blow on it wrong and it is gravel.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 88,
+        "params": {
+          "count": 14,
+          "thickness": 0.085,
+          "jitter": 0.08
+        }
+      }
+    },
+    {
+      "id": "trilobite",
+      "name": "Trilobite",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 75,
+      "note": "Segmented. The grooves are shale, not bone.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 50,
+        "params": {
+          "ribs": 8,
+          "thickness": 0.075,
+          "aspect": 0.4
+        }
+      }
+    },
+    {
+      "id": "brachiopod",
+      "name": "Brachiopod",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 40,
+      "instancesMin": 2,
+      "instancesMax": 3,
+      "note": "Small. Rarely alone.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 26,
+        "params": {
+          "ribs": 7,
+          "thickness": 0.09
+        }
+      }
+    },
+    {
+      "id": "agnostid",
+      "name": "Agnostid trilobite",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 65,
+      "instancesMin": 2,
+      "instancesMax": 4,
+      "note": "Blind, tiny, everywhere.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 24,
+        "params": {
+          "ribs": 4,
+          "thickness": 0.1,
+          "aspect": 0.5
+        }
+      }
+    },
+    {
+      "id": "hyolith",
+      "name": "Hyolith",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 50,
+      "instancesMin": 2,
+      "instancesMax": 3,
+      "note": "A cone nobody agrees about.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 30,
+        "params": {
+          "taperFrom": 0.12,
+          "taperTo": 0.02
+        }
+      }
+    },
+    {
+      "id": "knightia",
+      "name": "Knightia",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 110,
+      "crackMultiplier": 1.2,
+      "note": "Ribs one cell wide. Breathe on them.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 68,
+        "params": {
+          "ribs": 11,
+          "thickness": 0.07,
+          "aspect": 0.3
+        }
+      }
+    },
+    {
+      "id": "fossil_leaf",
+      "name": "Fossil leaf",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 60,
+      "crackMultiplier": 1.35,
+      "note": "Thinner than the brush bristles.",
+      "shape": {
+        "kind": "leaf",
+        "spanCells": 60,
+        "params": {
+          "ribs": 7,
+          "thickness": 0.06,
+          "aspect": 0.3
+        }
+      }
+    },
+    {
+      "id": "diplomystus",
+      "name": "Diplomystus",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 135,
+      "crackMultiplier": 1.2,
+      "note": "The big herring. Worth the patience.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 86,
+        "params": {
+          "ribs": 14,
+          "thickness": 0.075,
+          "aspect": 0.34
+        }
+      }
+    },
+    {
+      "id": "palm_frond",
+      "name": "Palm frond",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 95,
+      "crackMultiplier": 1.3,
+      "note": "Every blade is its own chance to ruin it.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 78,
+        "params": {
+          "ribs": 13,
+          "thickness": 0.05
+        }
+      }
+    },
+    {
+      "id": "raptor_claw",
+      "name": "Raptor claw",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 170,
+      "note": "A crescent with an opinion.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 56,
+        "params": {
+          "bend": 1.7,
+          "taperFrom": 0.17,
+          "taperTo": 0.02
+        }
+      }
+    },
+    {
+      "id": "trex_tooth",
+      "name": "T. rex tooth",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 200,
+      "setID": "trex",
+      "note": "Small, dense, and the reason you came.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 46,
+        "params": {
+          "taperFrom": 0.2,
+          "taperTo": 0.03,
+          "bend": 0.16
+        }
+      }
+    },
+    {
+      "id": "trex_rib",
+      "name": "T. rex rib",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 185,
+      "setID": "trex",
+      "note": "Runs corner to corner. Budget your daylight.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 104,
+        "params": {
+          "taperFrom": 0.085,
+          "taperTo": 0.025,
+          "bend": 0.5
+        }
+      }
+    },
+    {
+      "id": "trex_vertebra",
+      "name": "T. rex vertebra",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 215,
+      "setID": "trex",
+      "note": "Three fused drums of bone.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 58,
+        "params": {
+          "count": 3,
+          "thickness": 0.3,
+          "jitter": 0.12
+        }
+      }
+    },
+    {
+      "id": "trike_horn",
+      "name": "Triceratops horn",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 260,
+      "note": "Enormous, and buried in nodules.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 112,
+        "params": {
+          "taperFrom": 0.21,
+          "taperTo": 0.025,
+          "bend": 0.3
+        }
+      }
+    }
   ],
-
   "sites": [
-    { "id": "charmouth", "name": "Charmouth, Dorset", "period": "Jurassic",
+    {
+      "id": "charmouth",
+      "name": "Charmouth, Dorset",
+      "period": "Jurassic",
       "twist": "Blue Lias, three honest layers. Nothing is out to get you here.",
       "unlock": "start",
-      "fossilWeights": { "ammonite": 30, "belemnite": 24, "crinoid": 16,
-                         "ichthyo_vertebrae": 12, "ichthyo_rib": 10, "ichthyo_paddle": 8 } },
-
-    { "id": "wheeler", "name": "Wheeler Shale, Utah", "period": "Cambrian",
+      "fossilWeights": {
+        "ammonite": 30,
+        "belemnite": 24,
+        "crinoid": 16,
+        "ichthyo_vertebrae": 12,
+        "ichthyo_rib": 10,
+        "ichthyo_paddle": 8
+      }
+    },
+    {
+      "id": "wheeler",
+      "name": "Wheeler Shale, Utah",
+      "period": "Cambrian",
       "twist": "Shale splits thin. Less to brush through, several specimens per slab.",
-      "unlock": { "reputation": 200 },
-      "modifiers": { "maxDepth": 2, "extraInstances": 1 },
-      "palette": { "topsoil": [66, 60, 52], "clay": [104, 98, 84],
-                   "sandstone": [158, 152, 132], "matrix": [196, 192, 174] },
-      "fossilWeights": { "trilobite": 30, "brachiopod": 26, "agnostid": 24, "hyolith": 20 } },
-
-    { "id": "green_river", "name": "Green River, Wyoming", "period": "Eocene",
-      "twist": "Lake shale. The fish are paper. Cracks come at a third again the usual rate.",
-      "unlock": { "reputation": 600 },
-      "modifiers": { "crackMultiplier": 1.35 },
-      "palette": { "topsoil": [84, 70, 48], "clay": [146, 122, 78],
-                   "sandstone": [206, 180, 126], "matrix": [232, 219, 186] },
-      "fossilWeights": { "knightia": 30, "fossil_leaf": 24, "diplomystus": 24, "palm_frond": 22 } },
-
-    { "id": "hell_creek", "name": "Hell Creek, Montana", "period": "Late Cretaceous",
+      "unlock": {
+        "reputation": 60
+      },
+      "modifiers": {
+        "maxDepth": 2,
+        "extraInstances": 1
+      },
+      "palette": {
+        "topsoil": [
+          66,
+          60,
+          52
+        ],
+        "clay": [
+          104,
+          98,
+          84
+        ],
+        "sandstone": [
+          158,
+          152,
+          132
+        ],
+        "matrix": [
+          196,
+          192,
+          174
+        ]
+      },
+      "fossilWeights": {
+        "trilobite": 30,
+        "brachiopod": 26,
+        "agnostid": 24,
+        "hyolith": 20
+      }
+    },
+    {
+      "id": "green_river",
+      "name": "Green River, Wyoming",
+      "period": "Eocene",
+      "twist": "Lake shale. The fish are paper and crack a third more readily, but a whole one is worth half again as much.",
+      "unlock": {
+        "reputation": 180
+      },
+      "modifiers": {
+        "crackMultiplier": 1.35,
+        "payoutMultiplier": 1.6
+      },
+      "palette": {
+        "topsoil": [
+          84,
+          70,
+          48
+        ],
+        "clay": [
+          146,
+          122,
+          78
+        ],
+        "sandstone": [
+          206,
+          180,
+          126
+        ],
+        "matrix": [
+          232,
+          219,
+          186
+        ]
+      },
+      "fossilWeights": {
+        "knightia": 30,
+        "fossil_leaf": 24,
+        "diplomystus": 24,
+        "palm_frond": 22
+      }
+    },
+    {
+      "id": "hell_creek",
+      "name": "Hell Creek, Montana",
+      "period": "Late Cretaceous",
       "twist": "Big bones, and three more nodules of ironstone sat on top of them.",
-      "unlock": { "crewMilestone": 250000 },
-      "modifiers": { "extraRockNodules": 3 },
-      "palette": { "topsoil": [82, 48, 36], "clay": [148, 78, 50],
-                   "sandstone": [198, 138, 92], "matrix": [226, 196, 154] },
-      "fossilWeights": { "raptor_claw": 26, "trex_tooth": 22, "trex_rib": 18,
-                         "trex_vertebra": 18, "trike_horn": 16 } },
-
-    { "id": "night_dig", "name": "Night dig", "period": "Mixed", "twist":
-      "Headlamp only. Twelve seconds less daylight, and half again on everything you bag.",
-      "unlock": { "crewMilestone": 1000000 },
-      "modifiers": { "daylightDelta": -12, "payoutMultiplier": 1.5, "lightLevel": 0.55 },
-      "fossilWeights": { "ammonite": 10, "belemnite": 8, "ichthyo_vertebrae": 8,
-                         "trilobite": 10, "brachiopod": 8, "knightia": 10,
-                         "fossil_leaf": 8, "diplomystus": 8, "raptor_claw": 10,
-                         "trex_tooth": 8, "trex_vertebra": 6, "trike_horn": 6 } }
+      "unlock": {
+        "crewMilestone": 250000
+      },
+      "modifiers": {
+        "extraRockNodules": 3
+      },
+      "palette": {
+        "topsoil": [
+          82,
+          48,
+          36
+        ],
+        "clay": [
+          148,
+          78,
+          50
+        ],
+        "sandstone": [
+          198,
+          138,
+          92
+        ],
+        "matrix": [
+          226,
+          196,
+          154
+        ]
+      },
+      "fossilWeights": {
+        "raptor_claw": 26,
+        "trex_tooth": 22,
+        "trex_rib": 18,
+        "trex_vertebra": 18,
+        "trike_horn": 16
+      }
+    },
+    {
+      "id": "night_dig",
+      "name": "Night dig",
+      "period": "Mixed",
+      "twist": "Headlamp only. Twelve seconds less daylight, and half again on everything you bag.",
+      "unlock": {
+        "crewMilestone": 1000000
+      },
+      "modifiers": {
+        "daylightDelta": -12,
+        "payoutMultiplier": 1.5,
+        "lightLevel": 0.55
+      },
+      "fossilWeights": {
+        "ammonite": 10,
+        "belemnite": 8,
+        "ichthyo_vertebrae": 8,
+        "trilobite": 10,
+        "brachiopod": 8,
+        "knightia": 10,
+        "fossil_leaf": 8,
+        "diplomystus": 8,
+        "raptor_claw": 10,
+        "trex_tooth": 8,
+        "trex_vertebra": 6,
+        "trike_horn": 6
+      }
+    }
   ],
-
   "sets": [
-    { "id": "trex", "name": "Tyrannosaurus rex",
-      "pieces": ["trex_tooth", "trex_rib", "trex_vertebra"],
+    {
+      "id": "trex",
+      "name": "Tyrannosaurus rex",
+      "pieces": [
+        "trex_tooth",
+        "trex_rib",
+        "trex_vertebra"
+      ],
       "reputationBonus": 400,
-      "perk": { "label": "Apex predator — Hell Creek fossils pay +15%",
-                "kind": "sitePayoutBonus", "value": 0.15, "siteID": "hell_creek" } },
-
-    { "id": "ichthyosaur", "name": "Ichthyosaur",
-      "pieces": ["ichthyo_vertebrae", "ichthyo_rib", "ichthyo_paddle"],
+      "perk": {
+        "label": "Apex predator \u2014 Hell Creek fossils pay +15%",
+        "kind": "sitePayoutBonus",
+        "value": 0.15,
+        "siteID": "hell_creek"
+      }
+    },
+    {
+      "id": "ichthyosaur",
+      "name": "Ichthyosaur",
+      "pieces": [
+        "ichthyo_vertebrae",
+        "ichthyo_rib",
+        "ichthyo_paddle"
+      ],
       "reputationBonus": 300,
-      "perk": { "label": "Sea dragon — every slab gets 5 more seconds of daylight",
-                "kind": "extraDaylight", "value": 5 } }
+      "perk": {
+        "label": "Sea dragon \u2014 every slab gets 5 more seconds of daylight",
+        "kind": "extraDaylight",
+        "value": 5
+      }
+    }
+  ],
+  "tools": [
+    {
+      "id": "brush",
+      "name": "Brush",
+      "price": 0,
+      "blurb": "The one you already own. Honest, middling, forgiving enough.",
+      "brush": {
+        "id": "brush",
+        "name": "Brush",
+        "radius": 4.2,
+        "strength": 1.4,
+        "crackMultiplier": 1.0,
+        "safeSpeed": 1.4,
+        "price": 0
+      }
+    },
+    {
+      "id": "fine_brush",
+      "name": "Fine brush",
+      "price": 55,
+      "blurb": "Narrow and slow. Bone survives things it has no right to.",
+      "brush": {
+        "id": "fine_brush",
+        "name": "Fine brush",
+        "radius": 2.4,
+        "strength": 1.2,
+        "crackMultiplier": 0.35,
+        "safeSpeed": 2.2,
+        "price": 55
+      }
+    },
+    {
+      "id": "air_blower",
+      "name": "Air blower",
+      "price": 80,
+      "blurb": "Clears a hand's width at a time. Will also ruin a Knightia instantly.",
+      "brush": {
+        "id": "air_blower",
+        "name": "Air blower",
+        "radius": 7.5,
+        "strength": 1.8,
+        "crackMultiplier": 2.6,
+        "safeSpeed": 0.75,
+        "price": 80
+      }
+    },
+    {
+      "id": "dental_pick",
+      "name": "Dental pick",
+      "price": 70,
+      "blurb": "Ironstone nodules give up at a third of the usual fight.",
+      "modifiers": {
+        "rockHardnessMultiplier": 0.33
+      }
+    },
+    {
+      "id": "xray_goggles",
+      "name": "X-ray goggles",
+      "price": 95,
+      "blurb": "Three seconds of knowing exactly where not to rush.",
+      "modifiers": {
+        "revealSeconds": 3
+      }
+    },
+    {
+      "id": "headlamp",
+      "name": "Headlamp",
+      "price": 60,
+      "blurb": "Ten more seconds of daylight. The sun does not know about this.",
+      "modifiers": {
+        "daylightDelta": 10
+      }
+    },
+    {
+      "id": "sieve",
+      "name": "Sieve",
+      "price": 75,
+      "blurb": "Gems pay double. It does nothing at all for the fossil.",
+      "modifiers": {
+        "gemMultiplier": 2
+      }
+    }
+  ],
+  "charms": [
+    {
+      "id": "authentic_damage",
+      "name": "Authentic damage",
+      "price": 65,
+      "blurb": "Cracked bone counts half intact. Collectors like a little history.",
+      "modifiers": {
+        "crackedIntactCredit": 0.5
+      }
+    },
+    {
+      "id": "steady_hands",
+      "name": "Steady hands",
+      "price": 75,
+      "blurb": "Every tool's safe speed, a quarter higher.",
+      "modifiers": {
+        "safeSpeedMultiplier": 1.25
+      }
+    },
+    {
+      "id": "night_owl",
+      "name": "Night owl",
+      "price": 50,
+      "blurb": "Fifteen more seconds. A tenth less money. Worth it more often than not.",
+      "modifiers": {
+        "daylightDelta": 15,
+        "payoutMultiplier": 0.9
+      }
+    },
+    {
+      "id": "collectors_eye",
+      "name": "Collector's eye",
+      "price": 40,
+      "blurb": "You know what it is at a tenth exposed.",
+      "modifiers": {
+        "identifyExposure": 0.1
+      }
+    },
+    {
+      "id": "rush_job",
+      "name": "Rush job",
+      "price": 70,
+      "blurb": "Bag with twenty seconds to spare and he pays forty percent over.",
+      "modifiers": {
+        "rushMultiplier": 1.4,
+        "rushThreshold": 20
+      }
+    },
+    {
+      "id": "rock_hound",
+      "name": "Rock hound",
+      "price": 50,
+      "blurb": "Eight dollars for every nodule you clear out entirely.",
+      "modifiers": {
+        "rockNodulePayout": 8
+      }
+    },
+    {
+      "id": "compound_interest",
+      "name": "Compound interest",
+      "price": 60,
+      "blurb": "Two percent more on everything, for each charm you are carrying.",
+      "scaling": {
+        "kind": "payoutPerCharm",
+        "value": 0.02
+      }
+    },
+    {
+      "id": "cretaceous_permit",
+      "name": "Cretaceous permit",
+      "price": 95,
+      "blurb": "Every third slab comes out of Hell Creek, wherever you happen to be.",
+      "slabRule": {
+        "everyNthDay": 3,
+        "siteID": "hell_creek"
+      }
+    },
+    {
+      "id": "fine_motor",
+      "name": "Fine motor",
+      "price": 80,
+      "blurb": "Bone cracks three-quarters as readily.",
+      "modifiers": {
+        "crackMultiplier": 0.75
+      }
+    },
+    {
+      "id": "gem_cradle",
+      "name": "Gem cradle",
+      "price": 55,
+      "blurb": "Gems pay half again. Stacks with a sieve, cheerfully.",
+      "modifiers": {
+        "gemMultiplier": 1.5
+      }
+    },
+    {
+      "id": "long_shadows",
+      "name": "Long shadows",
+      "price": 45,
+      "blurb": "Eight more seconds of usable light.",
+      "modifiers": {
+        "daylightDelta": 8
+      }
+    },
+    {
+      "id": "provenance_papers",
+      "name": "Provenance papers",
+      "price": 70,
+      "blurb": "Ten percent more on everything. Nobody asks where they came from.",
+      "modifiers": {
+        "payoutMultiplier": 1.1
+      }
+    },
+    {
+      "id": "union_card",
+      "name": "Union card",
+      "price": 60,
+      "blurb": "Six dollars a nodule, and the rock itself argues less.",
+      "modifiers": {
+        "rockNodulePayout": 6,
+        "rockHardnessMultiplier": 0.8
+      }
+    },
+    {
+      "id": "patient_hand",
+      "name": "Patient hand",
+      "price": 65,
+      "blurb": "Your hand steadies as the week goes on. Five percent per day survived.",
+      "modifiers": {
+        "daylightDelta": 5
+      },
+      "scaling": {
+        "kind": "safeSpeedPerDay",
+        "value": 0.05
+      }
+    },
+    {
+      "id": "collectors_loupe",
+      "name": "Collector's loupe",
+      "price": 120,
+      "pool": "vault",
+      "blurb": "Identified at a twentieth exposed, and worth fifteen percent more.",
+      "modifiers": {
+        "identifyExposure": 0.05,
+        "payoutMultiplier": 1.15
+      }
+    },
+    {
+      "id": "steady_lamp",
+      "name": "Steady lamp",
+      "price": 130,
+      "pool": "vault",
+      "blurb": "Twenty more seconds, and a tenth fewer cracks.",
+      "modifiers": {
+        "daylightDelta": 20,
+        "crackMultiplier": 0.9
+      }
+    },
+    {
+      "id": "diamond_sieve",
+      "name": "Diamond sieve",
+      "price": 125,
+      "pool": "vault",
+      "blurb": "Gems pay treble. The Collector pretends not to notice.",
+      "modifiers": {
+        "gemMultiplier": 3
+      }
+    }
   ]
 }

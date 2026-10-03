@@ -12,7 +12,8 @@ public struct SharedConstants: Sendable, Codable, Equatable {
     /// rock and gem counts from a seed.
     public var fossils: [Fossil]
     public var sites: [Site]
-    public var tools: [BrushTool]
+    public var tools: [Tool]
+    public var charms: [Charm]
     public var installments: [Int]
     public var installmentGrowth: Float
 
@@ -21,7 +22,8 @@ public struct SharedConstants: Sendable, Codable, Equatable {
         self.tuning = tuning
         self.fossils = catalog.fossils
         self.sites = catalog.sites
-        self.tools = BrushTool.all
+        self.tools = catalog.tools
+        self.charms = catalog.charms
         self.installments = Installments.table
         self.installmentGrowth = Installments.growth
     }

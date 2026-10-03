@@ -1,4 +1,409 @@
 {
+  "charms" : [
+    {
+      "blurb" : "Cracked bone counts half intact. Collectors like a little history.",
+      "id" : "authentic_damage",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0.5,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Authentic damage",
+      "pool" : "shop",
+      "price" : 65,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Every tool's safe speed, a quarter higher.",
+      "id" : "steady_hands",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1.25
+      },
+      "name" : "Steady hands",
+      "pool" : "shop",
+      "price" : 75,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Fifteen more seconds. A tenth less money. Worth it more often than not.",
+      "id" : "night_owl",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 15,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 0.9,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Night owl",
+      "pool" : "shop",
+      "price" : 50,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "You know what it is at a tenth exposed.",
+      "id" : "collectors_eye",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.1,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Collector's eye",
+      "pool" : "shop",
+      "price" : 40,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Bag with twenty seconds to spare and he pays forty percent over.",
+      "id" : "rush_job",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1.4,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Rush job",
+      "pool" : "shop",
+      "price" : 70,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Eight dollars for every nodule you clear out entirely.",
+      "id" : "rock_hound",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 8,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Rock hound",
+      "pool" : "shop",
+      "price" : 50,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Two percent more on everything, for each charm you are carrying.",
+      "id" : "compound_interest",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Compound interest",
+      "pool" : "shop",
+      "price" : 60,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerCharm",
+        "value" : 0.02
+      }
+    },
+    {
+      "blurb" : "Every third slab comes out of Hell Creek, wherever you happen to be.",
+      "id" : "cretaceous_permit",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Cretaceous permit",
+      "pool" : "shop",
+      "price" : 95,
+      "reputationRequired" : 0,
+      "slabRule" : {
+        "everyNthDay" : 3,
+        "siteID" : "hell_creek"
+      }
+    },
+    {
+      "blurb" : "Bone cracks three-quarters as readily.",
+      "id" : "fine_motor",
+      "modifiers" : {
+        "crackMultiplier" : 0.75,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Fine motor",
+      "pool" : "shop",
+      "price" : 80,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Gems pay half again. Stacks with a sieve, cheerfully.",
+      "id" : "gem_cradle",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1.5,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Gem cradle",
+      "pool" : "shop",
+      "price" : 55,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Eight more seconds of usable light.",
+      "id" : "long_shadows",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 8,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Long shadows",
+      "pool" : "shop",
+      "price" : 45,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Ten percent more on everything. Nobody asks where they came from.",
+      "id" : "provenance_papers",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1.1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Provenance papers",
+      "pool" : "shop",
+      "price" : 70,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Six dollars a nodule, and the rock itself argues less.",
+      "id" : "union_card",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 0.8,
+        "rockNodulePayout" : 6,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Union card",
+      "pool" : "shop",
+      "price" : 60,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Your hand steadies as the week goes on. Five percent per day survived.",
+      "id" : "patient_hand",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 5,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Patient hand",
+      "pool" : "shop",
+      "price" : 65,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "safeSpeedPerDay",
+        "value" : 0.05
+      }
+    },
+    {
+      "blurb" : "Identified at a twentieth exposed, and worth fifteen percent more.",
+      "id" : "collectors_loupe",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.05,
+        "payoutMultiplier" : 1.15,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Collector's loupe",
+      "pool" : "vault",
+      "price" : 120,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Twenty more seconds, and a tenth fewer cracks.",
+      "id" : "steady_lamp",
+      "modifiers" : {
+        "crackMultiplier" : 0.9,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 20,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Steady lamp",
+      "pool" : "vault",
+      "price" : 130,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Gems pay treble. The Collector pretends not to notice.",
+      "id" : "diamond_sieve",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 3,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Diamond sieve",
+      "pool" : "vault",
+      "price" : 125,
+      "reputationRequired" : 0
+    }
+  ],
   "fossils" : [
     {
       "baseValue" : 90,
@@ -520,16 +925,16 @@
       }
     }
   ],
-  "installmentGrowth" : 1.32,
+  "installmentGrowth" : 1.22,
   "installments" : [
     350,
     450,
-    600,
-    800,
-    1050,
-    1400,
-    1850,
-    2450
+    575,
+    725,
+    900,
+    1100,
+    1350,
+    1650
   ],
   "schema" : 1,
   "sites" : [
@@ -662,7 +1067,7 @@
       "period" : "Cambrian",
       "twist" : "Shale splits thin. Less to brush through, several specimens per slab.",
       "unlock" : {
-        "reputation" : 200
+        "reputation" : 60
       }
     },
     {
@@ -680,7 +1085,7 @@
         "extraRockNodules" : 0,
         "lightLevel" : 1,
         "maxDepth" : 3,
-        "payoutMultiplier" : 1
+        "payoutMultiplier" : 1.6
       },
       "name" : "Green River, Wyoming",
       "palette" : {
@@ -726,9 +1131,9 @@
         }
       },
       "period" : "Eocene",
-      "twist" : "Lake shale. The fish are paper. Cracks come at a third again the usual rate.",
+      "twist" : "Lake shale. The fish are paper and crack a third more readily, but a whole one is worth half again as much.",
       "unlock" : {
-        "reputation" : 600
+        "reputation" : 180
       }
     },
     {
@@ -875,31 +1280,185 @@
   ],
   "tools" : [
     {
-      "crackMultiplier" : 0.35,
-      "id" : "fine_brush",
-      "name" : "Fine brush",
-      "price" : 95,
-      "radius" : 2.4,
-      "safeSpeed" : 2.2,
-      "strength" : 1.2
-    },
-    {
-      "crackMultiplier" : 1,
+      "blurb" : "The one you already own. Honest, middling, forgiving enough.",
+      "brush" : {
+        "crackMultiplier" : 1,
+        "id" : "brush",
+        "name" : "Brush",
+        "price" : 0,
+        "radius" : 4.2,
+        "safeSpeed" : 1.4,
+        "strength" : 1.4
+      },
       "id" : "brush",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
       "name" : "Brush",
       "price" : 0,
-      "radius" : 4.2,
-      "safeSpeed" : 1.4,
-      "strength" : 1.4
+      "reputationRequired" : 0
     },
     {
-      "crackMultiplier" : 2.6,
+      "blurb" : "Narrow and slow. Bone survives things it has no right to.",
+      "brush" : {
+        "crackMultiplier" : 0.35,
+        "id" : "fine_brush",
+        "name" : "Fine brush",
+        "price" : 55,
+        "radius" : 2.4,
+        "safeSpeed" : 2.2,
+        "strength" : 1.2
+      },
+      "id" : "fine_brush",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Fine brush",
+      "price" : 55,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Clears a hand's width at a time. Will also ruin a Knightia instantly.",
+      "brush" : {
+        "crackMultiplier" : 2.6,
+        "id" : "air_blower",
+        "name" : "Air blower",
+        "price" : 80,
+        "radius" : 7.5,
+        "safeSpeed" : 0.75,
+        "strength" : 1.8
+      },
       "id" : "air_blower",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
       "name" : "Air blower",
-      "price" : 140,
-      "radius" : 7.5,
-      "safeSpeed" : 0.75,
-      "strength" : 1.8
+      "price" : 80,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Ironstone nodules give up at a third of the usual fight.",
+      "id" : "dental_pick",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 0.33,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Dental pick",
+      "price" : 70,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Three seconds of knowing exactly where not to rush.",
+      "id" : "xray_goggles",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 3,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "X-ray goggles",
+      "price" : 95,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Ten more seconds of daylight. The sun does not know about this.",
+      "id" : "headlamp",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 10,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Headlamp",
+      "price" : 60,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Gems pay double. It does nothing at all for the fossil.",
+      "id" : "sieve",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 2,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Sieve",
+      "price" : 75,
+      "reputationRequired" : 0
     }
   ],
   "tuning" : {
@@ -922,7 +1481,7 @@
     "gemsMax" : 2,
     "gemsMin" : 0,
     "identifyExposure" : 0.25,
-    "intactCrackWeight" : 3,
+    "intactCrackWeight" : 5,
     "layerHardness" : [
       1,
       1,

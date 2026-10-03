@@ -51,6 +51,7 @@ struct DigView: View {
             slab
             readouts
             SpeedMeter(speed: engine.speed, safeSpeed: engine.safeSpeed)
+            passiveBadges
             toolTray
         }
         .padding(.horizontal, Measure.gutter)
@@ -186,6 +187,32 @@ struct DigView: View {
         }
     }
 
+    /// Passive tools have no button, so they are shown as always-on badges. Otherwise
+    /// a player who spent $95 on goggles has nothing on screen telling them so.
+    @ViewBuilder
+    private var passiveBadges: some View {
+        let passives = engine.passiveTools
+        if !passives.isEmpty {
+            HStack(spacing: 6) {
+                ForEach(passives) { tool in
+                    Text(tool.name)
+                        .font(Typography.label(.caption2))
+                        .tracking(0.8)
+                        .foregroundStyle(Ink.muted)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 3)
+                                .stroke(Ink.hairline, lineWidth: Measure.hairline)
+                        )
+                }
+                Spacer()
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Carrying " + passives.map(\.name).joined(separator: ", "))
+        }
+    }
+
     private var readouts: some View {
         HStack(spacing: 10) {
             Readout(label: "Exposed", value: "\(engine.exposurePercent)%")
@@ -208,7 +235,7 @@ struct DigView: View {
 
     private var toolTray: some View {
         HStack(spacing: 10) {
-            let tools = BrushTool.all
+            let tools = engine.availableBrushes
             let tray = ForEach(tools) { tool in
                 ToolButton(tool: tool, isSelected: tool.id == engine.tool.id) {
                     engine.tool = tool

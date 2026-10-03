@@ -30,6 +30,8 @@ final class DigEngine {
     let specimenNumber: Int
     let totalDaylight: Float
     let modifiers: ModifierSet
+    /// What the player is carrying. Drives the tool tray and the passive badges.
+    let loadout: Loadout
 
     // MARK: Hot state, deliberately not observed
 
@@ -51,23 +53,38 @@ final class DigEngine {
     private(set) var wholeGems = 0
     /// Set the first time a crack happens, for the one diegetic hint in §9.
     private(set) var hasCracked = false
+    /// Seconds of X-ray goggle reveal left. Counts down only while digging, so looking
+    /// at the slab before the first touch does not spend it.
+    private(set) var revealRemaining: Float = 0
+
+    var isRevealing: Bool { revealRemaining > 0 }
+
+    /// Brushes the player can select, and the always-on tools they are carrying.
+    var availableBrushes: [BrushTool] { loadout.brushes }
+    var passiveTools: [Tool] { loadout.passives }
 
     // MARK: Init
 
     init(
         seed: UInt64,
         site: Site,
+        day: Int = 1,
+        loadout: Loadout = Loadout(),
         catalog: ContentCatalog = .shared,
         tuning: SimTuning = .standard,
         extraModifiers: ModifierSet = ModifierSet(),
-        tool: BrushTool = .brush
+        tool: BrushTool? = nil
     ) {
         let generated = SlabGenerator.generate(
             seed: seed, site: site, catalog: catalog, tuning: tuning
         )
         let fossil = catalog.fossil(generated.layout.fossilID) ?? catalog.fossils[0]
 
-        var composed = ModifierSet.combining([site.modifiers.modifierSet, extraModifiers])
+        var composed = ModifierSet.combining([
+            site.modifiers.modifierSet,
+            loadout.modifiers(context: CharmContext(day: day, siteID: site.id)),
+            extraModifiers,
+        ])
         // Fossil fragility multiplies the site's. A Knightia at Green River is the
         // worst case in the game and that is the point.
         composed.crackMultiplier *= fossil.crackMultiplier
@@ -76,20 +93,23 @@ final class DigEngine {
         self.fossil = fossil
         self.catalog = catalog
         self.modifiers = composed
+        self.loadout = loadout
         self.specimenNumber = Int(seed % 9_000) + 1_000
-        self.tool = tool
+        self.tool = tool ?? loadout.brushes.first ?? .brush
 
         var simulation = SlabSimulation(
             grid: generated.grid, layout: generated.layout, tuning: tuning
         )
         simulation.crackMultiplier = composed.crackMultiplier
         simulation.safeSpeedMultiplier = composed.safeSpeedMultiplier
+        simulation.rockHardnessMultiplier = composed.rockHardnessMultiplier
         self.sim = simulation
 
         let daylight = max(5, tuning.daylightSeconds + composed.daylightDelta)
         self.totalDaylight = daylight
         self.daylightRemaining = daylight
-        self.safeSpeed = simulation.safeSpeed(for: tool)
+        self.safeSpeed = simulation.safeSpeed(for: self.tool)
+        self.revealRemaining = composed.revealSeconds
         publish(force: true)
     }
 
@@ -97,15 +117,21 @@ final class DigEngine {
     init(
         restored: SlabSnapshot.Restored,
         site: Site,
+        loadout: Loadout = Loadout(),
         catalog: ContentCatalog = .shared,
         extraModifiers: ModifierSet = ModifierSet()
     ) {
         let simulation = restored.simulation
         let fossil = catalog.fossil(simulation.layout.fossilID) ?? catalog.fossils[0]
-        var composed = ModifierSet.combining([site.modifiers.modifierSet, extraModifiers])
+        var composed = ModifierSet.combining([
+            site.modifiers.modifierSet,
+            loadout.modifiers(context: CharmContext(day: restored.day, siteID: site.id)),
+            extraModifiers,
+        ])
         composed.crackMultiplier *= fossil.crackMultiplier
 
         self.site = site
+        self.loadout = loadout
         self.fossil = fossil
         self.catalog = catalog
         self.modifiers = composed
@@ -117,6 +143,9 @@ final class DigEngine {
         self.totalDaylight = max(5, simulation.tuning.daylightSeconds + composed.daylightDelta)
         self.daylightRemaining = min(restored.daylightRemaining, self.totalDaylight)
         self.safeSpeed = simulation.safeSpeed(for: restored.tool)
+        // The reveal is spent: it is three seconds at the start of a slab, not three
+        // seconds every time the app is reopened.
+        self.revealRemaining = 0
         // Waiting, not digging: §5 says the slab comes back with daylight paused, and
         // it resumes on the next touch.
         self.phase = .waiting
@@ -224,6 +253,7 @@ final class DigEngine {
     func payout() -> PayoutBreakdown {
         Payout.evaluate(PayoutContext(
             baseValue: fossil.baseValue,
+            instances: sim.layout.instances,
             exposure: sim.exposure,
             boneCells: sim.boneCells,
             crackedCells: sim.crackedBone,
@@ -270,6 +300,9 @@ final class DigEngine {
 
     func tick(delta: TimeInterval) {
         guard phase == .digging else { return }
+        if revealRemaining > 0 {
+            revealRemaining = max(0, revealRemaining - Float(delta))
+        }
         if !sim.isBrushing {
             // The EMA decays in frames, so convert. 60 Hz nominal.
             sim.tickIdle(frames: max(1, Int((delta * 60).rounded())))
@@ -331,6 +364,7 @@ final class DigEngine {
         quiet.rockNodulePayout = 0
         return Payout.evaluate(PayoutContext(
             baseValue: fossil.baseValue,
+            instances: sim.layout.instances,
             exposure: sim.exposure,
             boneCells: sim.boneCells,
             crackedCells: sim.crackedBone,

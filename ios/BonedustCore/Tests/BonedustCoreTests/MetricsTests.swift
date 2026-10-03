@@ -21,7 +21,6 @@ final class MetricsTests: XCTestCase {
     }
 
     func testIntactFormula() {
-        // intact = max(0, 1 - (cracked / bone) * 3)
         var (grid, layout) = TestSlab.boneBlock(size: (w: 10, h: 10), exposed: true)
         func withCracked(_ count: Int) -> Float {
             var copy = grid
@@ -35,9 +34,11 @@ final class MetricsTests: XCTestCase {
             }
             return SlabSimulation(grid: copy, layout: layout).intact
         }
+        // intact = max(0, 1 - (cracked / bone) * intactCrackWeight), weight 5.
         XCTAssertEqual(withCracked(0), 1, accuracy: 0.0001)
-        XCTAssertEqual(withCracked(10), 0.7, accuracy: 0.0001)
-        XCTAssertEqual(withCracked(33), 0.01, accuracy: 0.0001)
+        XCTAssertEqual(withCracked(10), 0.5, accuracy: 0.0001)
+        XCTAssertEqual(withCracked(19), 0.05, accuracy: 0.0001)
+        XCTAssertEqual(withCracked(20), 0, "a fifth cracked makes it worthless")
         XCTAssertEqual(withCracked(40), 0, "intact floors at zero")
         layout.boneCells = 0
         XCTAssertEqual(SlabSimulation(grid: grid, layout: layout).intact, 1)

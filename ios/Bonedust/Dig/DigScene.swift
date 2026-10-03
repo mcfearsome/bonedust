@@ -84,6 +84,12 @@ final class DigScene: SKScene {
 
         engine.tick(delta: delta)
         engine.publish()
+        // X-ray goggles. Flipping this forces a full redraw on the frame it changes,
+        // which is why it is checked before the upload rather than inside it.
+        if renderer.revealBuriedBone != engine.isRevealing {
+            renderer.revealBuriedBone = engine.isRevealing
+            pendingFullRedraw = true
+        }
         uploadSlab(engine)
         updateContinuousFeedback(engine)
     }

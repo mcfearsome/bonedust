@@ -159,3 +159,101 @@ Two things the simulator got wrong first, both worth keeping written down:
 - **Navigation is a switch on a coordinator's `screen`, not a `NavigationStack`.** The
   flow is a state machine driven by `RunState.phase` and there is no "back" out of a
   slab; a push/pop stack would be a second source of truth to keep in step.
+
+## M3: what the economy sweep found (2026-10-02)
+
+M3 added tools, charms and the supply tent, and then the sweep found that **none of it
+mattered** — buying a tool made the simulated player measurably worse. Chasing that
+down turned up six real defects. They are written out because every one of them was
+invisible to the unit tests and only a measurement could have caught them.
+
+### Bugs in the game
+
+1. **Multiple fossil instances were paid for once.** `exposure` is measured over the
+   union of every instance, so Wheeler Shale's twist — "several specimens per slab" —
+   tripled the bone you had to clear while paying for one fossil. The site gated behind
+   Reputation was strictly worse than the starting one. `PayoutContext.instances` now
+   multiplies the base value, and Wheeler went from $98 to $143 a slab.
+
+2. **Reputation-gated Green River was a downgrade.** Its twist is a 35% higher crack
+   rate and nothing else, so it cost 600 Reputation to unlock a site that paid *less*
+   than Charmouth. It now pays 1.6x, which is the risk it adds expressed as reward.
+
+3. **The kit was thrown away between runs.** §4 says the Collector takes your tools as
+   interest *when you fail*, which means they survive when you don't — but every run
+   started with the bare brush. The installment ramp was therefore unwinnable by
+   construction: the amount owed grew 30% a tier while income could not grow at all.
+   `MetaProgress` now carries tools and charms, and seizes them on a failure.
+
+4. **Reputation accrued too slowly to open the map.** At 10:1 on leftover cash a tier 1
+   win earns about 10 Reputation, so Wheeler's 200 needed twenty successful runs and
+   Green River's 600 needed sixty — while careers were ending at tier two or three.
+   There is now a flat `15 x tier` award for clearing the week, and the gates moved to
+   60 and 180. Surviving a harder week is what opens the map, which is also the thing
+   the player is proud of.
+
+5. **Item prices were set against no measured income at all.** I had invented them in
+   the content file; the cheapest charm cost 70 against a run that earned ~360 total.
+   Everything is now roughly 55% of what it was, so a first purchase is a real decision
+   on day two rather than an impossibility.
+
+6. **`playSlab` took a `Loadout` and ignored its `ModifierSet`.** Passive tools were
+   silently inert — a headlamp produced *bit-identical* results to no headlamp, which
+   read as a balance finding and was plumbing. `playSlab` now composes the loadout
+   itself and `playRun` no longer passes it separately.
+
+### Bugs in the measuring instrument
+
+The simulator is not the game, and three of its flaws were masquerading as game balance:
+
+7. **The brush teleported.** When the sweep wrapped to the top of the slab or switched
+   from surveying to excavating, the model dragged the finger straight across the slab:
+   one enormous stroke that carved a line *and* spiked the speed EMA, cracking bone that
+   had never been brushed quickly. This alone was suppressing income by about a quarter
+   and accounted for essentially all measured cracking — the crack mechanic was never
+   being exercised on purpose. The model now lifts the finger when the path jumps.
+
+8. **One brush per slab made tools look harmful.** A fine brush clears a quarter of the
+   area per pass, so using it for a whole slab collapsed coverage. The model now surveys
+   with the widest brush and works the fossil with the gentlest, switching on whether
+   bone is *known* to be near — and it may only avoid what it has actually uncovered,
+   not what the bone mask says is there.
+
+9. **Policy speeds were mixed up with travel distances**, and **the shopper kept no
+   reserve** — it earned $450 against $350 owed and still failed, having bought itself
+   below the line.
+
+### The curve, after all that
+
+`make simulate` over 800 careers, each played from tier 1 until it fails, carrying the
+kit forward and moving to the best site its Reputation has opened:
+
+| tier | owed | win% | §9 target |
+|---|---|---|---|
+| 1 | 350 | **70.6%** | ~70% |
+| 2 | 450 | 34.3% | ~60% |
+| 3 | 575 | 22.7% | ~48% |
+| 4 | 725 | 52.3% | ~38% |
+| 5 | 900 | **30.4%** | ~30% |
+
+Tier 1 and tier 5 land on their targets. The middle is lumpy because site unlocks arrive
+discretely: the tier just after an unlock is easy and the one before it is hard. Smoothing
+that means either more gradual income growth or gates placed between tiers rather than on
+them, and it is not worth fitting further against a model player whose absolute income is
+still unverified by human hands.
+
+### Tuning changed, and why
+
+- **`intactCrackWeight` 3.0 → 5.0.** At 3.0 care was worthless: exposure is raised to
+  1.5 while intact stays linear, so "clear fast and accept cracks" beat "go slow and stay
+  whole" at *every* site, and no brush was worth buying. Pillar 2 was decorative. At 5.0
+  a fifth of the fossil cracked makes it worthless and the fine brush pays for itself.
+- **Installment curve → `350, 450, 575, 725, 900, 1100, 1350, 1650` (~1.22x).** The
+  brief offered `350, 450, 600, 800, 1050` as a sample and marked the exact curve
+  `[DECIDE]`. That ramp climbs ~30% a tier; measured income climbs nowhere near that
+  fast, which put tier 3 at a 5% win rate against a 48% target.
+- **Green River pays 1.6x; Wheeler and Green River gate at 60 and 180 Reputation.**
+
+All of these are provisional in one specific way: the model player sweeps the slab
+perfectly and has flawless local perception, so it cracks far less than a person will.
+Every number here should be re-measured against a human once a simulator runtime exists.

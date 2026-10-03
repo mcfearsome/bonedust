@@ -57,9 +57,13 @@ Xcode supports — see **Toolchain** in `DECISIONS.md` if `xcodebuild` reports
 - **M2 — run loop: complete.** Five days, the installment, slab results, run end,
   Reputation, and a one-slot autosave that restores a part-dug slab with daylight
   paused. Plus the §9 economy simulator (`make simulate`).
-- M3 content and charms, M4 meta, M5 crew ledger, M6 polish: not started.
+- **M3 — content and charms: complete.** Seven tools (three brushes, four passives),
+  seventeen charms, the supply tent with restock and resale, kit that carries across
+  successful runs, and a per-day site override. Tools and charms both resolve into one
+  `ModifierSet`, so nothing special-cases a charm inside the brush loop.
+- M4 meta, M5 crew ledger, M6 polish: not started.
 
-132 core tests pass. App-layer tests compile but cannot be *run* here — see
+149 core tests pass. App-layer tests compile but cannot be *run* here — see
 **Toolchain** in `DECISIONS.md`.
 
 ## The one rule
