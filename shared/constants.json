@@ -1,0 +1,943 @@
+{
+  "fossils" : [
+    {
+      "baseValue" : 90,
+      "crackMultiplier" : 1,
+      "formation" : "Blue Lias",
+      "id" : "ammonite",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Ammonite",
+      "note" : "Coiled and forgiving. The whorls hold together.",
+      "period" : "Jurassic",
+      "shape" : {
+        "kind" : "spiral",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 9,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.14,
+          "turns" : 2.6
+        },
+        "spanCells" : 58
+      }
+    },
+    {
+      "baseValue" : 55,
+      "crackMultiplier" : 1.25,
+      "formation" : "Blue Lias",
+      "id" : "belemnite",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Belemnite",
+      "note" : "Thin as a pencil. Treat it like one.",
+      "period" : "Jurassic",
+      "shape" : {
+        "kind" : "taper",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.06,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 9,
+          "taperFrom" : 0.055,
+          "taperTo" : 0.008,
+          "thickness" : 0.1,
+          "turns" : 2.6
+        },
+        "spanCells" : 72
+      }
+    },
+    {
+      "baseValue" : 140,
+      "crackMultiplier" : 1,
+      "formation" : "Blue Lias",
+      "id" : "ichthyo_vertebrae",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Ichthyosaur vertebrae",
+      "note" : "Scattered down the slab like dropped coins.",
+      "period" : "Jurassic",
+      "setID" : "ichthyosaur",
+      "shape" : {
+        "kind" : "discs",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 6,
+          "growth" : 0.085,
+          "jitter" : 0.22,
+          "ribs" : 9,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.17,
+          "turns" : 2.6
+        },
+        "spanCells" : 80
+      }
+    },
+    {
+      "baseValue" : 125,
+      "crackMultiplier" : 1,
+      "formation" : "Blue Lias",
+      "id" : "ichthyo_rib",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Ichthyosaur rib",
+      "note" : "A long curve. Easy to catch the end of.",
+      "period" : "Jurassic",
+      "setID" : "ichthyosaur",
+      "shape" : {
+        "kind" : "taper",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.42,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 9,
+          "taperFrom" : 0.075,
+          "taperTo" : 0.02,
+          "thickness" : 0.1,
+          "turns" : 2.6
+        },
+        "spanCells" : 92
+      }
+    },
+    {
+      "baseValue" : 155,
+      "crackMultiplier" : 1,
+      "formation" : "Blue Lias",
+      "id" : "ichthyo_paddle",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Ichthyosaur paddle",
+      "note" : "Phalanges packed like cobbles.",
+      "period" : "Jurassic",
+      "setID" : "ichthyosaur",
+      "shape" : {
+        "kind" : "fan",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 6,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.075,
+          "turns" : 2.6
+        },
+        "spanCells" : 54
+      }
+    },
+    {
+      "baseValue" : 70,
+      "crackMultiplier" : 1.15,
+      "formation" : "Blue Lias",
+      "id" : "crinoid",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Crinoid stem",
+      "note" : "A stack of tiny discs. Blow on it wrong and it is gravel.",
+      "period" : "Jurassic",
+      "shape" : {
+        "kind" : "discs",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 14,
+          "growth" : 0.085,
+          "jitter" : 0.08,
+          "ribs" : 9,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.085,
+          "turns" : 2.6
+        },
+        "spanCells" : 88
+      }
+    },
+    {
+      "baseValue" : 75,
+      "crackMultiplier" : 1,
+      "formation" : "Wheeler Shale",
+      "id" : "trilobite",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Trilobite",
+      "note" : "Segmented. The grooves are shale, not bone.",
+      "period" : "Cambrian",
+      "shape" : {
+        "kind" : "segmentedBody",
+        "params" : {
+          "aspect" : 0.4,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 8,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.075,
+          "turns" : 2.6
+        },
+        "spanCells" : 50
+      }
+    },
+    {
+      "baseValue" : 40,
+      "crackMultiplier" : 1,
+      "formation" : "Wheeler Shale",
+      "id" : "brachiopod",
+      "instancesMax" : 3,
+      "instancesMin" : 2,
+      "name" : "Brachiopod",
+      "note" : "Small. Rarely alone.",
+      "period" : "Cambrian",
+      "shape" : {
+        "kind" : "fan",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 7,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.09,
+          "turns" : 2.6
+        },
+        "spanCells" : 26
+      }
+    },
+    {
+      "baseValue" : 65,
+      "crackMultiplier" : 1,
+      "formation" : "Wheeler Shale",
+      "id" : "agnostid",
+      "instancesMax" : 4,
+      "instancesMin" : 2,
+      "name" : "Agnostid trilobite",
+      "note" : "Blind, tiny, everywhere.",
+      "period" : "Cambrian",
+      "shape" : {
+        "kind" : "segmentedBody",
+        "params" : {
+          "aspect" : 0.5,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 4,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.1,
+          "turns" : 2.6
+        },
+        "spanCells" : 24
+      }
+    },
+    {
+      "baseValue" : 50,
+      "crackMultiplier" : 1,
+      "formation" : "Wheeler Shale",
+      "id" : "hyolith",
+      "instancesMax" : 3,
+      "instancesMin" : 2,
+      "name" : "Hyolith",
+      "note" : "A cone nobody agrees about.",
+      "period" : "Cambrian",
+      "shape" : {
+        "kind" : "taper",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 9,
+          "taperFrom" : 0.12,
+          "taperTo" : 0.02,
+          "thickness" : 0.1,
+          "turns" : 2.6
+        },
+        "spanCells" : 30
+      }
+    },
+    {
+      "baseValue" : 110,
+      "crackMultiplier" : 1.2,
+      "formation" : "Green River",
+      "id" : "knightia",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Knightia",
+      "note" : "Ribs one cell wide. Breathe on them.",
+      "period" : "Eocene",
+      "shape" : {
+        "kind" : "fish",
+        "params" : {
+          "aspect" : 0.3,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 11,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.07,
+          "turns" : 2.6
+        },
+        "spanCells" : 68
+      }
+    },
+    {
+      "baseValue" : 60,
+      "crackMultiplier" : 1.35,
+      "formation" : "Green River",
+      "id" : "fossil_leaf",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Fossil leaf",
+      "note" : "Thinner than the brush bristles.",
+      "period" : "Eocene",
+      "shape" : {
+        "kind" : "leaf",
+        "params" : {
+          "aspect" : 0.3,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 7,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.06,
+          "turns" : 2.6
+        },
+        "spanCells" : 60
+      }
+    },
+    {
+      "baseValue" : 135,
+      "crackMultiplier" : 1.2,
+      "formation" : "Green River",
+      "id" : "diplomystus",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Diplomystus",
+      "note" : "The big herring. Worth the patience.",
+      "period" : "Eocene",
+      "shape" : {
+        "kind" : "fish",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 14,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.075,
+          "turns" : 2.6
+        },
+        "spanCells" : 86
+      }
+    },
+    {
+      "baseValue" : 95,
+      "crackMultiplier" : 1.3,
+      "formation" : "Green River",
+      "id" : "palm_frond",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Palm frond",
+      "note" : "Every blade is its own chance to ruin it.",
+      "period" : "Eocene",
+      "shape" : {
+        "kind" : "fan",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 13,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.05,
+          "turns" : 2.6
+        },
+        "spanCells" : 78
+      }
+    },
+    {
+      "baseValue" : 170,
+      "crackMultiplier" : 1,
+      "formation" : "Hell Creek",
+      "id" : "raptor_claw",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Raptor claw",
+      "note" : "A crescent with an opinion.",
+      "period" : "Late Cretaceous",
+      "shape" : {
+        "kind" : "crescent",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 1.7,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 9,
+          "taperFrom" : 0.17,
+          "taperTo" : 0.02,
+          "thickness" : 0.1,
+          "turns" : 2.6
+        },
+        "spanCells" : 56
+      }
+    },
+    {
+      "baseValue" : 200,
+      "crackMultiplier" : 1,
+      "formation" : "Hell Creek",
+      "id" : "trex_tooth",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "T. rex tooth",
+      "note" : "Small, dense, and the reason you came.",
+      "period" : "Late Cretaceous",
+      "setID" : "trex",
+      "shape" : {
+        "kind" : "taper",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.16,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 9,
+          "taperFrom" : 0.2,
+          "taperTo" : 0.03,
+          "thickness" : 0.1,
+          "turns" : 2.6
+        },
+        "spanCells" : 46
+      }
+    },
+    {
+      "baseValue" : 185,
+      "crackMultiplier" : 1,
+      "formation" : "Hell Creek",
+      "id" : "trex_rib",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "T. rex rib",
+      "note" : "Runs corner to corner. Budget your daylight.",
+      "period" : "Late Cretaceous",
+      "setID" : "trex",
+      "shape" : {
+        "kind" : "taper",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.5,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 9,
+          "taperFrom" : 0.085,
+          "taperTo" : 0.025,
+          "thickness" : 0.1,
+          "turns" : 2.6
+        },
+        "spanCells" : 104
+      }
+    },
+    {
+      "baseValue" : 215,
+      "crackMultiplier" : 1,
+      "formation" : "Hell Creek",
+      "id" : "trex_vertebra",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "T. rex vertebra",
+      "note" : "Three fused drums of bone.",
+      "period" : "Late Cretaceous",
+      "setID" : "trex",
+      "shape" : {
+        "kind" : "discs",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.22,
+          "count" : 3,
+          "growth" : 0.085,
+          "jitter" : 0.12,
+          "ribs" : 9,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.3,
+          "turns" : 2.6
+        },
+        "spanCells" : 58
+      }
+    },
+    {
+      "baseValue" : 260,
+      "crackMultiplier" : 1,
+      "formation" : "Hell Creek",
+      "id" : "trike_horn",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Triceratops horn",
+      "note" : "Enormous, and buried in nodules.",
+      "period" : "Late Cretaceous",
+      "shape" : {
+        "kind" : "taper",
+        "params" : {
+          "aspect" : 0.34,
+          "bend" : 0.3,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "ribs" : 9,
+          "taperFrom" : 0.21,
+          "taperTo" : 0.025,
+          "thickness" : 0.1,
+          "turns" : 2.6
+        },
+        "spanCells" : 112
+      }
+    }
+  ],
+  "installmentGrowth" : 1.32,
+  "installments" : [
+    350,
+    450,
+    600,
+    800,
+    1050,
+    1400,
+    1850,
+    2450
+  ],
+  "schema" : 1,
+  "sites" : [
+    {
+      "fossilWeights" : {
+        "ammonite" : 30,
+        "belemnite" : 24,
+        "crinoid" : 16,
+        "ichthyo_paddle" : 8,
+        "ichthyo_rib" : 10,
+        "ichthyo_vertebrae" : 12
+      },
+      "id" : "charmouth",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "daylightDelta" : 0,
+        "extraInstances" : 0,
+        "extraRockNodules" : 0,
+        "lightLevel" : 1,
+        "maxDepth" : 3,
+        "payoutMultiplier" : 1
+      },
+      "name" : "Charmouth, Dorset",
+      "palette" : {
+        "bone" : {
+          "b" : 214,
+          "g" : 233,
+          "r" : 242
+        },
+        "clay" : {
+          "b" : 57,
+          "g" : 88,
+          "r" : 136
+        },
+        "crackedBone" : {
+          "b" : 74,
+          "g" : 92,
+          "r" : 112
+        },
+        "gem" : {
+          "b" : 190,
+          "g" : 168,
+          "r" : 70
+        },
+        "matrix" : {
+          "b" : 166,
+          "g" : 203,
+          "r" : 224
+        },
+        "rock" : {
+          "b" : 102,
+          "g" : 106,
+          "r" : 110
+        },
+        "sandstone" : {
+          "b" : 104,
+          "g" : 152,
+          "r" : 196
+        },
+        "topsoil" : {
+          "b" : 40,
+          "g" : 52,
+          "r" : 74
+        }
+      },
+      "period" : "Jurassic",
+      "twist" : "Blue Lias, three honest layers. Nothing is out to get you here.",
+      "unlock" : "start"
+    },
+    {
+      "fossilWeights" : {
+        "agnostid" : 24,
+        "brachiopod" : 26,
+        "hyolith" : 20,
+        "trilobite" : 30
+      },
+      "id" : "wheeler",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "daylightDelta" : 0,
+        "extraInstances" : 1,
+        "extraRockNodules" : 0,
+        "lightLevel" : 1,
+        "maxDepth" : 2,
+        "payoutMultiplier" : 1
+      },
+      "name" : "Wheeler Shale, Utah",
+      "palette" : {
+        "bone" : {
+          "b" : 214,
+          "g" : 233,
+          "r" : 242
+        },
+        "clay" : {
+          "b" : 84,
+          "g" : 98,
+          "r" : 104
+        },
+        "crackedBone" : {
+          "b" : 74,
+          "g" : 92,
+          "r" : 112
+        },
+        "gem" : {
+          "b" : 190,
+          "g" : 168,
+          "r" : 70
+        },
+        "matrix" : {
+          "b" : 174,
+          "g" : 192,
+          "r" : 196
+        },
+        "rock" : {
+          "b" : 102,
+          "g" : 106,
+          "r" : 110
+        },
+        "sandstone" : {
+          "b" : 132,
+          "g" : 152,
+          "r" : 158
+        },
+        "topsoil" : {
+          "b" : 52,
+          "g" : 60,
+          "r" : 66
+        }
+      },
+      "period" : "Cambrian",
+      "twist" : "Shale splits thin. Less to brush through, several specimens per slab.",
+      "unlock" : {
+        "reputation" : 200
+      }
+    },
+    {
+      "fossilWeights" : {
+        "diplomystus" : 24,
+        "fossil_leaf" : 24,
+        "knightia" : 30,
+        "palm_frond" : 22
+      },
+      "id" : "green_river",
+      "modifiers" : {
+        "crackMultiplier" : 1.35,
+        "daylightDelta" : 0,
+        "extraInstances" : 0,
+        "extraRockNodules" : 0,
+        "lightLevel" : 1,
+        "maxDepth" : 3,
+        "payoutMultiplier" : 1
+      },
+      "name" : "Green River, Wyoming",
+      "palette" : {
+        "bone" : {
+          "b" : 214,
+          "g" : 233,
+          "r" : 242
+        },
+        "clay" : {
+          "b" : 78,
+          "g" : 122,
+          "r" : 146
+        },
+        "crackedBone" : {
+          "b" : 74,
+          "g" : 92,
+          "r" : 112
+        },
+        "gem" : {
+          "b" : 190,
+          "g" : 168,
+          "r" : 70
+        },
+        "matrix" : {
+          "b" : 186,
+          "g" : 219,
+          "r" : 232
+        },
+        "rock" : {
+          "b" : 102,
+          "g" : 106,
+          "r" : 110
+        },
+        "sandstone" : {
+          "b" : 126,
+          "g" : 180,
+          "r" : 206
+        },
+        "topsoil" : {
+          "b" : 48,
+          "g" : 70,
+          "r" : 84
+        }
+      },
+      "period" : "Eocene",
+      "twist" : "Lake shale. The fish are paper. Cracks come at a third again the usual rate.",
+      "unlock" : {
+        "reputation" : 600
+      }
+    },
+    {
+      "fossilWeights" : {
+        "raptor_claw" : 26,
+        "trex_rib" : 18,
+        "trex_tooth" : 22,
+        "trex_vertebra" : 18,
+        "trike_horn" : 16
+      },
+      "id" : "hell_creek",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "daylightDelta" : 0,
+        "extraInstances" : 0,
+        "extraRockNodules" : 3,
+        "lightLevel" : 1,
+        "maxDepth" : 3,
+        "payoutMultiplier" : 1
+      },
+      "name" : "Hell Creek, Montana",
+      "palette" : {
+        "bone" : {
+          "b" : 214,
+          "g" : 233,
+          "r" : 242
+        },
+        "clay" : {
+          "b" : 50,
+          "g" : 78,
+          "r" : 148
+        },
+        "crackedBone" : {
+          "b" : 74,
+          "g" : 92,
+          "r" : 112
+        },
+        "gem" : {
+          "b" : 190,
+          "g" : 168,
+          "r" : 70
+        },
+        "matrix" : {
+          "b" : 154,
+          "g" : 196,
+          "r" : 226
+        },
+        "rock" : {
+          "b" : 102,
+          "g" : 106,
+          "r" : 110
+        },
+        "sandstone" : {
+          "b" : 92,
+          "g" : 138,
+          "r" : 198
+        },
+        "topsoil" : {
+          "b" : 36,
+          "g" : 48,
+          "r" : 82
+        }
+      },
+      "period" : "Late Cretaceous",
+      "twist" : "Big bones, and three more nodules of ironstone sat on top of them.",
+      "unlock" : {
+        "crewMilestone" : 250000
+      }
+    },
+    {
+      "fossilWeights" : {
+        "ammonite" : 10,
+        "belemnite" : 8,
+        "brachiopod" : 8,
+        "diplomystus" : 8,
+        "fossil_leaf" : 8,
+        "ichthyo_vertebrae" : 8,
+        "knightia" : 10,
+        "raptor_claw" : 10,
+        "trex_tooth" : 8,
+        "trex_vertebra" : 6,
+        "trike_horn" : 6,
+        "trilobite" : 10
+      },
+      "id" : "night_dig",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "daylightDelta" : -12,
+        "extraInstances" : 0,
+        "extraRockNodules" : 0,
+        "lightLevel" : 0.55,
+        "maxDepth" : 3,
+        "payoutMultiplier" : 1.5
+      },
+      "name" : "Night dig",
+      "palette" : {
+        "bone" : {
+          "b" : 214,
+          "g" : 233,
+          "r" : 242
+        },
+        "clay" : {
+          "b" : 57,
+          "g" : 88,
+          "r" : 136
+        },
+        "crackedBone" : {
+          "b" : 74,
+          "g" : 92,
+          "r" : 112
+        },
+        "gem" : {
+          "b" : 190,
+          "g" : 168,
+          "r" : 70
+        },
+        "matrix" : {
+          "b" : 166,
+          "g" : 203,
+          "r" : 224
+        },
+        "rock" : {
+          "b" : 102,
+          "g" : 106,
+          "r" : 110
+        },
+        "sandstone" : {
+          "b" : 104,
+          "g" : 152,
+          "r" : 196
+        },
+        "topsoil" : {
+          "b" : 40,
+          "g" : 52,
+          "r" : 74
+        }
+      },
+      "period" : "Mixed",
+      "twist" : "Headlamp only. Twelve seconds less daylight, and half again on everything you bag.",
+      "unlock" : {
+        "crewMilestone" : 1000000
+      }
+    }
+  ],
+  "tools" : [
+    {
+      "crackMultiplier" : 0.35,
+      "id" : "fine_brush",
+      "name" : "Fine brush",
+      "price" : 95,
+      "radius" : 2.4,
+      "safeSpeed" : 2.2,
+      "strength" : 1.2
+    },
+    {
+      "crackMultiplier" : 1,
+      "id" : "brush",
+      "name" : "Brush",
+      "price" : 0,
+      "radius" : 4.2,
+      "safeSpeed" : 1.4,
+      "strength" : 1.4
+    },
+    {
+      "crackMultiplier" : 2.6,
+      "id" : "air_blower",
+      "name" : "Air blower",
+      "price" : 140,
+      "radius" : 7.5,
+      "safeSpeed" : 0.75,
+      "strength" : 1.8
+    }
+  ],
+  "tuning" : {
+    "boneTellTint" : 0.2,
+    "cellNoise" : 0.07,
+    "crackRate" : 0.0011,
+    "crackWalkMax" : 8,
+    "crackWalkMin" : 3,
+    "daylightSeconds" : 60,
+    "emaAlpha" : 0.25,
+    "emaIdleDecay" : 0.85,
+    "exposureExponent" : 1.5,
+    "fossilOffsetX" : 7,
+    "fossilOffsetY" : 13,
+    "fossilRotation" : 0.7,
+    "fossilScaleMax" : 1.15,
+    "fossilScaleMin" : 0.95,
+    "gemPlacementAttempts" : 24,
+    "gemValue" : 20,
+    "gemsMax" : 2,
+    "gemsMin" : 0,
+    "identifyExposure" : 0.25,
+    "intactCrackWeight" : 3,
+    "layerHardness" : [
+      1,
+      1,
+      1.35,
+      1.7
+    ],
+    "maxSampleSpeed" : 40,
+    "referenceFrameMillis" : 16.666668,
+    "removalRate" : 0.24,
+    "rockHardnessMultiplier" : 3.2,
+    "rockNodulesMax" : 4,
+    "rockNodulesMin" : 2,
+    "rockRadiusMax" : 10,
+    "rockRadiusMin" : 4,
+    "stepFactor" : 0.35,
+    "wearColorBlend" : 0.55
+  }
+}

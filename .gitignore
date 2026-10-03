@@ -1,0 +1,13 @@
+.DS_Store
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcworkspace/xcuserdata/
+.build/
+build/
+DerivedData/
+.swiftpm/
+ios/Bonedust.xcodeproj/
+/server/tmp/
+/server/log/
+/server/.env
+.dual-graph/

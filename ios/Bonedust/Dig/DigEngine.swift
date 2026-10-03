@@ -1,0 +1,296 @@
+import BonedustCore
+import Foundation
+import Observation
+
+/// Owns one slab: the simulation, the daylight clock, and the readouts the HUD binds
+/// to. Knows nothing about SpriteKit, haptics or audio.
+///
+/// The split that matters: `sim` is `@ObservationIgnored`. Coalesced touches mutate
+/// it up to 120 times a second, and if it were observed, every one of those would
+/// invalidate the entire SwiftUI HUD. Instead the scene calls `publish()` once per
+/// frame, which writes the observed scalars only when they have actually changed.
+@MainActor
+@Observable
+final class DigEngine {
+
+    enum Phase: Equatable {
+        /// Generated, untouched. Daylight has not started.
+        case waiting
+        case digging
+        /// Out of daylight, or bagged.
+        case finished(bagged: Bool)
+    }
+
+    // MARK: Fixed for this slab
+
+    let site: Site
+    let fossil: Fossil
+    let catalog: ContentCatalog
+    /// Museum accession number shown on the specimen chip.
+    let specimenNumber: Int
+    let totalDaylight: Float
+    let modifiers: ModifierSet
+
+    // MARK: Hot state, deliberately not observed
+
+    @ObservationIgnored private(set) var sim: SlabSimulation
+
+    // MARK: Observed, refreshed once per frame
+
+    var tool: BrushTool {
+        didSet { safeSpeed = sim.safeSpeed(for: tool) }
+    }
+    private(set) var phase: Phase = .waiting
+    private(set) var daylightRemaining: Float
+    private(set) var exposurePercent = 0
+    private(set) var intactPercent = 100
+    private(set) var estimatedValue = 0
+    private(set) var speed: Float = 0
+    private(set) var safeSpeed: Float = 1.4
+    private(set) var isIdentified = false
+    private(set) var wholeGems = 0
+    /// Set the first time a crack happens, for the one diegetic hint in §9.
+    private(set) var hasCracked = false
+
+    // MARK: Init
+
+    init(
+        seed: UInt64,
+        site: Site,
+        catalog: ContentCatalog = .shared,
+        tuning: SimTuning = .standard,
+        extraModifiers: ModifierSet = ModifierSet(),
+        tool: BrushTool = .brush
+    ) {
+        let generated = SlabGenerator.generate(
+            seed: seed, site: site, catalog: catalog, tuning: tuning
+        )
+        let fossil = catalog.fossil(generated.layout.fossilID) ?? catalog.fossils[0]
+
+        var composed = ModifierSet.combining([site.modifiers.modifierSet, extraModifiers])
+        // Fossil fragility multiplies the site's. A Knightia at Green River is the
+        // worst case in the game and that is the point.
+        composed.crackMultiplier *= fossil.crackMultiplier
+
+        self.site = site
+        self.fossil = fossil
+        self.catalog = catalog
+        self.modifiers = composed
+        self.specimenNumber = Int(seed % 9_000) + 1_000
+        self.tool = tool
+
+        var simulation = SlabSimulation(
+            grid: generated.grid, layout: generated.layout, tuning: tuning
+        )
+        simulation.crackMultiplier = composed.crackMultiplier
+        simulation.safeSpeedMultiplier = composed.safeSpeedMultiplier
+        self.sim = simulation
+
+        let daylight = max(5, tuning.daylightSeconds + composed.daylightDelta)
+        self.totalDaylight = daylight
+        self.daylightRemaining = daylight
+        self.safeSpeed = simulation.safeSpeed(for: tool)
+        publish(force: true)
+    }
+
+    // MARK: Derived
+
+    var layout: SlabLayout { sim.layout }
+
+    // Read-only windows onto the simulation, so the scene can render and route
+    // feedback without being handed a mutable reference to the dig.
+    var grid: SlabGrid { sim.grid }
+    var isBrushing: Bool { sim.isBrushing }
+    var exposedBoneCells: Int { sim.exposedBone }
+    var crackedBoneCells: Int { sim.crackedBone }
+
+    /// Hands the changed rectangle to the renderer and clears it.
+    func consumeDirtyRegion() -> DirtyRegion { sim.consumeDirty() }
+
+    func markEverythingDirty() { sim.markEverythingDirty() }
+
+    /// True when the brush is currently over an exposed bone cell, for haptic grain.
+    func isOverBone(_ point: Vec2) -> Bool {
+        let x = Int(point.x), y = Int(point.y)
+        guard SlabGrid.contains(x, y) else { return false }
+        let index = SlabGrid.index(x, y)
+        return sim.grid.isBone(index) && sim.grid.isExposed(index)
+    }
+
+    var specimenCode: String { String(format: "BD-%04d", specimenNumber) }
+
+    /// §3: hidden until exposure reaches the identify threshold.
+    var specimenName: String { isIdentified ? fossil.name : "Unidentified" }
+
+    var daylightFraction: Float {
+        totalDaylight <= 0 ? 0 : max(0, daylightRemaining / totalDaylight)
+    }
+
+    var isOverSafeSpeed: Bool { speed > safeSpeed }
+
+    var isFinished: Bool {
+        if case .finished = phase { return true }
+        return false
+    }
+
+    /// Rock nodules whose every cell has been cleared, for the Rock hound charm.
+    /// Flood-filled on demand at bag time rather than tracked per cell — it is once
+    /// per slab, and tracking nodule membership would need a byte per cell.
+    func clearedNodules() -> Int {
+        guard modifiers.rockNodulePayout > 0 else { return 0 }
+        var seen = [Bool](repeating: false, count: SlabGrid.cellCount)
+        var cleared = 0
+        var stack: [Int] = []
+        for start in 0..<SlabGrid.cellCount where !seen[start] && sim.grid.isRock(start) {
+            stack.removeAll(keepingCapacity: true)
+            stack.append(start)
+            seen[start] = true
+            var allExposed = true
+            while let index = stack.popLast() {
+                if sim.grid.cells[index].depth > 0 { allExposed = false }
+                let x = index % SlabGrid.width
+                let y = index / SlabGrid.width
+                for (dx, dy) in [(1, 0), (-1, 0), (0, 1), (0, -1)] {
+                    let nx = x + dx, ny = y + dy
+                    guard SlabGrid.contains(nx, ny) else { continue }
+                    let neighbour = SlabGrid.index(nx, ny)
+                    guard !seen[neighbour], sim.grid.isRock(neighbour) else { continue }
+                    seen[neighbour] = true
+                    stack.append(neighbour)
+                }
+            }
+            if allExposed { cleared += 1 }
+        }
+        return cleared
+    }
+
+    func payout() -> PayoutBreakdown {
+        Payout.evaluate(PayoutContext(
+            baseValue: fossil.baseValue,
+            exposure: sim.exposure,
+            boneCells: sim.boneCells,
+            crackedCells: sim.crackedBone,
+            wholeGems: sim.wholeGems,
+            clearedNodules: clearedNodules(),
+            daylightRemaining: max(0, daylightRemaining),
+            modifiers: modifiers,
+            tuning: sim.tuning
+        ))
+    }
+
+    // MARK: Input
+
+    @discardableResult
+    func brushBegan(at point: Vec2) -> StrokeResult {
+        startDaylightIfNeeded()
+        guard !isFinished else { return StrokeResult() }
+        return record(sim.beginStroke(at: point, tool: tool))
+    }
+
+    @discardableResult
+    func brushMoved(to point: Vec2, deltaMillis: Float) -> StrokeResult {
+        guard !isFinished else { return StrokeResult() }
+        return record(sim.moveStroke(to: point, deltaMillis: deltaMillis, tool: tool))
+    }
+
+    func brushEnded() {
+        sim.endStroke()
+    }
+
+    private func record(_ result: StrokeResult) -> StrokeResult {
+        if result.cracksStarted > 0 { hasCracked = true }
+        return result
+    }
+
+    /// §3: the daylight timer starts on the first touch, not when the slab appears.
+    /// A player should be able to look at the slab and plan.
+    private func startDaylightIfNeeded() {
+        guard phase == .waiting else { return }
+        phase = .digging
+    }
+
+    // MARK: Clock
+
+    func tick(delta: TimeInterval) {
+        guard phase == .digging else { return }
+        if !sim.isBrushing {
+            // The EMA decays in frames, so convert. 60 Hz nominal.
+            sim.tickIdle(frames: max(1, Int((delta * 60).rounded())))
+        }
+        daylightRemaining -= Float(delta)
+        if daylightRemaining <= 0 {
+            daylightRemaining = 0
+            finish(bagged: false)
+        }
+    }
+
+    func bagIt() {
+        guard phase != .waiting || sim.exposedBone > 0 else { return }
+        finish(bagged: true)
+    }
+
+    private func finish(bagged: Bool) {
+        guard !isFinished else { return }
+        sim.endStroke()
+        phase = .finished(bagged: bagged)
+        publish(force: true)
+    }
+
+    /// Mid-slab autosave support (§5): daylight is paused simply by not ticking.
+    func pause() {
+        if phase == .digging { sim.endStroke() }
+    }
+
+    // MARK: Publishing
+
+    /// Copies the handful of values the HUD binds to out of the simulation, writing
+    /// only what changed so SwiftUI does not invalidate on every frame.
+    func publish(force: Bool = false) {
+        let exposure = Int((sim.exposure * 100).rounded())
+        if force || exposure != exposurePercent { exposurePercent = exposure }
+
+        let intact = Int((sim.intact * 100).rounded())
+        if force || intact != intactPercent { intactPercent = intact }
+
+        let identified = sim.exposure >= modifiers.identifyExposure
+        if force || identified != isIdentified { isIdentified = identified }
+
+        if force || sim.wholeGems != wholeGems { wholeGems = sim.wholeGems }
+
+        // Speed drives the meter, which has to move smoothly, so it is published
+        // every frame rather than only on change.
+        speed = sim.speed
+
+        let value = payoutEstimate()
+        if force || value != estimatedValue { estimatedValue = value }
+    }
+
+    /// The "Est. value" readout. Deliberately excludes the rush bonus and nodule
+    /// money: showing a number that jumps when a timer crosses a threshold would read
+    /// as a bug, and those are revealed on the results screen instead.
+    private func payoutEstimate() -> Int {
+        var quiet = modifiers
+        quiet.rushMultiplier = 1
+        quiet.rockNodulePayout = 0
+        return Payout.evaluate(PayoutContext(
+            baseValue: fossil.baseValue,
+            exposure: sim.exposure,
+            boneCells: sim.boneCells,
+            crackedCells: sim.crackedBone,
+            wholeGems: sim.wholeGems,
+            clearedNodules: 0,
+            daylightRemaining: 0,
+            modifiers: quiet,
+            tuning: sim.tuning
+        )).total
+    }
+
+    // MARK: Debug
+
+    /// Used by the M1 debug overlay, which retunes constants with a dig in progress.
+    func applyTuning(_ tuning: SimTuning) {
+        sim.tuning = tuning
+        safeSpeed = sim.safeSpeed(for: tool)
+        publish(force: true)
+    }
+}
