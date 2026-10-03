@@ -1,35 +1,23 @@
 import BonedustCore
 import SwiftUI
 
-/// M1's shell: pick a site, dig a slab, see what it paid, go again.
+/// Routes between the run's screens and owns the objects that outlive a slab.
 ///
-/// This is not §7's title screen. The run loop, supply tent and results screen arrive
-/// at M2; until then this exists so the brush can be felt in isolation, which §9 calls
-/// the most important thing to get right before anything else is built.
+/// Navigation is a switch on `coordinator.screen` rather than a `NavigationStack`:
+/// the flow is a state machine driven by `RunState.phase`, there is no "back" out of
+/// a slab, and a push/pop stack would be a second source of truth to keep in step.
 struct RootView: View {
 
     @State private var settings = GameSettings()
-    @State private var route: Route = .menu
-    @State private var seed: UInt64 = UInt64.random(in: 1...UInt64.max >> 2)
-    @State private var siteID = "charmouth"
-    @State private var lastResult: SlabResult?
+    @State private var coordinator: RunCoordinator
+    @State private var showSettings = false
+    @Environment(\.scenePhase) private var scenePhase
 
-    private enum Route: Equatable {
-        case menu
-        case digging
-    }
-
-    private struct SlabResult: Equatable {
-        var fossilName: String
-        var period: String
-        var formation: String
-        var breakdown: PayoutBreakdown
-        var bagged: Bool
-        var gems: Int
-    }
-
-    private var site: Site {
-        ContentCatalog.shared.site(siteID) ?? ContentCatalog.shared.sites[0]
+    init() {
+        let settings = GameSettings()
+        let coordinator = RunCoordinator(settings: settings, store: RunStore())
+        _settings = State(initialValue: settings)
+        _coordinator = State(initialValue: coordinator)
     }
 
     var body: some View {
@@ -37,185 +25,88 @@ struct RootView: View {
             .environment(settings)
             .preferredColorScheme(.dark)
             .tint(Ink.accent)
+            .sheet(isPresented: $showSettings) {
+                SettingsView(
+                    settings: settings,
+                    onAbandonRun: coordinator.run == nil ? nil : { coordinator.abandonRun() }
+                )
+            }
+            // §5: the slab is written when the app leaves the foreground, which is the
+            // only moment the mid-dig guarantee actually has to hold.
+            .onChange(of: scenePhase) { _, phase in
+                if phase != .active { coordinator.autosave() }
+            }
     }
 
     @ViewBuilder
     private var content: some View {
-        switch route {
-        case .menu:
-            menu
-        case .digging:
-            DigView(
-                engine: DigEngine(
-                    seed: seed,
-                    site: site,
-                    extraModifiers: settings.gentleModeModifiers
-                ),
-                onBagged: handleBagged
+        switch coordinator.screen {
+        case .title:
+            TitleView(coordinator: coordinator, showSettings: $showSettings)
+
+        case .siteSelect:
+            SiteSelectView(
+                coordinator: coordinator,
+                onPick: { coordinator.startRun(siteID: $0) },
+                onCancel: { coordinator.showTitle() }
             )
-            // A fresh engine per slab, keyed so SwiftUI rebuilds rather than reusing
-            // the previous dig's state.
-            .id(seed)
+
+        case .dig:
+            if let engine = coordinator.digEngine, let run = coordinator.run {
+                DigView(
+                    engine: engine,
+                    day: run.currentDay,
+                    totalDays: run.totalDays,
+                    cash: run.cash,
+                    installment: run.installment,
+                    onBagged: { coordinator.slabFinished($0) }
+                )
+                // Keyed on the slab's seed so a new day builds a new view rather than
+                // reusing the previous dig's gesture and scene state.
+                .id(engine.layout.seed)
+            } else {
+                recovery
+            }
+
+        case .slabResults:
+            if let record = coordinator.lastRecord,
+               let run = coordinator.run,
+               let fossil = ContentCatalog.shared.fossil(record.fossilID) {
+                SlabResultsView(
+                    record: record,
+                    fossil: fossil,
+                    run: run,
+                    onContinue: { coordinator.continueFromResults() }
+                )
+            } else {
+                recovery
+            }
+
+        case .runEnd:
+            if let run = coordinator.run {
+                RunEndView(
+                    run: run,
+                    meta: coordinator.meta,
+                    onDone: { coordinator.acknowledgeRunEnd() }
+                )
+            } else {
+                recovery
+            }
         }
     }
 
-    private var menu: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("BONEDUST")
-                        .font(Typography.display(40))
-                        .foregroundStyle(Ink.ivory)
-                    Text("Milestone 1 · brush feel")
-                        .font(Typography.label(.caption))
-                        .tracking(1.2)
-                        .foregroundStyle(Ink.accent)
-                }
-                .padding(.top, 18)
-
-                if let result = lastResult { resultCard(result) }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    FieldLabel(text: "Site")
-                    ForEach(ContentCatalog.shared.sites) { candidate in
-                        siteRow(candidate)
-                    }
-                }
-
-                Toggle("Gentle mode", isOn: $settings.gentleMode)
-                    .font(Typography.ui(.subheadline))
-                    .foregroundStyle(Ink.ivory)
-
-                Button {
-                    seed = UInt64.random(in: 1...UInt64.max >> 2)
-                    route = .digging
-                } label: {
-                    Text("New slab")
-                        .font(Typography.ui(.headline, weight: .bold))
-                        .foregroundStyle(Ink.ground)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 54)
-                        .background(Ink.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
-                }
-            }
-            .padding(.horizontal, Measure.gutter)
-            .padding(.bottom, 32)
+    /// Shown only if a screen's data went missing, which should not happen. Better a
+    /// way back to the title than a blank screen the player cannot leave.
+    private var recovery: some View {
+        VStack(spacing: 14) {
+            Text("That dig got away from us.")
+                .font(Typography.ui(.headline))
+                .foregroundStyle(Ink.ivory)
+            Button("Back to the title") { coordinator.showTitle() }
+                .font(Typography.ui(.subheadline, weight: .semibold))
+                .foregroundStyle(Ink.accent)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Ink.ground.ignoresSafeArea())
-    }
-
-    private func siteRow(_ candidate: Site) -> some View {
-        Button {
-            siteID = candidate.id
-        } label: {
-            VStack(alignment: .leading, spacing: 3) {
-                HStack {
-                    Text(candidate.name)
-                        .font(Typography.ui(.subheadline, weight: .semibold))
-                        .foregroundStyle(Ink.ivory)
-                    Spacer()
-                    Text(candidate.period.uppercased())
-                        .font(Typography.label(.caption2))
-                        .tracking(1)
-                        .foregroundStyle(Ink.muted)
-                }
-                Text(candidate.twist)
-                    .font(Typography.ui(.caption))
-                    .foregroundStyle(Ink.muted)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(11)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Ink.raised)
-            .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: Measure.cardRadius)
-                    .stroke(
-                        candidate.id == siteID ? Ink.accent : Ink.hairline,
-                        lineWidth: candidate.id == siteID ? 1.5 : Measure.hairline
-                    )
-            )
-        }
-        .accessibilityAddTraits(candidate.id == siteID ? [.isSelected, .isButton] : .isButton)
-    }
-
-    /// A first pass at §7.4's museum-label specimen tag.
-    private func resultCard(_ result: SlabResult) -> some View {
-        VStack(alignment: .leading, spacing: 7) {
-            FieldLabel(text: result.bagged ? "Bagged" : "Out of daylight")
-            Text(result.fossilName)
-                .font(Typography.display(21))
-                .foregroundStyle(Ink.ivory)
-            Text("\(result.period) · \(result.formation)")
-                .font(Typography.ui(.caption))
-                .foregroundStyle(Ink.muted)
-            SpecimenRule()
-            grid(result)
-            SpecimenRule()
-            HStack {
-                Text("TOTAL")
-                    .font(Typography.label(.caption2))
-                    .tracking(1.2)
-                    .foregroundStyle(Ink.muted)
-                Spacer()
-                Text("$\(result.breakdown.total)")
-                    .font(Typography.number(.title3, weight: .bold))
-                    .foregroundStyle(Ink.accent)
-                    .monospacedDigit()
-            }
-        }
-        .padding(13)
-        .background(Ink.raised)
-        .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: Measure.cardRadius)
-                .stroke(Ink.hairline, lineWidth: Measure.hairline)
-        )
-    }
-
-    private func grid(_ result: SlabResult) -> some View {
-        VStack(spacing: 3) {
-            line("Exposed", "\(Int((result.breakdown.exposure * 100).rounded()))%")
-            line("Intact", "\(Int((result.breakdown.intact * 100).rounded()))%")
-            line("Fossil", "$\(result.breakdown.fossil)")
-            if result.gems > 0 {
-                line("Gems (\(result.gems))", "$\(result.breakdown.gems)")
-            }
-            if result.breakdown.bonuses > 0 {
-                line("Bonuses", "$\(result.breakdown.bonuses)")
-            }
-            if result.breakdown.multiplier != 1 {
-                line("Multiplier", String(format: "x%.2f", result.breakdown.multiplier))
-            }
-        }
-    }
-
-    private func line(_ name: String, _ value: String) -> some View {
-        HStack {
-            Text(name)
-                .font(Typography.ui(.caption))
-                .foregroundStyle(Ink.muted)
-            Spacer()
-            Text(value)
-                .font(Typography.number(.caption, weight: .medium))
-                .foregroundStyle(Ink.ivory)
-                .monospacedDigit()
-        }
-    }
-
-    private func handleBagged(_ engine: DigEngine) {
-        var bagged = false
-        if case .finished(let wasBagged) = engine.phase { bagged = wasBagged }
-        lastResult = SlabResult(
-            fossilName: engine.fossil.name,
-            period: engine.fossil.period,
-            formation: engine.fossil.formation,
-            breakdown: engine.payout(),
-            bagged: bagged,
-            gems: engine.wholeGems
-        )
-        route = .menu
     }
 }

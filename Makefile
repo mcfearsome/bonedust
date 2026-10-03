@@ -7,7 +7,7 @@
 SIM ?= platform=iOS Simulator,name=iPhone 16
 CORE := ios/BonedustCore
 
-.PHONY: all project test test-core test-app bench constants content app clean
+.PHONY: all project test test-core test-app bench simulate constants content app clean
 
 all: test
 
@@ -33,6 +33,12 @@ app: project
 # 60 fps on an iPhone 12, and this is the half of that budget we control.
 bench:
 	cd $(CORE) && swift build -c release && ./.build/release/bonedust-tool bench
+
+# §9's balance target: win rate per installment tier for a scripted average player.
+RUNS ?= 10000
+simulate:
+	cd $(CORE) && swift build -c release && \
+		./.build/release/bonedust-tool simulate --runs $(RUNS)
 
 content:
 	cd $(CORE) && swift run bonedust-tool content-check

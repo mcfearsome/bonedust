@@ -34,6 +34,7 @@ make project       # regenerate ios/Bonedust.xcodeproj from project.yml.
 make app           # build the app for a simulator.
 make test-app      # app-layer tests.
 make constants     # regenerate shared/constants.json after a tuning change.
+make simulate      # win rate per installment tier, 10,000 scripted runs.
 ./scripts/verify-ios.sh   # compile every iOS source without needing a simulator.
 ```
 
@@ -53,9 +54,13 @@ Xcode supports — see **Toolchain** in `DECISIONS.md` if `xcodebuild` reports
 - **M1 — slab simulation and feel: complete.** Seeded generation, brushing, cracking,
   metrics, payout, SpriteKit rendering, coalesced touch input, speed meter, haptics,
   synthesized audio, dust, and a debug overlay with a slider per tuning constant.
-  94 core tests, plus app-layer tests for the engine and renderer.
-- **M2 — run loop:** not started.
+- **M2 — run loop: complete.** Five days, the installment, slab results, run end,
+  Reputation, and a one-slot autosave that restores a part-dug slab with daylight
+  paused. Plus the §9 economy simulator (`make simulate`).
 - M3 content and charms, M4 meta, M5 crew ledger, M6 polish: not started.
+
+132 core tests pass. App-layer tests compile but cannot be *run* here — see
+**Toolchain** in `DECISIONS.md`.
 
 ## The one rule
 

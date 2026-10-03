@@ -93,6 +93,60 @@ final class DigEngine {
         publish(force: true)
     }
 
+    /// Resumes a dig from an autosave (§5). Daylight picks up where it paused.
+    init(
+        restored: SlabSnapshot.Restored,
+        site: Site,
+        catalog: ContentCatalog = .shared,
+        extraModifiers: ModifierSet = ModifierSet()
+    ) {
+        let simulation = restored.simulation
+        let fossil = catalog.fossil(simulation.layout.fossilID) ?? catalog.fossils[0]
+        var composed = ModifierSet.combining([site.modifiers.modifierSet, extraModifiers])
+        composed.crackMultiplier *= fossil.crackMultiplier
+
+        self.site = site
+        self.fossil = fossil
+        self.catalog = catalog
+        self.modifiers = composed
+        self.specimenNumber = Int(simulation.layout.seed % 9_000) + 1_000
+        self.tool = restored.tool
+        self.sim = simulation
+        // The slab was already in progress, so the clock does not restart: total
+        // daylight is reconstructed from the budget, and what is left is what was saved.
+        self.totalDaylight = max(5, simulation.tuning.daylightSeconds + composed.daylightDelta)
+        self.daylightRemaining = min(restored.daylightRemaining, self.totalDaylight)
+        self.safeSpeed = simulation.safeSpeed(for: restored.tool)
+        // Waiting, not digging: §5 says the slab comes back with daylight paused, and
+        // it resumes on the next touch.
+        self.phase = .waiting
+        publish(force: true)
+    }
+
+    /// Captures the dig for the autosave slot.
+    func snapshot(day: Int) -> SlabSnapshot {
+        SlabSnapshot.capture(
+            sim, daylightRemaining: daylightRemaining, toolID: tool.id, day: day
+        )
+    }
+
+    /// The record the run banks for this slab.
+    func slabRecord(day: Int) -> SlabRecord {
+        var bagged = false
+        if case .finished(let wasBagged) = phase { bagged = wasBagged }
+        return SlabRecord(
+            day: day,
+            seed: sim.layout.seed,
+            siteID: site.id,
+            fossilID: fossil.id,
+            payout: payout(),
+            durationMillis: Int(elapsedSeconds * 1_000),
+            bagged: bagged,
+            wholeGems: sim.wholeGems,
+            daylightLeft: max(0, daylightRemaining)
+        )
+    }
+
     // MARK: Derived
 
     var layout: SlabLayout { sim.layout }
@@ -121,6 +175,9 @@ final class DigEngine {
 
     /// §3: hidden until exposure reaches the identify threshold.
     var specimenName: String { isIdentified ? fossil.name : "Unidentified" }
+
+    /// Seconds of daylight spent so far, for the slab record's duration.
+    var elapsedSeconds: Float { max(0, totalDaylight - daylightRemaining) }
 
     var daylightFraction: Float {
         totalDaylight <= 0 ? 0 : max(0, daylightRemaining / totalDaylight)

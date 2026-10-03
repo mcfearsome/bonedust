@@ -5,6 +5,14 @@ import Foundation
 //   dump-constants  — writes shared/constants.json for the Rails service (§6)
 //   simulate        — runs the economy sim from §9's acceptance criteria
 
+extension String {
+    /// Right-aligns in a field of `width`. Used instead of printf padding so that no
+    /// Swift String ever reaches a %s conversion.
+    func leftPadded(to width: Int) -> String {
+        count >= width ? self : String(repeating: " ", count: width - count) + self
+    }
+}
+
 let arguments = Array(CommandLine.arguments.dropFirst())
 let command = arguments.first ?? "help"
 
@@ -89,6 +97,79 @@ case "bench":
         exit(1)
     }
 
+case "simulate":
+    // §9: 10,000 runs with a scripted average player, win rate per installment tier.
+    // Target is ~70% at tier 1 falling to ~30% by tier 5.
+    var runsPerTier = 2_000
+    var siteID = "charmouth"
+    var policy = PlayerPolicy.average
+    var policyName = "average"
+    var index = 1
+    while index < arguments.count {
+        switch arguments[index] {
+        case "--runs" where index + 1 < arguments.count:
+            // The brief states 10,000 runs total, spread across the tiers.
+            runsPerTier = max(1, (Int(arguments[index + 1]) ?? 10_000) / 5)
+            index += 2
+        case "--site" where index + 1 < arguments.count:
+            siteID = arguments[index + 1]
+            index += 2
+        case "--policy" where index + 1 < arguments.count:
+            policyName = arguments[index + 1]
+            switch policyName {
+            case "careful": policy = .careful
+            case "reckless": policy = .reckless
+            default: policy = .average
+            }
+            index += 2
+        default:
+            index += 1
+        }
+    }
+
+    guard ContentCatalog.shared.site(siteID) != nil else {
+        print("unknown site \(siteID)")
+        exit(1)
+    }
+
+    let started = Date()
+    let reports = EconomySimulator.sweep(
+        runsPerTier: runsPerTier, siteID: siteID, policy: policy
+    )
+    let elapsed = Date().timeIntervalSince(started)
+
+    print("site \(siteID), policy \(policyName), \(runsPerTier * 5) runs "
+        + "in \(String(format: "%.1f", elapsed))s")
+    print("")
+    print("tier  owed   win%   target  mean $  mean slab  exposure  intact")
+    // The §9 curve, in the table rather than from memory.
+    let targets: [Int: Double] = [1: 0.70, 2: 0.60, 3: 0.48, 4: 0.38, 5: 0.30]
+    for report in reports {
+        // Built by interpolation, not String(format:). Passing a Swift String to a
+        // %s conversion hands printf something that is not a C string, and it
+        // segfaults rather than printing wrong.
+        let target = targets[report.tier].map { String(format: "%.0f%%", $0 * 100) } ?? "-"
+        let row = [
+            String(report.tier).leftPadded(to: 4),
+            String(report.installment).leftPadded(to: 6),
+            String(format: "%.1f%%", report.winRate * 100).leftPadded(to: 7),
+            target.leftPadded(to: 7),
+            String(format: "%.0f", report.meanEarned).leftPadded(to: 8),
+            String(format: "%.0f", report.meanSlabPayout).leftPadded(to: 11),
+            String(format: "%.3f", report.meanExposure).leftPadded(to: 10),
+            String(format: "%.3f", report.meanIntact).leftPadded(to: 8),
+        ]
+        print(row.joined())
+    }
+    print("")
+    // Report, do not fail: this baseline has no shop, and §4's economy assumes the
+    // player is buying tools and charms. The number to hold to the target is the one
+    // measured once M3 lands.
+    let tier1 = reports.first { $0.tier == 1 }?.winRate ?? 0
+    let tier5 = reports.first { $0.tier == 5 }?.winRate ?? 0
+    print(String(format: "tier 1 %.0f%% -> tier 5 %.0f%% (no shop purchases)",
+                 tier1 * 100, tier5 * 100))
+
 case "content-check":
     let problems = ContentCatalog.shared.validate()
     if problems.isEmpty {
@@ -106,5 +187,8 @@ default:
 
       dump-constants [path]   write the Swift/Ruby shared constants file
       content-check           validate content.json references
+      bench                   worst-case frame time for the brush loop
+      simulate [--runs 10000] [--site charmouth] [--policy average|careful|reckless]
+                              win rate per installment tier
     """)
 }

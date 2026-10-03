@@ -90,3 +90,72 @@ Format: decision, then the reason in one line.
   `xcodebuild`, and it is what caught the `SlabRenderer` exclusivity bug that
   `swiftc -typecheck` alone misses, because exclusivity is diagnosed during SIL
   generation rather than type checking.
+
+## Economy baseline, measured at M2 (2026-10-02)
+
+`make simulate` runs 10,000 scripted runs and reports win rate per installment tier.
+The M2 baseline, at Charmouth with the starting brush and **no shop purchases**:
+
+| tier | owed | win% | §9 target | mean run $ | mean slab $ | exposure | intact |
+|---|---|---|---|---|---|---|---|
+| 1 | 350 | 53.1% | ~70% | 357 | 71 | 0.851 | 0.775 |
+| 2 | 450 | 5.8% | ~60% | 355 | 71 | 0.851 | 0.773 |
+| 3 | 600 | 0.0% | ~48% | 357 | 71 | 0.850 | 0.775 |
+| 4 | 800 | 0.0% | ~38% | 356 | 71 | 0.851 | 0.774 |
+| 5 | 1050 | 0.0% | ~30% | 357 | 71 | 0.850 | 0.773 |
+
+**The economy has not been tuned against this, on purpose.** Earnings are flat across
+tiers because nothing in the baseline makes the player stronger: the supply tent, the
+tools beyond the starting brush, the charms and the higher-value sites are all M3 and
+M4. Fitting fossil values or the installment curve to this table would mean correcting
+twice — once now and once when a player who buys a fine brush on day one stops cracking
+ten percent of every fossil. The tier curve gets judged after M3.
+
+What the sweep already shows is that the core tension is real, and that is what the
+balance tests lock in rather than the win rates:
+
+| policy | exposure | intact | mean slab $ |
+|---|---|---|---|
+| careful (slow, long lookahead) | 0.73 | 0.87 | 63 |
+| average | 0.85 | 0.78 | **71** |
+| reckless (fast, no lookahead) | 0.90 | 0.36 | 47 |
+
+Speed buys exposure and costs intact, and neither extreme beats playing between them.
+
+Two things the simulator got wrong first, both worth keeping written down:
+
+- **Policy speeds are cells per 60 Hz frame, not per input sample.** Using them as
+  per-sample distances halved the player's speed and produced a 0% win rate at every
+  tier. Any code that mixes a speed (frame-relative, like `safeSpeed` and the meter)
+  with a travel distance (sample-relative) has to convert.
+- **A player model with no lookahead cracks everything.** The speed EMA smooths at
+  0.25, so coming down from a clearing sweep to a safe speed takes about six samples —
+  a fifth of a second, by which point the brush is already over the bone. Reacting
+  only to bone *under* the brush is a model of someone who has not learned the tell;
+  the tell exists so you slow down before you arrive. `PlayerPolicy.lookaheadSamples`
+  is the dial, and `testLookaheadIsWorthMoney` asserts that reading the slab pays.
+
+## M2 decisions
+
+- **Failure resets the installment tier to 1 but never touches Reputation.** The brief
+  says the Collector takes your tools; it does not say what happens to the ramp. Tier
+  reset makes failure cost something real, while keeping Reputation means a bad run
+  cannot undo an evening's progress. Meta progression that one mistake can destroy
+  makes a game hostile rather than tense.
+- **All leftover cash converts to Reputation; nothing carries into the next run.**
+  Straight from §4, and it is what makes a day-four purchase a gamble instead of
+  deferred saving.
+- **Covering the installment early does not end the run.** You always play five days.
+  That is the whole point of the shop: once you are safe, the question becomes how much
+  you dare spend.
+- **Save data is Codable blobs inside one SwiftData row, not a model per field.**
+  `RunState`, `MetaProgress` and `SlabSnapshot` are already value types that round-trip
+  through JSON, nothing queries inside a saved run, and each carries a `schema` int so a
+  format change is a version check instead of a SwiftData migration. Modelling
+  `RunState` twice would double every future change for no gain.
+- **A restored slab is refused if the bone mask no longer matches its seed.** Resuming
+  a dig whose `boneCells` disagrees with the bone on screen would quietly corrupt every
+  payout from then on. On refusal the day's slab is re-cut and the player is told why.
+- **Navigation is a switch on a coordinator's `screen`, not a `NavigationStack`.** The
+  flow is a state machine driven by `RunState.phase` and there is no "back" out of a
+  slab; a push/pop stack would be a second source of truth to keep in step.

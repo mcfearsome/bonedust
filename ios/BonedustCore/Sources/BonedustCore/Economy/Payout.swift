@@ -40,7 +40,7 @@ public struct PayoutContext: Sendable, Equatable {
 }
 
 /// What the results screen prints, line for line.
-public struct PayoutBreakdown: Sendable, Equatable {
+public struct PayoutBreakdown: Sendable, Codable, Equatable {
     public var exposure: Float
     public var intact: Float
     public var fossil: Int
