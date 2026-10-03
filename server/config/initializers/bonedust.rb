@@ -20,3 +20,18 @@ rescue StandardError => e
 
   Rails.logger.warn("shared/constants.json could not be loaded: #{e.message}")
 end
+
+# Attestation is only as good as its configuration, so a production boot that cannot
+# enforce it fails here rather than serving requests that skip the check.
+Rails.application.config.after_initialize do
+  next unless Rails.env.production?
+
+  if ENV["APP_ATTEST_APP_ID"].blank?
+    raise "APP_ATTEST_APP_ID must be set in production (teamID.bundleID). " \
+          "Without it the relying-party check cannot run and App Attest proves only " \
+          "that some app signed the request, not that this one did."
+  end
+  if ENV["ATTEST_MODE"] == "permissive"
+    raise "ATTEST_MODE=permissive is not allowed in production."
+  end
+end

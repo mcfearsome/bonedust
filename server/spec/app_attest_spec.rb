@@ -188,3 +188,66 @@ RSpec.describe AppAttest do
     expect(described_class.required?).to be(true)
   end
 end
+
+# The fail-open hole the security review found, and the aaguid gap beside it.
+RSpec.describe AppAttest, "configuration" do
+  it "refuses an assertion when the app id is missing and attestation is enforced" do
+    # This used to return early and accept anything. App Attest then proved only that
+    # *some* app on genuine hardware signed the request, which anybody with their own
+    # entitled build can arrange.
+    allow(described_class).to receive(:permissive?).and_return(false)
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("APP_ATTEST_APP_ID").and_return(nil)
+
+    digger = Digger.for_install(SecureRandom.uuid)
+    digger.update!(attest_public_key: "x", attest_counter: 0)
+    expect {
+      described_class.send(:verify_rp_id!, "whatever")
+    }.to raise_error(described_class::Failure, /not configured/)
+  end
+
+  it "skips the check only when running permissively" do
+    allow(described_class).to receive_messages(permissive?: true, required?: false)
+    allow(ENV).to receive(:[]).and_call_original
+    allow(ENV).to receive(:[]).with("APP_ATTEST_APP_ID").and_return(nil)
+    expect { described_class.send(:verify_rp_id!, "whatever") }.not_to raise_error
+  end
+
+  describe "the authenticator stamp" do
+    def auth_data_with(aaguid)
+      (("\x11" * 32) + [0x40].pack("C") + [1].pack("N") + aaguid + ("\x00" * 2)).b
+    end
+
+    it "accepts Apple's production authenticator" do
+      expect {
+        described_class.send(:verify_aaguid!, auth_data_with(described_class::PRODUCTION_AAGUID))
+      }.not_to raise_error
+    end
+
+    it "refuses a development attestation in production" do
+      # A far easier bar than App Review, and the obvious way in once the relying-party
+      # check is closed.
+      allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new("production"))
+      expect {
+        described_class.send(:verify_aaguid!, auth_data_with(described_class::DEVELOPMENT_AAGUID))
+      }.to raise_error(described_class::Failure, /development attestation/)
+    end
+
+    it "allows a development attestation outside production" do
+      expect {
+        described_class.send(:verify_aaguid!, auth_data_with(described_class::DEVELOPMENT_AAGUID))
+      }.not_to raise_error
+    end
+
+    it "refuses an authenticator it does not recognise" do
+      expect {
+        described_class.send(:verify_aaguid!, auth_data_with("x" * 16))
+      }.to raise_error(described_class::Failure, /unrecognised/)
+    end
+
+    it "ignores an assertion, which carries no credential data" do
+      short = ("\x11" * 32) + [0x40].pack("C") + [1].pack("N")
+      expect { described_class.send(:verify_aaguid!, short) }.not_to raise_error
+    end
+  end
+end

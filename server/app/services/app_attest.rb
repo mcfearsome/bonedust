@@ -30,6 +30,15 @@ class AppAttest
   # The OID carrying the challenge nonce in the leaf certificate.
   NONCE_OID = "1.2.840.113635.100.8.2"
 
+  # Apple stamps the authenticator with "appattestdevelop" for a development attestation
+  # and "appattest" plus null padding for a production one.
+  #
+  # Checked because accepting the development aaguid in production would let anybody with a
+  # dev-provisioned build attest a key — a far easier bar than shipping through App Review,
+  # and the obvious way in once the relying-party check is closed.
+  DEVELOPMENT_AAGUID = "appattestdevelop"
+  PRODUCTION_AAGUID = "appattest#{"\x00" * 7}".b
+
   class << self
     # Permissive mode exists so the service can be run locally without a provisioned
     # device. It must never be on in production, which `required?` enforces rather than
@@ -84,6 +93,7 @@ class AppAttest
       public_key = chain.first.public_key
       verify_key_id!(key_id, public_key)
       verify_rp_id!(auth_data[:rp_id_hash])
+      verify_aaguid!(auth_data[:raw])
 
       digger.update!(
         attest_key_id: key_id,
@@ -167,12 +177,38 @@ class AppAttest
       raise Failure, "key id does not match public key" unless secure_equal?(key_id.to_s, expected)
     end
 
+    # Fails closed. An unset APP_ATTEST_APP_ID used to mean "skip this check", which was
+    # an authentication bypass dressed as a development convenience.
+    #
+    # App Attest proves "this is *your* app on genuine Apple hardware". Without the
+    # relying-party check it only proves "this is *some* app on genuine hardware" — which
+    # anybody holding an App Attest entitlement can produce for an app they wrote, register
+    # against this server, and then use to mint payments indefinitely. The signature would
+    # verify and the counter would advance, because the key really is theirs.
     def verify_rp_id!(rp_id_hash)
       app_id = ENV["APP_ATTEST_APP_ID"]
-      return if app_id.blank?   # unset in development
+      if app_id.blank?
+        raise Failure, "APP_ATTEST_APP_ID is not configured" if required?
+
+        return   # permissive development only, never when attestation is enforced
+      end
 
       expected = OpenSSL::Digest::SHA256.digest(app_id)
       raise Failure, "relying party mismatch" unless secure_equal?(rp_id_hash, expected)
+    end
+
+    def verify_aaguid!(bytes)
+      # Only an attestation carries attestedCredentialData; an assertion does not.
+      return if bytes.bytesize < 53
+
+      aaguid = bytes[37, 16].b
+      case aaguid
+      when PRODUCTION_AAGUID then nil
+      when DEVELOPMENT_AAGUID.b
+        raise Failure, "development attestation refused" if Rails.env.production?
+      else
+        raise Failure, "unrecognised authenticator"
+      end
     end
 
     def load_root

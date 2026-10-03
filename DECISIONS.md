@@ -343,3 +343,30 @@ Every number here should be re-measured against a human once a simulator runtime
 I hand-wrote a SHA-256 in the client's attestation file. CryptoKit ships one that is
 hardware-accelerated and audited, and hand-rolled crypto on the path that signs payment
 requests is precisely where not to be clever. Replaced before it was committed.
+
+### An authentication bypass caught after M5 was committed
+
+`AppAttest.verify_rp_id!` returned early when `APP_ATTEST_APP_ID` was unset, with the
+comment "unset in development". That is a fail-open authentication check, and it would have
+shipped: `ios/project.yml` carries `BonedustAppAttestAppID: ""` as a placeholder.
+
+Why it mattered. App Attest proves "this is *your* app, on genuine Apple hardware". Skipping
+the relying-party hash reduces it to "this is *some* app on genuine hardware" — and anybody
+with an App Attest entitlement can attest a key for an app they wrote, register it against
+this server, and sign payments forever. The ECDSA check passes and the counter advances,
+because the key genuinely is theirs. The ceiling would still cap each payment, but the rate
+limit is per install and installs are free.
+
+Fixed three ways, because one of them is a config file somebody will get wrong:
+
+1. `verify_rp_id!` raises when the app id is missing and attestation is required. It returns
+   early only under `permissive?`, which production refuses.
+2. Production refuses to boot without `APP_ATTEST_APP_ID`, so a misconfiguration is a failed
+   deploy rather than a silently weakened one.
+3. The authenticator aaguid is now checked. Apple stamps `appattestdevelop` for development
+   attestations and `appattest` plus null padding for production; accepting the former in
+   production would let anyone with a dev-provisioned build attest a key, which is a much
+   lower bar than App Review.
+
+The lesson worth keeping: "unset in development" is a reason to branch on the *environment*,
+never a reason to skip a security check. The branch belongs on `required?`.

@@ -194,6 +194,22 @@ a provisioned build and Apple's App Attest root certificate. The root is a confi
 `ATTEST_MODE=permissive` exists so the service can be run locally, and it is refused in
 production by `AppAttest.required?` rather than by a deploy checklist.
 
+Two things an automated security review caught, both now closed:
+
+- **The relying-party check used to fail open.** An unset `APP_ATTEST_APP_ID` meant "skip
+  it", which was an authentication bypass dressed as a development convenience. App Attest
+  proves "this is *your* app on genuine Apple hardware"; without that check it proves only
+  "this is *some* app on genuine hardware" — which anybody holding an App Attest entitlement
+  can produce for an app they wrote, register here, and then use to mint payments
+  indefinitely. The signature verifies and the counter advances, because the key really is
+  theirs. It now raises whenever attestation is enforced, and a production boot refuses to
+  start without the variable set.
+- **The authenticator stamp was not checked.** Apple writes `appattestdevelop` into the
+  aaguid for a development attestation and `appattest` plus null padding for a production
+  one. Accepting the development value in production would let anyone with a dev-provisioned
+  build attest a key, which is a far easier bar than App Review and the obvious next way in
+  once the relying-party check is closed.
+
 Attestation **fails soft on the client**. App Attest is unavailable on the simulator, on
 jailbroken devices, and when Apple's service is down; the request then goes out unsigned and
 the *server* decides what to do with it. The policy lives on the server, where it cannot be
