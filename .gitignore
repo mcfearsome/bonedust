@@ -10,4 +10,8 @@ ios/Bonedust.xcodeproj/
 /server/tmp/
 /server/log/
 /server/.env
+/server/.bundle/
+/server/vendor/bundle/
+/server/storage/
+/server/config/apple_app_attest_root.pem
 .dual-graph/

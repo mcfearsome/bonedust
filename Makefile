@@ -7,7 +7,8 @@
 SIM ?= platform=iOS Simulator,name=iPhone 16
 CORE := ios/BonedustCore
 
-.PHONY: all project test test-core test-app bench simulate constants content app clean
+.PHONY: all project test test-core test-app bench simulate constants golden content app \
+	server-test server-golden server-load server-setup clean
 
 all: test
 
@@ -23,7 +24,7 @@ test-app: project
 	xcodebuild test -project ios/Bonedust.xcodeproj -scheme Bonedust \
 		-destination '$(SIM)' CODE_SIGNING_ALLOWED=NO
 
-test: test-core
+test: test-core server-golden
 
 app: project
 	xcodebuild build -project ios/Bonedust.xcodeproj -scheme Bonedust \
@@ -39,6 +40,26 @@ RUNS ?= 10000
 simulate:
 	cd $(CORE) && swift build -c release && \
 		./.build/release/bonedust-tool simulate --runs $(RUNS)
+
+# §6's cross-language fixture. Swift emits it; the Ruby port must reproduce it.
+golden:
+	cd $(CORE) && swift run bonedust-tool golden ../../shared/golden/derivations.json
+
+# The Ruby port's own suite, including the golden comparison.
+server-test:
+	cd server && bundle exec rspec
+
+# The cross-language check on its own, without bundler or a database.
+server-golden:
+	ruby server/verify_golden.rb
+
+# §9: 500 concurrent payments with no lost increments. Needs a running server:
+#   cd server && ATTEST_MODE=permissive bin/rails server -p 3111
+server-load:
+	cd server && LEDGER_URL=$${LEDGER_URL:-http://localhost:3111} ruby script/load_test.rb 500
+
+server-setup:
+	cd server && bundle install && bin/rails db:prepare && bin/rails db:seed
 
 content:
 	cd $(CORE) && swift run bonedust-tool content-check

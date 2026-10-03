@@ -42,7 +42,13 @@ struct RootView: View {
             // §5: the slab is written when the app leaves the foreground, which is the
             // only moment the mid-dig guarantee actually has to hold.
             .onChange(of: scenePhase) { _, phase in
-                if phase != .active { coordinator.autosave() }
+                if phase != .active {
+                    coordinator.autosave()
+                } else {
+                    // Coming back to the foreground is when a player who dug offline is
+                    // most likely to have a connection again.
+                    Task { await coordinator.ledger.flush() }
+                }
             }
     }
 
@@ -123,6 +129,9 @@ struct RootView: View {
 
         case .collection:
             CollectionView(meta: coordinator.meta) { coordinator.showTitle() }
+
+        case .crewLedger:
+            CrewLedgerView(store: coordinator.ledger) { coordinator.showTitle() }
 
         case .runEnd:
             if let run = coordinator.run {

@@ -140,3 +140,76 @@ the game, only the competitive part.
 `paid_season` and the "diggers this season" count need a season. A season is a
 calendar quarter, stored as a row so it can be changed without a deploy. Seasons
 reset the season board only; `paid_total` and the debt never reset.
+
+## Where it runs
+
+**`api.bonedust.app`.** The apex is left for a marketing page, and a subdomain means the
+API can change hosts with one DNS record without touching whatever serves the website. The
+client reads the base URL from `Info.plist` (`BonedustLedgerBaseURL`), so pointing a debug
+build at a local server is an edit to `ios/project.yml` rather than to code.
+
+Rails 8 rejects requests for hosts it does not recognise, so production names
+`api.bonedust.app` explicitly along with the platform hostnames Fly and Render add. `/up` is
+excluded from that check, because health probes arrive on an internal address — which is a
+confusing way to discover host authorization the first time a deploy answers 403 to
+everything.
+
+## What the server actually verifies
+
+From the seed alone it reproduces **which fossil was drawn, how many copies, and the most
+that slab could have paid**. All three are integer PRNG draws and arithmetic over constants,
+so they port exactly: `make server-golden` asserts 250 seeds across all five sites match
+Swift to the dollar.
+
+It deliberately does **not** reproduce bone, rock or gem cell counts, which §6 also asks
+for. Those come out of the rasterizer, which runs on 32-bit floats and platform `libm`;
+`sin` can differ in the last bit between the client's macOS and the server's Linux, which is
+enough to flip a cell on a boundary. An exact test on cell counts would fail for reasons
+with nothing to do with cheating, and the ceiling never uses them. The gem count is assumed
+to be the maximum, which keeps the ceiling an upper bound.
+
+Getting the arithmetic to agree took one non-obvious step. Swift's content types store
+`Float`, so Swift sees `1.6` as `1.60000002384185791015625` while Ruby sees
+`1.6000000000000000888…`. The ceiling therefore widens every value to `Double` *before* any
+arithmetic, and Ruby narrows each constant to 32 bits as it loads. Without that the two
+disagreed by exactly one dollar on Hell Creek slabs — which is what the negative test in the
+golden fixture now demonstrates on purpose.
+
+**The ceiling is deliberately generous.** It assumes a flawless dig, every charm the client
+claims, every skeleton set complete, and that any rush bonus landed, then allows one percent
+plus a dollar. A ceiling that is too loose rejects no honest player and still makes inventing
+money impossible. One that is too tight tells a paying customer they are a cheat, which is
+unforgivable and cannot be taken back.
+
+## Attestation, honestly
+
+The **assertion** path — the one that runs on every payment — is implemented and tested with
+real P-256 keys. A tampered body, a signature from another key, a replayed hardware counter,
+a spent nonce, an expired nonce, another install's nonce and a mismatched app id are each
+rejected (`spec/app_attest_spec.rb`).
+
+The **registration** path is implemented but has never run against a real device, which needs
+a provisioned build and Apple's App Attest root certificate. The root is a configured file
+(`config/apple_app_attest_root.pem`, gitignored) rather than something baked in.
+`ATTEST_MODE=permissive` exists so the service can be run locally, and it is refused in
+production by `AppAttest.required?` rather than by a deploy checklist.
+
+Attestation **fails soft on the client**. App Attest is unavailable on the simulator, on
+jailbroken devices, and when Apple's service is down; the request then goes out unsigned and
+the *server* decides what to do with it. The policy lives on the server, where it cannot be
+edited by whoever is holding the phone.
+
+## The payment queue
+
+Durable, keyed by slab id, and safe to retry:
+
+- **Written to disk on every change**, so a payment survives the app being killed between
+  bagging a slab and finding a network.
+- **A retry cannot double-count.** `payments.slab_id` has a unique index, and the endpoint
+  answers a repeat with the payment that already exists rather than an error — which is
+  what makes retrying safe at all. Verified end to end.
+- **A refusal is final.** A 422 means the server will never accept that payment, so the
+  queue drops it. Keeping it would wedge every later payment behind an item that can never
+  clear.
+- **Seeds travel as strings.** A seed past 2^53 does not survive a JSON number, and a server
+  scoring a different seed would reject an honest payment. Tested with 9007199254740993.

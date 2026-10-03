@@ -1,0 +1,62 @@
+# Bonedust crew ledger.
+#
+# Built with Podman (`podman build -t bonedust-ledger -f Containerfile ..` from /server,
+# note the parent context) and deployable as a plain OCI image, which is what Fly.io takes.
+#
+# The build context is the repository root rather than /server, because the service loads
+# shared/constants.json and shared/ledger.json. Those files are the contract with the
+# client: the ceiling arithmetic has to use the same numbers the app does, and a container
+# that did not carry them would compute a different ceiling and start rejecting honest
+# payments.
+
+FROM docker.io/library/ruby:3.4-slim AS build
+
+ENV BUNDLE_WITHOUT=development:test \
+    BUNDLE_DEPLOYMENT=1 \
+    BUNDLE_PATH=/usr/local/bundle \
+    RAILS_ENV=production
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential git libpq-dev pkg-config && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY server/Gemfile server/Gemfile.lock ./
+RUN bundle install && \
+    rm -rf "${BUNDLE_PATH}"/ruby/*/cache
+
+COPY server/ ./
+# The shared contract, at the path the service expects relative to Rails.root.
+COPY shared/ ../shared/
+
+# Precompile the boot sequence so the first request does not pay for it.
+RUN SECRET_KEY_BASE=precompile-placeholder DATABASE_URL=postgres://invalid/none \
+    bundle exec bootsnap precompile app/ lib/ || true
+
+FROM docker.io/library/ruby:3.4-slim
+
+ENV BUNDLE_WITHOUT=development:test \
+    BUNDLE_DEPLOYMENT=1 \
+    BUNDLE_PATH=/usr/local/bundle \
+    RAILS_ENV=production \
+    RAILS_LOG_TO_STDOUT=1
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y curl libpq5 && \
+    rm -rf /var/lib/apt/lists/* && \
+    useradd --create-home --shell /bin/bash digger
+
+COPY --from=build /usr/local/bundle /usr/local/bundle
+COPY --from=build --chown=digger:digger /app /app
+COPY --from=build --chown=digger:digger /shared /shared
+
+USER digger
+WORKDIR /app
+
+EXPOSE 3000
+
+# Rails' own health endpoint. Fly and Render both poll it.
+HEALTHCHECK --interval=15s --timeout=3s --start-period=20s \
+  CMD curl -fsS http://localhost:3000/up || exit 1
+
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]

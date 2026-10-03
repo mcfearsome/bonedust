@@ -937,6 +937,39 @@
     1650
   ],
   "schema" : 1,
+  "sets" : [
+    {
+      "id" : "trex",
+      "name" : "Tyrannosaurus rex",
+      "perk" : {
+        "kind" : "sitePayoutBonus",
+        "label" : "Apex predator — Hell Creek fossils pay +15%",
+        "siteID" : "hell_creek",
+        "value" : 0.15
+      },
+      "pieces" : [
+        "trex_tooth",
+        "trex_rib",
+        "trex_vertebra"
+      ],
+      "reputationBonus" : 400
+    },
+    {
+      "id" : "ichthyosaur",
+      "name" : "Ichthyosaur",
+      "perk" : {
+        "kind" : "extraDaylight",
+        "label" : "Sea dragon — every slab gets 5 more seconds of daylight",
+        "value" : 5
+      },
+      "pieces" : [
+        "ichthyo_vertebrae",
+        "ichthyo_rib",
+        "ichthyo_paddle"
+      ],
+      "reputationBonus" : 300
+    }
+  ],
   "sites" : [
     {
       "fossilWeights" : {

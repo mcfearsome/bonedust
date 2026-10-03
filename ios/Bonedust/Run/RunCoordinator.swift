@@ -20,6 +20,7 @@ final class RunCoordinator {
         case supplyTent
         case runEnd
         case collection
+        case crewLedger
     }
 
     private(set) var screen: Screen = .title
@@ -37,16 +38,23 @@ final class RunCoordinator {
     var onRunAbsorbed: ((MetaProgress, MetaProgress.Rewards) -> Void)?
 
     let settings: GameSettings
+    /// The crew debt (§6). The run loop works without it reaching anything, which is what
+    /// "fully playable offline" has to mean in practice.
+    let ledger: CrewLedgerStore
     let store: RunStore
     private let catalog: ContentCatalog
 
     init(
         settings: GameSettings,
         store: RunStore,
+        ledger: CrewLedgerStore? = nil,
         catalog: ContentCatalog = .shared
     ) {
         self.settings = settings
         self.store = store
+        // Built here rather than as a default argument: default arguments are evaluated
+        // in a nonisolated context and this type is main-actor bound.
+        self.ledger = ledger ?? CrewLedgerStore()
         self.catalog = catalog
         self.meta = store.loadMeta()
         self.run = store.loadRun()
@@ -69,7 +77,10 @@ final class RunCoordinator {
             switch site.unlock {
             case .start: return true
             case .reputation(let needed): return meta.reputation >= needed
-            case .crewMilestone: return false
+            case .crewMilestone:
+                // From the cached ledger: once the crew reaches a milestone it stays
+                // reached, so going offline cannot take Hell Creek away again.
+                return ledger.hasUnlockedSite(site.id)
             }
         }
     }
@@ -94,6 +105,10 @@ final class RunCoordinator {
 
     func showCollection() {
         screen = .collection
+    }
+
+    func showCrewLedger() {
+        screen = .crewLedger
     }
 
     // MARK: Cosmetics
@@ -138,7 +153,7 @@ final class RunCoordinator {
         run = fresh
         store.save(run: fresh)
         store.save(slab: nil)
-        openDig(day: 1, restoring: false)
+        Task { await prepareDig(day: 1) }
     }
 
     /// Resumes from the autosave slot, including a part-dug slab.
@@ -160,6 +175,28 @@ final class RunCoordinator {
         case .succeeded, .failed:
             screen = .runEnd
         }
+    }
+
+    /// Asks the ledger for this day's seed before opening the dig, then opens it either way.
+    ///
+    /// The request is awaited rather than fired alongside, because the seed decides which
+    /// slab gets generated and a slab that changed underneath the player a second after
+    /// appearing would be worse than an offline one. The client timeout is short for
+    /// exactly this reason.
+    private func prepareDig(day: Int) async {
+        guard var current = run, current.issuedSlabs[day] == nil else {
+            openDig(day: day, restoring: false)
+            return
+        }
+        let siteID = current.siteForSlab(onDay: day, catalog: catalog)
+        if let issued = await ledger.issueSlab(site: siteID) {
+            current.noteIssued(
+                IssuedSlabRef(slabID: issued.slabID, seed: issued.seed), forDay: day
+            )
+            run = current
+            store.save(run: current)
+        }
+        openDig(day: day, restoring: false)
     }
 
     private func openDig(day: Int, restoring: Bool) {
@@ -195,7 +232,7 @@ final class RunCoordinator {
         }
 
         digEngine = DigEngine(
-            seed: run.slabSeed(forDay: day),
+            seed: run.effectiveSeed(forDay: day),
             site: site,
             day: day,
             loadout: loadout,
@@ -232,6 +269,15 @@ final class RunCoordinator {
         lastRecord = record
         store.save(run: current)
         store.save(slab: nil)
+
+        // Every dollar pays the crew debt (§6). Queued, not awaited: a slab must never
+        // wait on a network, and the queue is durable so nothing is lost either way.
+        ledger.record(
+            record,
+            charmIDs: current.charmIDs,
+            serverSlabID: current.serverSlabID(forDay: day),
+            localSeed: current.slabSeed(forDay: day)
+        )
         screen = .slabResults
     }
 
@@ -262,7 +308,7 @@ final class RunCoordinator {
 
         store.save(run: current)
         if case .digging(let day) = current.phase {
-            openDig(day: day, restoring: false)
+            Task { await prepareDig(day: day) }
         }
     }
 
@@ -297,7 +343,7 @@ final class RunCoordinator {
         current.leaveShop()
         run = current
         store.save(run: current)
-        openDig(day: day + 1, restoring: false)
+        Task { await prepareDig(day: day + 1) }
     }
 
     /// Applies a change to the run and persists it. Purchases are saved immediately

@@ -56,6 +56,8 @@ final class SharedConstantsTests: XCTestCase {
             // Name the site, so a one-site change does not print all five.
             check("site \(now.id)", false)
         }
+        check("set list", onDisk.sets.map(\.id) == live.sets.map(\.id))
+        check("set data", onDisk.sets == live.sets)
         check("charm list", onDisk.charms.map(\.id) == live.charms.map(\.id))
         for (disk, now) in zip(onDisk.charms, live.charms) where disk != now {
             check("charm \(now.id)", false)
@@ -82,6 +84,30 @@ final class SharedConstantsTests: XCTestCase {
         XCTAssertTrue(live.fossils.allSatisfy { $0.shape.spanCells > 0 })
         XCTAssertEqual(live.tuning.layerHardness.count, 4)
         XCTAssertGreaterThan(live.tuning.rockNodulesMax, 0)
+    }
+
+    func testGoldenFixtureIsCurrent() throws {
+        // §6's cross-language test reads shared/golden/derivations.json and asserts the
+        // Ruby port reaches identical values. A stale fixture would make that test pass
+        // against numbers the client no longer produces.
+        let url = repoRoot.appending(path: "shared/golden/derivations.json")
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return XCTFail("shared/golden/derivations.json is missing. Run `make golden`.")
+        }
+        let onDisk = try JSONDecoder().decode(
+            [ServerCeiling.SlabDerivation].self, from: try Data(contentsOf: url)
+        )
+        XCTAssertFalse(onDisk.isEmpty)
+        for derivation in onDisk {
+            guard let site = ContentCatalog.shared.site(derivation.siteID) else {
+                return XCTFail("fixture names unknown site \(derivation.siteID)")
+            }
+            let live = ServerCeiling.derive(seed: derivation.seed, site: site)
+            XCTAssertEqual(
+                live, derivation,
+                "seed \(derivation.seed) at \(derivation.siteID) drifted. Run `make golden`."
+            )
+        }
     }
 
     func testLedgerDataIsWellFormed() throws {

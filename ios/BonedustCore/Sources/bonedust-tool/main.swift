@@ -222,6 +222,25 @@ case "speeds":
                      speed, exposure / n, intact / n, total / n, left / n))
     }
 
+case "golden":
+    // Emits the cross-language fixture for §6's golden test: the server's Ruby port
+    // reads this and must reach identical values from the same seeds.
+    let path = arguments.count > 1 ? arguments[1] : "shared/golden/derivations.json"
+    var derivations: [ServerCeiling.SlabDerivation] = []
+    for site in ContentCatalog.shared.sites {
+        for index in 0..<50 {
+            let seed: UInt64 = 0x901D_E000 ^ (UInt64(index) &* 0x9E37_79B9_7F4A_7C15)
+            derivations.append(ServerCeiling.derive(seed: seed, site: site))
+        }
+    }
+    let goldenEncoder = JSONEncoder()
+    goldenEncoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    let goldenData = try goldenEncoder.encode(derivations)
+    try goldenData.write(to: URL(fileURLWithPath: path))
+    FileHandle.standardError.write(
+        Data("wrote \(derivations.count) derivations to \(path)\n".utf8)
+    )
+
 case "content-check":
     let problems = ContentCatalog.shared.validate()
     if problems.isEmpty {

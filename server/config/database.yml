@@ -1,0 +1,22 @@
+# The ledger's only persistent state.
+#
+# Database names are spelled out rather than derived from the Rails app name, because the
+# directory is called `server` and `server_production` tells a future operator nothing.
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+
+development:
+  <<: *default
+  database: bonedust_ledger_development
+
+test:
+  <<: *default
+  database: bonedust_ledger_test
+
+production:
+  <<: *default
+  # Fly and Render both inject DATABASE_URL; it wins over everything here.
+  url: <%= ENV["DATABASE_URL"] %>
+  database: bonedust_ledger_production

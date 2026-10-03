@@ -12,6 +12,7 @@ struct TitleView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 wordmark
+                crewDebtCard
                 if let problem = coordinator.resumeProblem { notice(problem) }
                 if let run = coordinator.run { resumeCard(run) }
                 standing
@@ -36,6 +37,71 @@ struct TitleView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Bonedust. Pay the Collector.")
+    }
+
+    /// §7.1's crew debt card. Shown even with no figures yet, because the debt is the
+    /// premise of the game and an empty space where it should be reads as a bug.
+    @ViewBuilder
+    private var crewDebtCard: some View {
+        Button {
+            coordinator.showCrewLedger()
+        } label: {
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(alignment: .firstTextBaseline) {
+                    FieldLabel(text: "The crew owes")
+                    Spacer()
+                    if !coordinator.ledger.isReachable {
+                        FieldLabel(text: "Offline")
+                    }
+                }
+                Text(coordinator.ledger.hasEverLoaded
+                        ? CrewLedgerView.money(coordinator.ledger.remaining)
+                        : "—")
+                    .font(Typography.number(.title, weight: .bold))
+                    .foregroundStyle(Ink.ivory)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Ink.ground)
+                        Capsule()
+                            .fill(Ink.accent)
+                            .frame(
+                                width: max(
+                                    coordinator.ledger.fractionPaid > 0 ? 3 : 0,
+                                    geometry.size.width * coordinator.ledger.fractionPaid
+                                )
+                            )
+                    }
+                }
+                .frame(height: 7)
+                if coordinator.ledger.queue.pending.isEmpty {
+                    Text("Every dollar you dig comes off it.")
+                        .font(Typography.ui(.caption2))
+                        .foregroundStyle(Ink.muted)
+                } else {
+                    Text("\(CrewLedgerView.money(coordinator.ledger.queue.pendingTotal)) of "
+                        + "yours is waiting to send.")
+                        .font(Typography.ui(.caption2))
+                        .foregroundStyle(Ink.accent)
+                }
+            }
+            .padding(13)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Ink.raised)
+            .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: Measure.cardRadius)
+                    .stroke(Ink.hairline, lineWidth: Measure.hairline)
+            )
+        }
+        .accessibilityLabel("Crew ledger")
+        .accessibilityValue(
+            coordinator.ledger.hasEverLoaded
+                ? "\(CrewLedgerView.money(coordinator.ledger.remaining)) still owed"
+                : "Not loaded yet"
+        )
     }
 
     private func notice(_ text: String) -> some View {
@@ -91,6 +157,7 @@ struct TitleView: View {
                 primary("New run") { coordinator.beginNewRun() }
             }
             secondary("Collection") { coordinator.showCollection() }
+            secondary("Crew Ledger") { coordinator.showCrewLedger() }
             secondary("Settings") { showSettings = true }
         }
     }

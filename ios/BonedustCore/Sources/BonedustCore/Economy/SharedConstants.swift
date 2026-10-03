@@ -14,6 +14,9 @@ public struct SharedConstants: Sendable, Codable, Equatable {
     public var sites: [Site]
     public var tools: [Tool]
     public var charms: [Charm]
+    /// Needed because a completed skeleton set raises the payout ceiling, so the server
+    /// has to know the perks exist even though it never tracks who has earned them.
+    public var sets: [SkeletonSet]
     public var installments: [Int]
     public var installmentGrowth: Float
 
@@ -24,6 +27,7 @@ public struct SharedConstants: Sendable, Codable, Equatable {
         self.sites = catalog.sites
         self.tools = catalog.tools
         self.charms = catalog.charms
+        self.sets = catalog.sets
         self.installments = Installments.table
         self.installmentGrowth = Installments.growth
     }

@@ -20,7 +20,8 @@ ios/project.yml       XcodeGen input. The .xcodeproj is generated, never edited.
 shared/constants.json Generated from Swift. The Rails service loads this so both
                       sides score a slab with the same numbers.
 shared/ledger.json    Crew debt total, milestone ladder, leaderboard definitions.
-server/               Rails 8 API for the crew ledger (M5).
+server/               Rails 8 API for the crew ledger. Deploys to api.bonedust.app.
+shared/golden/        Cross-language fixture: Swift emits it, Ruby must reproduce it.
 docs/CREW_LEDGER.md   Debt, milestone rewards, leaderboards, anti-cheat.
 DECISIONS.md          Every judgement call, with the reason.
 ```
@@ -36,7 +37,17 @@ make test-app      # app-layer tests.
 make constants     # regenerate shared/constants.json after a tuning change.
 make simulate      # win rate per installment tier, 10,000 scripted runs.
 ./scripts/verify-ios.sh   # compile every iOS source without needing a simulator.
+
+make server-setup  # bundle, create the database, seed the milestone ladder.
+make server-test   # 67 examples: plausibility, idempotency, attestation, boards.
+make server-golden # the cross-language check alone. No bundler, no database.
+make server-load   # 500 concurrent payments; needs a running server.
+make golden        # regenerate the fixture after a content or tuning change.
 ```
+
+`make test` runs the core suite *and* the cross-language golden check, because a tuning
+change that passes the Swift tests while breaking the Ruby port would make the server start
+rejecting honest payments.
 
 `make test-core` is the loop that matters day to day. The simulation is a Swift
 package specifically so that the tests covering removal, cracking, metrics, payout
@@ -65,7 +76,11 @@ Xcode supports — see **Toolchain** in `DECISIONS.md` if `xcodebuild` reports
   exposure and intact per species, two skeleton sets with permanent perks, ten
   achievements evaluated from pure rules, three Game Center leaderboards, and
   Reputation-gated brush trails.
-- M5 crew ledger, M6 polish: not started.
+- **M5 — crew ledger: complete.** Rails 8 API for `api.bonedust.app`, App Attest, a
+  server-side plausibility ceiling with a cross-language golden test, the durable payment
+  queue, cached milestone unlocks and the Crew Ledger screen. 67 server examples; 500
+  concurrent payments lose nothing.
+- M6 polish: not started.
 
 179 core tests pass. App-layer tests compile but cannot be *run* here — see
 **Toolchain** in `DECISIONS.md`.

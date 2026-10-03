@@ -54,6 +54,14 @@ targets:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
         ITSAppUsesNonExemptEncryption: false
+        # The crew ledger. api.bonedust.app in release; the apex is left for a marketing
+        # page. A debug build can be pointed at a local server by editing this.
+        BonedustLedgerBaseURL: "https://api.bonedust.app"
+        # App Attest identifies the app as teamID.bundleID. Filled in once the team is
+        # known; until then the server skips the relying-party check.
+        BonedustAppAttestAppID: ""
+      debug:
+        BonedustLedgerBaseURL: "https://api.bonedust.app"
 
   BonedustTests:
     type: bundle.unit-test

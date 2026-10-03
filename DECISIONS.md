@@ -294,3 +294,52 @@ Every number here should be re-measured against a human once a simulator runtime
 - **The results card previews the Collection with the current run folded in.** A specimen
   is not catalogued until the run settles, but finding the third T. rex piece has to show
   three pips or it reads as a bug.
+
+## M5 decisions
+
+- **The Rails service stays in this repository.** The deciding factor is §6's cross-language
+  golden test: 250 seeds producing identical ceilings in Swift and Ruby cannot run unless
+  both codebases are checked out together. Split them and `shared/constants.json` needs
+  publishing — a tag, a submodule or a copy that drifts — and the single most important
+  safety property of the ledger, that it never wrongly rejects an honest payment, becomes
+  something verified by hand across two repos. `/server` has no code dependency on `/ios`,
+  only on `shared/`, so extracting it later is a `git filter-repo` and nothing else.
+- **`api.bonedust.app`**, with the apex left for a marketing page.
+- **Seeds are issued below 2^62.** Swift seeds are `UInt64` and Postgres `bigint` is signed,
+  so half the space does not fit. Rather than a `numeric(20,0)` column paid for on every
+  index lookup, the server issues from the range that fits. 4.6 quintillion slabs is enough.
+- **Cell counts are not ported to Ruby, and the golden test says so.** §6 asks for them, but
+  they come out of a 32-bit-float rasterizer and platform `libm`, where `sin` differs in the
+  last bit between macOS and Linux. An exact test would fail for reasons unrelated to
+  cheating and the ceiling never uses them. What *is* compared is what the server acts on.
+- **A minimal CBOR decoder instead of a gem.** Apple's attestation payloads contain maps,
+  byte strings, text strings, integers and arrays and nothing else. Sixty tested lines beat
+  a supply-chain dependency on the one code path that decides whether a request is trusted.
+  Floats, tags and indefinite lengths are refused rather than guessed at.
+- **Gentle mode still pays the crew debt in full**, and is excluded only from leaderboards.
+  Accessibility must not cost the communal part of the game.
+- **Every leaderboard is derived from the validated payments rollup.** There is no endpoint
+  that accepts a score, and a spec asserts there never is one: it would be a second,
+  unprotected way in and the first thing anybody would attack.
+
+### Three bugs worth recording
+
+- **The load test passed while every request failed.** Its check was `moved == credited`,
+  and with 500 server errors that was `0 == 0`. It now fails unless every payment was
+  accepted and something was actually credited. A test that passes when nothing happened is
+  worse than no test.
+- **Then it failed while the server was correct.** It read `paid` from `GET /v1/ledger`,
+  which is cached for 15 seconds by design, so it compared two reads inside one cache
+  window and reported $5,000 lost that was in the database the whole time. It now reads the
+  row.
+- **Retry idempotency never fired.** `Payment`'s uniqueness *validation* raises
+  `RecordInvalid` before the database ever rejects the duplicate, and only `RecordNotUnique`
+  was rescued — so a queue retry got a 422 and the client would have retried forever. The
+  duplicate is now checked up front, with the index and the rescue still covering two
+  retries arriving together.
+
+### One thing I got wrong and reverted
+
+I hand-wrote a SHA-256 in the client's attestation file. CryptoKit ships one that is
+hardware-accelerated and audited, and hand-rolled crypto on the path that signs payment
+requests is precisely where not to be clever. Replaced before it was committed.

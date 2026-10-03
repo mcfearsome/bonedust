@@ -71,6 +71,17 @@ public enum RunPhase: Sendable, Codable, Equatable {
     }
 }
 
+/// A slab the server issued, remembered so its payment can be matched to it.
+public struct IssuedSlabRef: Sendable, Codable, Equatable {
+    public var slabID: String
+    public var seed: UInt64
+
+    public init(slabID: String, seed: UInt64) {
+        self.slabID = slabID
+        self.seed = seed
+    }
+}
+
 /// One run: five days, five slabs, one installment due at the end of it.
 ///
 /// A pure value type with the whole state machine on it, so the five-day arc can be
@@ -97,6 +108,8 @@ public struct RunState: Sendable, Codable, Equatable {
     public var charmIDs: [String]
     /// What the tent is offering on this visit. Part of the save so a relaunch cannot
     /// be used as a free reroll.
+    /// Server-issued slabs by day. Empty for a run dug entirely offline.
+    public var issuedSlabs: [Int: IssuedSlabRef]
     public var shop: ShopStock
     public var startedAt: Date
 
@@ -123,6 +136,7 @@ public struct RunState: Sendable, Codable, Equatable {
         self.phase = .digging(day: 1)
         self.toolIDs = toolIDs
         self.charmIDs = charmIDs
+        self.issuedSlabs = [:]
         self.shop = ShopStock()
         self.startedAt = startedAt
     }
@@ -153,6 +167,23 @@ public struct RunState: Sendable, Codable, Equatable {
     public func slabSeed(forDay day: Int) -> UInt64 {
         var rng = SplitMix64(seed: seed ^ (UInt64(max(1, day)) &* 0x9E37_79B9_7F4A_7C15))
         return rng.next()
+    }
+
+    /// The seed a day's slab is actually dug from.
+    ///
+    /// The server's one when there is one, because that is what makes the payment
+    /// checkable (§6); otherwise the locally derived one, and the payment is credited at a
+    /// fraction. The dig itself cannot tell the difference.
+    public func effectiveSeed(forDay day: Int) -> UInt64 {
+        issuedSlabs[day]?.seed ?? slabSeed(forDay: day)
+    }
+
+    public func serverSlabID(forDay day: Int) -> String? {
+        issuedSlabs[day]?.slabID
+    }
+
+    public mutating func noteIssued(_ reference: IssuedSlabRef, forDay day: Int) {
+        issuedSlabs[day] = reference
     }
 
     public func record(forDay day: Int) -> SlabRecord? {
