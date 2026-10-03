@@ -23,6 +23,7 @@ struct DigView: View {
     let totalDays: Int
     let cash: Int
     let installment: Int
+    let trail: BrushTrail
     let onBagged: (DigEngine) -> Void
 
     init(
@@ -31,6 +32,7 @@ struct DigView: View {
         totalDays: Int = 5,
         cash: Int = 0,
         installment: Int = 350,
+        trail: BrushTrail = .natural,
         onBagged: @escaping (DigEngine) -> Void = { _ in }
     ) {
         _engine = State(initialValue: engine)
@@ -39,6 +41,7 @@ struct DigView: View {
         self.totalDays = totalDays
         self.cash = cash
         self.installment = installment
+        self.trail = trail
         self.onBagged = onBagged
     }
 
@@ -274,6 +277,7 @@ struct DigView: View {
         scene.haptics = haptics
         scene.audio = audio
         scene.reducedMotion = reduceMotion
+        scene.trail = trail
         scene.onFirstCrack = showCrackHint
         scene.configureRenderer()
         haptics.isEnabled = settings.hapticsEnabled

@@ -10,6 +10,7 @@ struct RootView: View {
 
     @State private var settings = GameSettings()
     @State private var coordinator: RunCoordinator
+    @State private var gameCenter = GameCenterService()
     @State private var showSettings = false
     @Environment(\.scenePhase) private var scenePhase
 
@@ -23,11 +24,18 @@ struct RootView: View {
     var body: some View {
         content
             .environment(settings)
+            .onAppear(perform: connectGameCenter)
             .preferredColorScheme(.dark)
             .tint(Ink.accent)
             .sheet(isPresented: $showSettings) {
                 SettingsView(
                     settings: settings,
+                    trails: coordinator.unlockedTrails,
+                    selectedTrailID: coordinator.selectedTrail.id,
+                    lockedTrails: ContentCatalog.shared.trails.filter {
+                        $0.reputationRequired > coordinator.meta.reputation
+                    },
+                    onSelectTrail: { coordinator.selectTrail($0) },
                     onAbandonRun: coordinator.run == nil ? nil : { coordinator.abandonRun() }
                 )
             }
@@ -36,6 +44,16 @@ struct RootView: View {
             .onChange(of: scenePhase) { _, phase in
                 if phase != .active { coordinator.autosave() }
             }
+    }
+
+    /// Game Center is wired up here rather than inside the coordinator, so the run loop
+    /// has no dependency on it at all and a player who is not signed in gets exactly the
+    /// same game.
+    private func connectGameCenter() {
+        gameCenter.authenticate()
+        coordinator.onRunAbsorbed = { meta, rewards in
+            gameCenter.record(meta, rewards: rewards, gentleMode: settings.gentleMode)
+        }
     }
 
     @ViewBuilder
@@ -59,6 +77,7 @@ struct RootView: View {
                     totalDays: run.totalDays,
                     cash: run.cash,
                     installment: run.installment,
+                    trail: coordinator.selectedTrail,
                     onBagged: { coordinator.slabFinished($0) }
                 )
                 // Keyed on the slab's seed so a new day builds a new view rather than
@@ -76,6 +95,9 @@ struct RootView: View {
                     record: record,
                     fossil: fossil,
                     run: run,
+                    // The slab has been banked but the run is not over, so the Collection
+                    // has not absorbed it yet. Show the pips as they will stand.
+                    collection: coordinator.collectionIncludingCurrentRun,
                     onContinue: { coordinator.continueFromResults() }
                 )
             } else {
@@ -99,11 +121,15 @@ struct RootView: View {
                 recovery
             }
 
+        case .collection:
+            CollectionView(meta: coordinator.meta) { coordinator.showTitle() }
+
         case .runEnd:
             if let run = coordinator.run {
                 RunEndView(
                     run: run,
                     meta: coordinator.meta,
+                    rewards: coordinator.lastRewards,
                     onDone: { coordinator.acknowledgeRunEnd() }
                 )
             } else {

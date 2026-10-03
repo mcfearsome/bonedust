@@ -14,6 +14,12 @@ public struct SlabRecord: Sendable, Codable, Equatable {
     public var bagged: Bool
     public var wholeGems: Int
     public var daylightLeft: Float
+    /// Whether the specimen was identified before the slab ended.
+    ///
+    /// Stored rather than re-derived from exposure, because the threshold moves with the
+    /// loadout — "Collector's eye" identifies at a tenth. You cannot catalogue a fossil
+    /// the game never named for you.
+    public var identified: Bool
     /// Issued by the server, when the slab was started online. Nil for an offline
     /// slab, which the ledger credits at 50% (see docs/CREW_LEDGER.md).
     public var serverSlabID: String?
@@ -21,7 +27,8 @@ public struct SlabRecord: Sendable, Codable, Equatable {
     public init(
         day: Int, seed: UInt64, siteID: String, fossilID: String,
         payout: PayoutBreakdown, durationMillis: Int, bagged: Bool,
-        wholeGems: Int, daylightLeft: Float, serverSlabID: String? = nil
+        wholeGems: Int, daylightLeft: Float, identified: Bool = false,
+        serverSlabID: String? = nil
     ) {
         self.day = day
         self.seed = seed
@@ -32,6 +39,7 @@ public struct SlabRecord: Sendable, Codable, Equatable {
         self.bagged = bagged
         self.wholeGems = wholeGems
         self.daylightLeft = daylightLeft
+        self.identified = identified
         self.serverSlabID = serverSlabID
     }
 }
@@ -341,6 +349,18 @@ public struct MetaProgress: Sendable, Codable, Equatable {
     public var bestSlabPayout: Int
     /// Lifetime dollars contributed to the crew debt.
     public var lifetimeContribution: Int
+    /// Every species catalogued (§5).
+    public var collection: Collection
+    /// Skeleton sets finished, so a perk and its Reputation bonus are awarded once.
+    public var completedSetIDs: [String]
+    /// Achievement ids already reported to Game Center.
+    public var reportedAchievementIDs: [String]
+    /// Highest installment tier ever cleared.
+    public var highestTierCleared: Int
+    /// Whether any slab has ever come out fully exposed and uncracked.
+    public var hasFlawlessSlab: Bool
+    /// Chosen cosmetic brush trail, unlocked by Reputation.
+    public var brushTrailID: String?
     /// The kit the next run starts with.
     ///
     /// §4 says the Collector takes your tools as interest *when you fail*, which means
@@ -360,25 +380,80 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         self.longestStreak = 0
         self.bestSlabPayout = 0
         self.lifetimeContribution = 0
+        self.collection = Collection()
+        self.completedSetIDs = []
+        self.reportedAchievementIDs = []
+        self.highestTierCleared = 0
+        self.hasFlawlessSlab = false
+        self.brushTrailID = nil
         self.carriedToolIDs = [BrushTool.brush.id]
         self.carriedCharmIDs = []
+    }
+
+    /// What a finished run added, for the end screen to show.
+    public struct Rewards: Sendable, Equatable {
+        public var reputationFromCash = 0
+        public var reputationFromSets = 0
+        /// Species catalogued for the first time.
+        public var newSpecies: [String] = []
+        /// Skeleton sets finished by this run.
+        public var completedSets: [String] = []
+        /// Achievements newly qualified for.
+        public var newAchievements: [String] = []
+
+        public init() {}
+
+        public var totalReputation: Int { reputationFromCash + reputationFromSets }
+        public var isEmpty: Bool {
+            totalReputation == 0 && newSpecies.isEmpty
+                && completedSets.isEmpty && newAchievements.isEmpty
+        }
     }
 
     /// Folds a finished run in.
     ///
     /// Failure resets the tier to 1 — the Collector took the tools, so the next run
-    /// starts from the bottom — but keeps Reputation, because meta progression that
-    /// can be destroyed by one bad run makes the game hostile rather than tense.
-    public mutating func absorb(_ run: RunState) {
+    /// starts from the bottom — but keeps Reputation and the Collection, because meta
+    /// progression that one bad run can destroy makes the game hostile rather than tense.
+    @discardableResult
+    public mutating func absorb(
+        _ run: RunState, catalog: ContentCatalog = .shared
+    ) -> Rewards {
+        var rewards = Rewards()
         lifetimeContribution += run.crewContribution
         bestSlabPayout = max(bestSlabPayout, run.slabs.map(\.payout.total).max() ?? 0)
+
+        // The Collection records what came out of the ground, whether or not the week
+        // was paid for. A fossil you dug is a fossil you dug.
+        let runIndex = runsCompleted + runsFailed
+        for slab in run.slabs {
+            if collection.record(slab, runIndex: runIndex) {
+                rewards.newSpecies.append(slab.fossilID)
+            }
+            if slab.payout.intact >= 0.999, slab.payout.exposure >= 0.999 {
+                hasFlawlessSlab = true
+            }
+        }
+
+        // Completing a set pays once. Comparing against the stored list rather than
+        // firing an event means a set finished while the app was being killed is still
+        // credited the next time this runs.
+        let known = Set(completedSetIDs)
+        for set in collection.completedSets(catalog: catalog) where !known.contains(set.id) {
+            completedSetIDs.append(set.id)
+            reputation += set.reputationBonus
+            rewards.reputationFromSets += set.reputationBonus
+            rewards.completedSets.append(set.id)
+        }
 
         switch run.phase {
         case .succeeded(let reputationEarned, _):
             reputation += reputationEarned
+            rewards.reputationFromCash = reputationEarned
             runsCompleted += 1
             currentStreak += 1
             longestStreak = max(longestStreak, currentStreak)
+            highestTierCleared = max(highestTierCleared, run.tier)
             nextTier = run.tier + 1
             carriedToolIDs = run.toolIDs
             carriedCharmIDs = run.charmIDs
@@ -392,7 +467,27 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         case .digging, .results, .supplyTent:
             break
         }
+
+        let qualified = Achievements.earned(by: self, catalog: catalog)
+        let reported = Set(reportedAchievementIDs)
+        rewards.newAchievements = qualified.subtracting(reported).sorted()
+        reportedAchievementIDs = qualified.sorted()
+        return rewards
     }
+
+    /// Permanent modifiers from completed skeleton sets, for a given site.
+    public func setPerks(
+        forSite siteID: String, catalog: ContentCatalog = .shared
+    ) -> ModifierSet {
+        ModifierSet.combining(
+            completedSetIDs
+                .compactMap { catalog.setsByID[$0]?.perk }
+                .map { $0.modifiers(forSite: siteID) }
+        )
+    }
+
+    /// Which item pools Reputation has opened. The vault is a crew milestone (M5).
+    public func unlockedPools() -> Set<ItemPool> { [.shop] }
 
     public var nextInstallment: Int { Installments.amount(tier: nextTier) }
 }

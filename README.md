@@ -61,9 +61,13 @@ Xcode supports — see **Toolchain** in `DECISIONS.md` if `xcodebuild` reports
   seventeen charms, the supply tent with restock and resale, kit that carries across
   successful runs, and a per-day site override. Tools and charms both resolve into one
   `ModifierSet`, so nothing special-cases a charm inside the brush loop.
-- M4 meta, M5 crew ledger, M6 polish: not started.
+- **M4 — meta progression: complete.** The Collection as a museum drawer with best
+  exposure and intact per species, two skeleton sets with permanent perks, ten
+  achievements evaluated from pure rules, three Game Center leaderboards, and
+  Reputation-gated brush trails.
+- M5 crew ledger, M6 polish: not started.
 
-149 core tests pass. App-layer tests compile but cannot be *run* here — see
+179 core tests pass. App-layer tests compile but cannot be *run* here — see
 **Toolchain** in `DECISIONS.md`.
 
 ## The one rule

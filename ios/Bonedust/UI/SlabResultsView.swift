@@ -7,6 +7,8 @@ struct SlabResultsView: View {
     let record: SlabRecord
     let fossil: Fossil
     let run: RunState
+    /// Collection as it stands after this slab, for the set progress pips.
+    let collection: Collection
     let onContinue: () -> Void
 
     private var isLastDay: Bool { record.day >= run.totalDays }
@@ -33,6 +35,7 @@ struct SlabResultsView: View {
                     bagged: record.bagged
                 )
 
+                setProgress
                 installmentProgress
 
                 Button(action: onContinue) {
@@ -49,6 +52,38 @@ struct SlabResultsView: View {
             .padding(.bottom, 28)
         }
         .background(Ink.ground.ignoresSafeArea())
+    }
+
+    /// §4: "Show set progress on the results screen." Only for the set this specimen
+    /// belongs to — listing every set on every card would turn the moment a T. rex tooth
+    /// comes out of the ground into a spreadsheet.
+    @ViewBuilder
+    private var setProgress: some View {
+        if let setID = fossil.setID, let set = ContentCatalog.shared.setsByID[setID] {
+            let progress = collection.progress(for: set)
+            let complete = progress.found == progress.total
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline) {
+                    FieldLabel(text: complete ? "Set complete" : "Part of a set")
+                    Spacer()
+                    SetPips(found: progress.found, total: progress.total)
+                }
+                Text(complete ? set.perk.label : set.name)
+                    .font(Typography.ui(.caption))
+                    .foregroundStyle(complete ? Ink.accent : Ink.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(13)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Ink.raised)
+            .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: Measure.cardRadius)
+                    .stroke(complete ? Ink.accent.opacity(0.5) : Ink.hairline,
+                            lineWidth: Measure.hairline)
+            )
+            .accessibilityElement(children: .combine)
+        }
     }
 
     /// The pressure gauge. This, not the daylight bar, is what the run is about.

@@ -21,6 +21,10 @@ final class DigScene: SKScene {
     var audio: DigAudio?
     /// Suppresses particle bursts, per §7.
     var reducedMotion = false
+    /// Cosmetic brush trail (§5). The default tints dust by the layer coming off, per §3;
+    /// any earned trail overrides that with its own colour, which is the whole point of
+    /// having chosen it.
+    var trail: BrushTrail = .natural
     /// Fires the first time a crack happens, for the single diegetic hint in §9.
     var onFirstCrack: (() -> Void)?
 
@@ -244,7 +248,9 @@ final class DigScene: SKScene {
             x: (CGFloat(point.x) / CGFloat(SlabGrid.width) - 0.5) * node.size.width,
             y: (0.5 - CGFloat(point.y) / CGFloat(SlabGrid.height)) * node.size.height
         )
-        let tint = renderer.dustColour(forLayer: layer)
+        let tint = trail.id == BrushTrail.natural.id
+            ? renderer.dustColour(forLayer: layer)
+            : trail.colour
         emitter.particleColor = SKColor(
             red: CGFloat(tint.r) / 255,
             green: CGFloat(tint.g) / 255,
@@ -260,7 +266,7 @@ final class DigScene: SKScene {
         let emitter = SKEmitterNode()
         emitter.particleTexture = DigScene.dustTexture
         emitter.particleBirthRate = 0
-        emitter.particleLifetime = 0.42
+        emitter.particleLifetime = CGFloat(trail.lifetime)
         emitter.particleLifetimeRange = 0.25
         emitter.particleSpeed = 46
         emitter.particleSpeedRange = 34
@@ -269,7 +275,7 @@ final class DigScene: SKScene {
         emitter.particleAlpha = 0.55
         emitter.particleAlphaRange = 0.2
         emitter.particleAlphaSpeed = -1.4
-        emitter.particleScale = 0.09
+        emitter.particleScale = CGFloat(trail.scale)
         emitter.particleScaleRange = 0.05
         emitter.particleScaleSpeed = -0.1
         emitter.particleColorBlendFactor = 1

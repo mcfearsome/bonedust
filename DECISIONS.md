@@ -257,3 +257,40 @@ still unverified by human hands.
 All of these are provisional in one specific way: the model player sweeps the slab
 perfectly and has flawless local perception, so it cracks far less than a person will.
 Every number here should be re-measured against a human once a simulator runtime exists.
+
+## M4 decisions
+
+- **Only identified specimens are catalogued.** A slab abandoned at 4% exposure was a
+  hole in the ground, not a find. `SlabRecord` stores `identified` rather than having the
+  Collection re-derive it from exposure, because the threshold moves with the loadout —
+  "Collector's eye" identifies at a tenth — and you cannot catalogue a fossil the game
+  never named for you.
+- **The Collection survives a failed run.** The Collector takes your tools, not your
+  drawer. A fossil you dug is a fossil you dug, whether or not the week got paid for.
+- **Achievements are recomputed from the whole of `MetaProgress`, not fired as events.**
+  Two things fall out of that: an achievement can never be missed because the app was
+  killed at the wrong moment, and a rule added in a later version is credited
+  retroactively for play that already happened. `reportedAchievementIDs` exists only so
+  the *new this run* list is right, never to decide whether something was earned.
+- **Achievement conditions are a closed enum in content, not predicates in code.** It
+  keeps them as data, and it means the whole set can be evaluated in a test with no Game
+  Center, no signed-in account and no network.
+- **Set perks resolve to a `ModifierSet` for a given site.** A Hell Creek perk returns a
+  neutral set everywhere else, so a completed set composes through exactly the same path
+  as a charm or a site twist and nothing downstream checks for it.
+- **`BrushTrail` has no `ModifierSet` at all.** Structural, not a convention: Reputation
+  buys decoration, and a trail that changed how a slab digs would put the meta layer in
+  competition with the charms. The default trail keeps §3's behaviour of tinting dust by
+  the layer coming off; an earned trail overrides the colour, which is the point of
+  having chosen it.
+- **Game Center lives outside the coordinator**, wired in `RootView` through an
+  `onRunAbsorbed` callback. The run loop has no dependency on it, so a player who is not
+  signed in, is offline, or is somewhere Game Center does not operate gets exactly the
+  same game. Every call in the service fails soft and nothing branches on the result.
+- **Gentle mode is excluded from leaderboards at the service boundary**, not at the call
+  sites — one gate is harder to forget than six. Achievements are still reported: §7
+  excludes those runs from leaderboards, which are competitive, not from achievements,
+  which are not.
+- **The results card previews the Collection with the current run folded in.** A specimen
+  is not catalogued until the run settles, but finding the third T. rex piece has to show
+  three pips or it reads as a bug.

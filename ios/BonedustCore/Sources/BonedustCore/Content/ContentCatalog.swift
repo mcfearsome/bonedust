@@ -8,6 +8,8 @@ public struct ContentCatalog: Sendable, Codable {
     public var sets: [SkeletonSet]
     public var tools: [Tool]
     public var charms: [Charm]
+    public var achievements: [Achievement]
+    public var trails: [BrushTrail]
 
     /// Built once in `init`, because the dig loop looks fossils up by id on every
     /// slab and a linear scan over nineteen entries inside generation is waste.
@@ -18,7 +20,7 @@ public struct ContentCatalog: Sendable, Codable {
     public let charmsByID: [String: Charm]
 
     private enum CodingKeys: String, CodingKey {
-        case version, fossils, sites, sets, tools, charms
+        case version, fossils, sites, sets, tools, charms, achievements, trails
     }
 
     public init(
@@ -27,7 +29,9 @@ public struct ContentCatalog: Sendable, Codable {
         sites: [Site],
         sets: [SkeletonSet],
         tools: [Tool] = [],
-        charms: [Charm] = []
+        charms: [Charm] = [],
+        achievements: [Achievement] = [],
+        trails: [BrushTrail] = []
     ) {
         self.version = version
         self.fossils = fossils
@@ -35,6 +39,8 @@ public struct ContentCatalog: Sendable, Codable {
         self.sets = sets
         self.tools = tools
         self.charms = charms
+        self.achievements = achievements
+        self.trails = trails
         self.fossilsByID = Dictionary(uniqueKeysWithValues: fossils.map { ($0.id, $0) })
         self.sitesByID = Dictionary(uniqueKeysWithValues: sites.map { ($0.id, $0) })
         self.setsByID = Dictionary(uniqueKeysWithValues: sets.map { ($0.id, $0) })
@@ -50,13 +56,25 @@ public struct ContentCatalog: Sendable, Codable {
             sites: try c.decode([Site].self, forKey: .sites),
             sets: try c.decode([SkeletonSet].self, forKey: .sets),
             tools: try c.decodeIfPresent([Tool].self, forKey: .tools) ?? [],
-            charms: try c.decodeIfPresent([Charm].self, forKey: .charms) ?? []
+            charms: try c.decodeIfPresent([Charm].self, forKey: .charms) ?? [],
+            achievements: try c.decodeIfPresent([Achievement].self, forKey: .achievements) ?? [],
+            trails: try c.decodeIfPresent([BrushTrail].self, forKey: .trails) ?? []
         )
     }
 
     public func fossil(_ id: String) -> Fossil? { fossilsByID[id] }
     public func site(_ id: String) -> Site? { sitesByID[id] }
     public func tool(_ id: String) -> Tool? { toolsByID[id] }
+    public func achievement(_ id: String) -> Achievement? {
+        achievements.first { $0.id == id }
+    }
+    public func trail(_ id: String) -> BrushTrail? { trails.first { $0.id == id } }
+
+    /// Cosmetic trails the given Reputation has unlocked (§5).
+    public func unlockedTrails(reputation: Int) -> [BrushTrail] {
+        trails.filter { $0.reputationRequired <= reputation }
+            .sorted { $0.reputationRequired < $1.reputationRequired }
+    }
     public func charm(_ id: String) -> Charm? { charmsByID[id] }
 
     /// The tool every run starts with.
@@ -149,6 +167,28 @@ public struct ContentCatalog: Sendable, Codable {
             if let rule = charm.slabRule, sitesByID[rule.siteID] == nil {
                 problems.append("charm \(charm.id) points at unknown site \(rule.siteID)")
             }
+        }
+        for achievement in achievements {
+            switch achievement.rule {
+            case .siteCleared(let siteID) where sitesByID[siteID] == nil:
+                problems.append("achievement \(achievement.id) references unknown site \(siteID)")
+            case .speciesDiscovered(let count) where count > fossils.count:
+                // A "catalogue everything" achievement that asks for more species than
+                // exist is unearnable, and adding a fossil silently breaks it.
+                problems.append(
+                    "achievement \(achievement.id) needs \(count) species but only "
+                        + "\(fossils.count) exist"
+                )
+            default:
+                break
+            }
+        }
+        if Set(achievements.map(\.id)).count != achievements.count {
+            problems.append("duplicate achievement id")
+        }
+        if Set(trails.map(\.id)).count != trails.count { problems.append("duplicate trail id") }
+        if !trails.isEmpty, !trails.contains(where: { $0.reputationRequired == 0 }) {
+            problems.append("no brush trail is available at zero Reputation")
         }
         if Set(tools.map(\.id)).count != tools.count { problems.append("duplicate tool id") }
         if Set(charms.map(\.id)).count != charms.count { problems.append("duplicate charm id") }

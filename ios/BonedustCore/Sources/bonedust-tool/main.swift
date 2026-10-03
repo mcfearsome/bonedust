@@ -225,9 +225,11 @@ case "speeds":
 case "content-check":
     let problems = ContentCatalog.shared.validate()
     if problems.isEmpty {
-        print("content ok: \(ContentCatalog.shared.fossils.count) fossils, "
-            + "\(ContentCatalog.shared.sites.count) sites, "
-            + "\(ContentCatalog.shared.sets.count) sets")
+        let catalog = ContentCatalog.shared
+        print("content ok: \(catalog.fossils.count) fossils, \(catalog.sites.count) sites, "
+            + "\(catalog.sets.count) sets, \(catalog.tools.count) tools, "
+            + "\(catalog.charms.count) charms, \(catalog.achievements.count) achievements, "
+            + "\(catalog.trails.count) trails")
     } else {
         for problem in problems { print("content problem: \(problem)") }
         exit(1)

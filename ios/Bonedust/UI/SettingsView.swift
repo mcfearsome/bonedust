@@ -1,9 +1,14 @@
+import BonedustCore
 import SwiftUI
 
 /// §7.7. Haptics, sound, reduced motion, left-handed tray, Gentle mode.
 struct SettingsView: View {
 
     let settings: GameSettings
+    let trails: [BrushTrail]
+    let selectedTrailID: String
+    let lockedTrails: [BrushTrail]
+    let onSelectTrail: (String) -> Void
     let onAbandonRun: (() -> Void)?
     @Environment(\.dismiss) private var dismiss
 
@@ -34,6 +39,32 @@ struct SettingsView: View {
                     Text("Layout")
                 } footer: {
                     Text("Moves Bag it to the left of the tools, away from your thumb.")
+                }
+
+                if trails.count > 1 || !lockedTrails.isEmpty {
+                    Section {
+                        Picker("Brush trail", selection: Binding(
+                            get: { selectedTrailID },
+                            set: { onSelectTrail($0) }
+                        )) {
+                            ForEach(trails) { trail in
+                                Text(trail.name).tag(trail.id)
+                            }
+                        }
+                        ForEach(lockedTrails) { trail in
+                            HStack {
+                                Text(trail.name).foregroundStyle(.secondary)
+                                Spacer()
+                                Text("\(trail.reputationRequired) Reputation")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    } header: {
+                        Text("Cosmetic")
+                    } footer: {
+                        Text("Trails are decoration only. None of them changes how a slab digs.")
+                    }
                 }
 
                 Section {

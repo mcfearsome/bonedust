@@ -172,7 +172,8 @@ final class DigEngine {
             durationMillis: Int(elapsedSeconds * 1_000),
             bagged: bagged,
             wholeGems: sim.wholeGems,
-            daylightLeft: max(0, daylightRemaining)
+            daylightLeft: max(0, daylightRemaining),
+            identified: isIdentified
         )
     }
 

@@ -791,5 +791,154 @@
         "gemMultiplier": 3
       }
     }
+  ],
+  "achievements": [
+    {
+      "id": "first_set",
+      "name": "Articulated",
+      "rule": {
+        "kind": "firstSetCompleted"
+      },
+      "blurb": "Complete a skeleton set."
+    },
+    {
+      "id": "flawless",
+      "name": "Not a mark on it",
+      "rule": {
+        "kind": "flawlessSlab"
+      },
+      "blurb": "Bag a slab fully exposed with nothing cracked."
+    },
+    {
+      "id": "big_slab",
+      "name": "Museum piece",
+      "rule": {
+        "kind": "slabPayoutAtLeast",
+        "value": 500
+      },
+      "blurb": "Bag a single slab worth $500."
+    },
+    {
+      "id": "streak_3",
+      "name": "Keeping him sweet",
+      "rule": {
+        "kind": "runStreakAtLeast",
+        "value": 3
+      },
+      "blurb": "Pay three installments in a row."
+    },
+    {
+      "id": "streak_10",
+      "name": "Almost respectable",
+      "rule": {
+        "kind": "runStreakAtLeast",
+        "value": 10
+      },
+      "blurb": "Pay ten installments in a row."
+    },
+    {
+      "id": "species_10",
+      "name": "A drawer of your own",
+      "rule": {
+        "kind": "speciesDiscovered",
+        "value": 10
+      },
+      "blurb": "Catalogue ten species."
+    },
+    {
+      "id": "species_all",
+      "name": "The whole cabinet",
+      "rule": {
+        "kind": "speciesDiscovered",
+        "value": 19
+      },
+      "blurb": "Catalogue every species."
+    },
+    {
+      "id": "charmouth_cleared",
+      "name": "Done with Dorset",
+      "rule": {
+        "kind": "siteCleared",
+        "site": "charmouth"
+      },
+      "blurb": "Catalogue everything Charmouth has."
+    },
+    {
+      "id": "tier_5",
+      "name": "Five weeks of this",
+      "rule": {
+        "kind": "installmentTierReached",
+        "value": 5
+      },
+      "blurb": "Clear the fifth installment."
+    },
+    {
+      "id": "contribution_10k",
+      "name": "Ten thousand of his money",
+      "rule": {
+        "kind": "lifetimeContributionAtLeast",
+        "value": 10000
+      },
+      "blurb": "Pay $10,000 toward the crew debt."
+    }
+  ],
+  "trails": [
+    {
+      "id": "natural",
+      "name": "Plain dust",
+      "colour": [
+        214,
+        198,
+        168
+      ],
+      "reputationRequired": 0
+    },
+    {
+      "id": "bonedust",
+      "name": "Bone dust",
+      "colour": [
+        242,
+        233,
+        214
+      ],
+      "lifetime": 0.5,
+      "reputationRequired": 150
+    },
+    {
+      "id": "ochre",
+      "name": "Ochre",
+      "colour": [
+        255,
+        107,
+        44
+      ],
+      "lifetime": 0.46,
+      "scale": 0.08,
+      "reputationRequired": 400
+    },
+    {
+      "id": "verdigris",
+      "name": "Verdigris",
+      "colour": [
+        86,
+        184,
+        200
+      ],
+      "lifetime": 0.55,
+      "scale": 0.07,
+      "reputationRequired": 800
+    },
+    {
+      "id": "ash",
+      "name": "Ash",
+      "colour": [
+        160,
+        154,
+        146
+      ],
+      "lifetime": 0.62,
+      "scale": 0.1,
+      "reputationRequired": 1500
+    }
   ]
 }

@@ -90,6 +90,7 @@ struct TitleView: View {
             } else {
                 primary("New run") { coordinator.beginNewRun() }
             }
+            secondary("Collection") { coordinator.showCollection() }
             secondary("Settings") { showSettings = true }
         }
     }

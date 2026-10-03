@@ -6,6 +6,7 @@ struct RunEndView: View {
 
     let run: RunState
     let meta: MetaProgress
+    let rewards: MetaProgress.Rewards
     let onDone: () -> Void
 
     private var succeeded: Bool {
@@ -17,6 +18,7 @@ struct RunEndView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 headline
+                if !rewards.isEmpty { rewardsCard }
                 stats
                 Button(action: onDone) {
                     Text(succeeded ? "Take the next job" : "New run")
@@ -55,6 +57,59 @@ struct RunEndView: View {
         }
     }
 
+    /// Shown only when there is something to show. An empty "you gained nothing" card
+    /// after a failed run would be a kick while the player is down.
+    private var rewardsCard: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            FieldLabel(text: "This run")
+            if !rewards.newSpecies.isEmpty {
+                rewardLine(
+                    rewards.newSpecies.count == 1 ? "New species" : "New species",
+                    rewards.newSpecies
+                        .compactMap { ContentCatalog.shared.fossil($0)?.name }
+                        .joined(separator: ", ")
+                )
+            }
+            if !rewards.completedSets.isEmpty {
+                ForEach(rewards.completedSets, id: \.self) { setID in
+                    if let set = ContentCatalog.shared.setsByID[setID] {
+                        rewardLine("Set complete", "\(set.name) — \(set.perk.label)")
+                    }
+                }
+            }
+            if rewards.reputationFromSets > 0 {
+                rewardLine("Set bonus", "+\(rewards.reputationFromSets) Reputation")
+            }
+            if !rewards.newAchievements.isEmpty {
+                rewardLine(
+                    "Achievements",
+                    rewards.newAchievements
+                        .compactMap { ContentCatalog.shared.achievement($0)?.name }
+                        .joined(separator: ", ")
+                )
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Ink.raised)
+        .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: Measure.cardRadius)
+                .stroke(Ink.accent.opacity(0.45), lineWidth: Measure.hairline)
+        )
+    }
+
+    private func rewardLine(_ name: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            FieldLabel(text: name)
+            Text(value)
+                .font(Typography.ui(.footnote, weight: .medium))
+                .foregroundStyle(Ink.ivory)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
     private var stats: some View {
         VStack(alignment: .leading, spacing: 11) {
             statRow("Earned this run", "$\(run.totalEarned)")
@@ -62,6 +117,10 @@ struct RunEndView: View {
             statRow("Best slab", "$\(run.slabs.map(\.payout.total).max() ?? 0)")
             SpecimenRule()
             statRow("Reputation", "\(meta.reputation)")
+            statRow(
+                "Collection",
+                "\(meta.collection.discoveredCount)/\(ContentCatalog.shared.fossils.count)"
+            )
             statRow(
                 "Next installment",
                 "$\(meta.nextInstallment)",

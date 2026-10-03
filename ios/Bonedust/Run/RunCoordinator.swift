@@ -19,6 +19,7 @@ final class RunCoordinator {
         case slabResults
         case supplyTent
         case runEnd
+        case collection
     }
 
     private(set) var screen: Screen = .title
@@ -29,9 +30,14 @@ final class RunCoordinator {
     private(set) var lastRecord: SlabRecord?
     /// Set when a resume was refused, so the title screen can say why.
     private(set) var resumeProblem: String?
+    /// What the last finished run added, for the end screen.
+    private(set) var lastRewards = MetaProgress.Rewards()
+    /// Called when a run has been folded into meta progress, so Game Center reporting
+    /// can live outside the coordinator rather than being wired through it.
+    var onRunAbsorbed: ((MetaProgress, MetaProgress.Rewards) -> Void)?
 
     let settings: GameSettings
-    private let store: RunStore
+    let store: RunStore
     private let catalog: ContentCatalog
 
     init(
@@ -72,6 +78,44 @@ final class RunCoordinator {
 
     func showTitle() {
         screen = .title
+    }
+
+    /// The Collection with the current run's finds folded in.
+    ///
+    /// A slab's specimen is not catalogued until the run settles, but the results card
+    /// has to show the pips the player just earned — otherwise finding the third T. rex
+    /// piece shows two pips and reads as a bug.
+    var collectionIncludingCurrentRun: Collection {
+        guard let run else { return meta.collection }
+        var preview = meta.collection
+        for slab in run.slabs { preview.record(slab) }
+        return preview
+    }
+
+    func showCollection() {
+        screen = .collection
+    }
+
+    // MARK: Cosmetics
+
+    /// Trails the player has earned (§5). Always at least one.
+    var unlockedTrails: [BrushTrail] {
+        let unlocked = catalog.unlockedTrails(reputation: meta.reputation)
+        return unlocked.isEmpty ? [.natural] : unlocked
+    }
+
+    var selectedTrail: BrushTrail {
+        meta.brushTrailID.flatMap { catalog.trail($0) }
+            ?? unlockedTrails.first
+            ?? .natural
+    }
+
+    func selectTrail(_ id: String) {
+        // Guard against a save that names a trail the current Reputation no longer
+        // reaches, which a content change could produce.
+        guard unlockedTrails.contains(where: { $0.id == id }) else { return }
+        meta.brushTrailID = id
+        store.save(meta: meta)
     }
 
     func beginNewRun() {
@@ -124,7 +168,13 @@ final class RunCoordinator {
         // resolved per day rather than taken from the run.
         let siteID = run.siteForSlab(onDay: day, catalog: catalog)
         guard let site = catalog.site(siteID) else { return }
-        let extra = settings.gentleModeModifiers
+        // Gentle mode plus any permanent perks from completed skeleton sets. Both fold
+        // into the same ModifierSet the charms use, so a set perk is not a special case
+        // anywhere downstream.
+        let extra = ModifierSet.combining([
+            settings.gentleModeModifiers,
+            meta.setPerks(forSite: siteID, catalog: catalog),
+        ])
         let loadout = run.loadout(catalog: catalog)
 
         if restoring, let snapshot = store.loadSlab(), snapshot.day == day {
@@ -198,8 +248,9 @@ final class RunCoordinator {
         }
 
         if current.isOver {
-            meta.absorb(current)
+            lastRewards = meta.absorb(current, catalog: catalog)
             store.save(meta: meta)
+            onRunAbsorbed?(meta, lastRewards)
             // The finished run stays in `run` so the end screen can read it, but it is
             // cleared from disk: §5 allows one *in-progress* slot, and a settled run is
             // not resumable.
@@ -228,7 +279,7 @@ final class RunCoordinator {
 
     /// Which item pools are open. The vault is a crew milestone, and the ledger client
     /// arrives at M5, so for now only the shop pool is available.
-    private var unlockedPools: Set<ItemPool> { [.shop] }
+    private var unlockedPools: Set<ItemPool> { meta.unlockedPools() }
 
     func buyTool(_ id: String) { mutateRun { try? $0.buyTool(id, catalog: catalog) } }
     func buyCharm(_ id: String) { mutateRun { try? $0.buyCharm(id, catalog: catalog) } }
@@ -270,9 +321,10 @@ final class RunCoordinator {
     func abandonRun() {
         guard var current = run else { return }
         current.abandon()
-        meta.absorb(current)
+        lastRewards = meta.absorb(current, catalog: catalog)
         run = current
         store.save(meta: meta)
+        onRunAbsorbed?(meta, lastRewards)
         store.save(run: nil)
         digEngine = nil
         screen = .runEnd
@@ -311,6 +363,23 @@ extension RunCoordinator {
         current.charmIDs.append(id)
         current.shop.charmIDs.removeAll { $0 == id }
         run = current
+    }
+
+    /// Marks a skeleton set complete without digging its pieces.
+    func debugCompleteSet(_ setID: String) {
+        guard let set = catalog.setsByID[setID] else { return }
+        for piece in set.pieces {
+            meta.collection.records[piece] = SpecimenRecord(
+                fossilID: piece, timesFound: 1, bestExposure: 1, bestIntact: 1, bestPayout: 1
+            )
+        }
+        if !meta.completedSetIDs.contains(setID) { meta.completedSetIDs.append(setID) }
+        store.save(meta: meta)
+    }
+
+    func debugSetReputation(_ value: Int) {
+        meta.reputation = value
+        store.save(meta: meta)
     }
 
     /// Ends the run as a success or a failure, without playing it.
