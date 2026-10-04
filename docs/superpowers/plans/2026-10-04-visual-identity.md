@@ -240,19 +240,7 @@ extension EarthRampTests {
         }
     }
 
-    /// Bone is what the player is digging for. It must separate from the matrix it
-    /// sits in, per site, or the fossil is invisible at the moment of exposure.
-    func testEverySiteBoneSeparatesFromItsMatrix() {
-        for site in ContentCatalog.shared.sites {
-            let ratio = site.palette.bone.contrastRatio(against: site.palette.matrix)
-            XCTAssertGreaterThanOrEqual(
-                ratio, 1.3,
-                "site '\(site.id)': bone is invisible against its own matrix at \(ratio)"
-            )
-        }
-    }
-}
-```
+
 
 - [ ] **Step 2: Run the test**
 
@@ -1351,6 +1339,30 @@ final class CelShadingTests: XCTestCase {
         XCTAssertEqual(ratioBefore, ratioAfter, accuracy: 0.05, "cel shading shifted hue")
     }
 
+    /// Moved here from Task 2, where it failed for the right reason: bone
+    /// legibility has never come from fill contrast. green_river's bone sits at
+    /// 1.14:1 against its own matrix — invisible — and the engine compensated with
+    /// a +/-14% lit/shadowed rim, because at 96x128 "there is no room for an
+    /// outline". The ink edge is that outline, and it must beat the rim it replaced
+    /// on every site, not just the forgiving ones.
+    func testInkEdgeMakesBoneSeparateFromMatrixOnEverySite() {
+        let ink = RGB8(0x1C, 0x1A, 0x17)   // Earth.s8
+        for site in ContentCatalog.shared.sites {
+            let matrix = site.palette.matrix
+            let bare = site.palette.bone.contrastRatio(against: matrix)
+            let edged = site.palette.bone.lerp(to: ink, 0.72).contrastRatio(against: matrix)
+
+            XCTAssertGreaterThanOrEqual(
+                edged, 3.0,
+                "site '\(site.id)': the ink edge does not separate bone from matrix (\(edged))"
+            )
+            XCTAssertGreaterThan(
+                edged, bare,
+                "site '\(site.id)': the ink edge is weaker than the bare fill it replaced"
+            )
+        }
+    }
+
     /// Thin specimens keep an interior. green_river's twist is "the fish are
     /// paper", so a fossil two cells across must not be all outline.
     func testInkEdgeSkipsRunsShorterThanThreeCells() {
@@ -1481,7 +1493,7 @@ if depth == 1, cell.flags & SlabGrid.Flag.bone != 0 {
 - [ ] **Step 7: Run the tests**
 
 Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/CelShadingTests`
-Expected: PASS, 4 tests.
+Expected: PASS, 5 tests. The per-site edge test is the one carried over from Task 2 — green_river should land near 5.49:1 against a bare-fill 1.14:1.
 
 - [ ] **Step 8: Confirm the Core suite is unaffected**
 
