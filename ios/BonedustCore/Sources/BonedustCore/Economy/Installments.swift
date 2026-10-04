@@ -31,7 +31,7 @@ public enum Installments {
     /// $1,170 at tier 4 because a site unlocks there, so smooth win rates would need a
     /// ramp that jumps to match. A difficulty curve that lurches to flatten a graph is
     /// fitting the model player rather than the game.
-    public static let table = [350, 400, 525, 650, 950, 1075, 1250, 1400]
+    public static let table = [500, 600, 850, 1150, 1600, 1850, 2200, 2600]
     public static let growth: Float = 1.22
 
     /// `tier` is 1-based: tier 1 is a player's first run.

@@ -953,3 +953,29 @@ stops there. Same split as the breath detector, for the same reason.
 The debug sheet shows the raw radius, the learned fingertip and the current multiplier,
 because guessing at hardware behaviour from a machine without that hardware is how the
 breath gate shipped rejecting actual breath.
+
+## Two ammonites in a row was a weighting bug, not a shape bug
+
+"I got 2 of these spirals in a row and the one before those was just 4 disjointed circles."
+
+Charmouth was **31% spirals** and 11% scattered discs, against 4% skulls, 4% skeletons and
+1% wings. The cause was the weighting: species were ranked by price with the cheapest given
+the highest weight, and the cheap fossils of a formation are overwhelmingly shells and
+coils. Adding better silhouettes did nothing about how rarely anyone saw them.
+
+Weights are now set **per shape kind**, each getting an equal share of the draw, split
+within the kind with a mild bias toward the cheaper members so a formation keeps a
+signature. Skeletons get 0.45 of a share, because a jackpot that turns up often is not one.
+
+Charmouth now: 8% spirals, **59% of draws carry a creature silhouette**, 3% skeletons.
+
+Income went up about 40% as a result, because the creature shapes are the expensive ones —
+a roster rebalance is an economy change whether or not it was meant as one. Installments
+re-fitted to [500, 600, 850, 1150, 1600, …]: 80%, 69%, 57%, 37%, 24% against targets of 70,
+60, 48, 38, 30. The top sits deliberately above target, since every measurement this session
+has shown the simulated player outperforming a real one.
+
+`testNotReadingTheSlabCostsTheFossil` had to be averaged across sites for the same reason
+the lookahead test did: careful and average play came out 0.9529 against 0.9539 on Charmouth
+alone, a tenth of a percent wearing the shape of a result. One site's species mix moves
+intactness further than the gap being measured.
