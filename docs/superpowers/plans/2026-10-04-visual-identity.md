@@ -855,6 +855,30 @@ final class ThemeTests: XCTestCase {
         theme.lightLevel = 1
         XCTAssertEqual(theme.ink, Ink.day)
     }
+
+    /// The palette is only ever one of the two presets. A blended palette would
+    /// put text and page at 1.09:1 in the middle; this asserts no third value
+    /// can reach a screen, at any light level a site could hold.
+    func testNoIntermediatePaletteIsEverProduced() {
+        let theme = Theme()
+        for step in 0...100 {
+            theme.lightLevel = Float(step) / 100
+            XCTAssertTrue(
+                theme.ink == Ink.day || theme.ink == Ink.night,
+                "lightLevel \(theme.lightLevel) produced a blended palette"
+            )
+        }
+    }
+
+    /// The game's only dim site must land on the night palette, not near the
+    /// crossover. night_dig is lightLevel 0.55 -> nightFraction 0.69.
+    func testTheOneNightSiteLandsOnTheNightPalette() {
+        let site = ContentCatalog.shared.site("night_dig")
+        XCTAssertNotNil(site, "night_dig left the catalog; update this test")
+        let theme = Theme()
+        theme.lightLevel = site!.modifiers.lightLevel
+        XCTAssertEqual(theme.ink, Ink.night)
+    }
 }
 ```
 
@@ -882,8 +906,13 @@ final class Theme {
     /// the page does not, because a notebook under a headlamp is not black.
     static let nightFloor: Float = 0.35
 
+    /// Where the palette flips. A switch, not a blend: see spec §6. Blending two
+    /// inverted palettes drives text and page together — ink-on-page is 1.09:1 at
+    /// the midpoint, and night_dig's lightLevel 0.55 lands at t=0.69, i.e. 2.52:1.
+    static let switchPoint: Double = 0.5
+
     var lightLevel: Float = 1 {
-        didSet { ink = Ink.lerp(from: .day, to: .night, Theme.nightFraction(for: lightLevel)) }
+        didSet { ink = Theme.nightFraction(for: lightLevel) >= Theme.switchPoint ? .night : .day }
     }
 
     private(set) var ink: Ink = .day
@@ -917,7 +946,7 @@ Note: `@Entry` requires iOS 17 with Xcode 16's macro, which this project has. If
 - [ ] **Step 4: Run the tests**
 
 Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/ThemeTests`
-Expected: PASS, 7 tests. night_dig is the thin one — expect roughly 3.12 against a 3.0 floor.
+Expected: PASS, 9 tests. night_dig is the thin one — expect roughly 3.12 against a 3.0 floor.
 
 - [ ] **Step 5: Commit**
 
