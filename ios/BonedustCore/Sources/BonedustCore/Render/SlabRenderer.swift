@@ -119,6 +119,20 @@ public struct SlabRenderer {
 
     // MARK: - Per-cell colour
 
+    /// Whether a cell falls on a hatch stripe.
+    ///
+    /// `(x + y)` is what makes it diagonal; `% 4 < 2` is what makes it 2 on, 2 off.
+    /// Internal rather than private so the pattern can be tested directly — the
+    /// alternative is reconstructing it from pixel bytes, which tests the test.
+    static func isHatched(x: Int, y: Int) -> Bool {
+        (x + y) % 4 < 2
+    }
+
+    /// Darkens a cell that sits on a hatch stripe, leaves the rest alone.
+    static func hatched(_ colour: RGB8, x: Int, y: Int) -> RGB8 {
+        isHatched(x: x, y: y) ? colour.lerp(to: Earth.s8, 0.5) : colour
+    }
+
     private static func colour(
         _ grid: SlabGrid, _ x: Int, _ y: Int, _ style: Style
     ) -> RGB8 {
@@ -151,6 +165,12 @@ public struct SlabRenderer {
             if boneAbove != boneBelow {
                 result = result.scaled(boneAbove ? 0.86 : 1.12)
             }
+        }
+
+        // Fracture leaves a permanent record on the page. The transient red bloom is
+        // the alarm; this is the annotation that stays. See spec §5.
+        if cell.flags & SlabGrid.Flag.cracked != 0 {
+            result = SlabRenderer.hatched(result, x: x, y: y)
         }
 
         if style.revealBuriedBone, cell.depth > 0, cell.flags & SlabGrid.Flag.bone != 0 {
