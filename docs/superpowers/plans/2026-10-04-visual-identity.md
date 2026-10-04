@@ -289,6 +289,18 @@ final class DesignTokenTests: XCTestCase {
         XCTAssertEqual(Ink.lerp(from: .day, to: .night, 1), Ink.night)
     }
 
+    /// The night accents must actually be the night ones. Reusing the day accents
+    /// here was the defect Task 1's review caught, and nothing else would notice:
+    /// Ink has no contrast assertion of its own, and the page still renders.
+    func testNightUsesTheNightAccentsNotTheDayOnes() {
+        XCTAssertNotEqual(Ink.night.stamp, Ink.day.stamp)
+        XCTAssertNotEqual(Ink.night.gem, Ink.day.gem)
+        XCTAssertNotEqual(Ink.night.safe, Ink.day.safe)
+        XCTAssertEqual(Ink.night.stamp, Color(Earth.stampNight))
+        XCTAssertEqual(Ink.night.gem, Color(Earth.gemNight))
+        XCTAssertEqual(Ink.night.safe, Color(Earth.safeNight))
+    }
+
     func testLerpClampsOutOfRangeFractions() {
         XCTAssertEqual(Ink.lerp(from: .day, to: .night, -5), Ink.day)
         XCTAssertEqual(Ink.lerp(from: .day, to: .night, 42), Ink.night)
@@ -365,17 +377,22 @@ struct Ink: Equatable {
         mount: Color(Earth.mount)
     )
 
-    /// The ramp inverted. Text goes pale, the page goes to lamp-lit brown. The
-    /// accents hold their hue: a stamp is still red under a headlamp.
+    /// The ramp inverted. Text goes pale, the page goes to lamp-lit brown.
+    ///
+    /// The accents keep their meaning but not their values: the day accents sit at
+    /// 2.2-2.5:1 against `nightPage`, far under AA, so night has its own three.
+    /// `gemNight` and `safeNight` are the original values from the dark UI this
+    /// redesign replaces — that palette was never wrong, it was a dark-mode
+    /// palette, and it is correct again here.
     static let night = Ink(
         page: Color(Earth.nightPage),
         raised: Color(Earth.s7),
         hairline: Color(Earth.s5),
         ink: Color(Earth.s1),
         muted: Color(Earth.s4),
-        stamp: Color(Earth.stamp),
-        gem: Color(Earth.gem),
-        safe: Color(Earth.safe),
+        stamp: Color(Earth.stampNight),
+        gem: Color(Earth.gemNight),
+        safe: Color(Earth.safeNight),
         mount: Color(Earth.s8)
     )
 
@@ -602,7 +619,7 @@ struct FieldLabel: View {
 - [ ] **Step 4: Run the tests**
 
 Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/DesignTokenTests`
-Expected: PASS, 5 tests. The Dynamic Type tests pass against the *system fallback* at this point, because no font file exists yet. That is the point — Task 4 proves the custom path.
+Expected: PASS, 6 tests. The Dynamic Type tests pass against the *system fallback* at this point, because no font file exists yet. That is the point — Task 4 proves the custom path.
 
 - [ ] **Step 5: Confirm the app still builds**
 
