@@ -8,7 +8,7 @@ SIM ?= platform=iOS Simulator,name=iPhone 17
 CORE := ios/BonedustCore
 
 .PHONY: all project test test-core test-app bench simulate constants golden content app \
-	server-test server-golden server-load server-setup render team-id device clean
+	server-test server-golden server-load server-setup render team-id device sheet shapes clean
 
 all: test
 
@@ -134,3 +134,26 @@ team-id:
 	@echo
 	@echo "First column is the Team ID -- use it in BonedustAppAttestAppID and"
 	@echo "DEVELOPMENT_TEAM. Third column is the organization that owns it."
+
+# Every species tiled into one image, so the catalogue can be judged at a glance.
+# Looking at them is the only test for whether a shape reads as an animal; a sanity
+# test can say a fossil is a playable size, not that it looks like a wrench.
+SHEET_OUT ?= build/sheet
+sheet:
+	cd $(CORE) && swift build -c release
+	mkdir -p $(dir $(SHEET_OUT))
+	$(CORE)/.build/release/bonedust-tool sheet $(SHEET_OUT).ppm 9
+	sips -s format png $(SHEET_OUT).ppm --out $(SHEET_OUT).png >/dev/null
+	rm -f $(SHEET_OUT).ppm
+	@echo "wrote $(SHEET_OUT).png"
+
+# One PNG per species, centred and alone.
+SHAPES_OUT ?= build/shapes
+shapes:
+	cd $(CORE) && swift build -c release
+	$(CORE)/.build/release/bonedust-tool shapes $(SHAPES_OUT) 5
+	for f in $(SHAPES_OUT)/*.ppm; do \
+		sips -s format png "$$f" --out "$${f%.ppm}.png" >/dev/null; \
+	done
+	rm -f $(SHAPES_OUT)/*.ppm
+	@echo "wrote $$(ls $(SHAPES_OUT)/*.png | wc -l | tr -d ' ') shapes"

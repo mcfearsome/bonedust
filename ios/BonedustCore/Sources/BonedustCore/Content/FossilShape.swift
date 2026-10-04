@@ -43,6 +43,28 @@ public struct ShapeParams: Sendable, Codable, Equatable {
     /// line -- reported from play as "just a single long thin bone, these fossils SUCK",
     /// which was a fair description of what the generator produced.
     public var knobEnds: Float = 0
+    /// Discs: how much of a connected column they form. 0 scatters them, 1 stacks them.
+    ///
+    /// A crinoid stem, a vertebral column and a hadrosaur's tooth battery are *columns* —
+    /// discs stacked touching, with an axis running through. Scattered, the same generator
+    /// produces a handful of unconnected lumps that read as debris rather than a specimen,
+    /// which is what "what is this supposed to be?" was looking at.
+    ///
+    /// Scattering is still right for some: ichthyosaur vertebrae really are found "like
+    /// dropped coins", and fish scales really are strewn. So this is a knob rather than a
+    /// fix applied everywhere.
+    public var chain: Float = 0
+    /// Taper: a flared root at the wide end, as a multiple of the shaft. 0 leaves a cone.
+    ///
+    /// A tooth is not a spike. It has a root that is wider than the crown and meets it at a
+    /// shoulder, and that shoulder is the entire difference between "tooth" and "thorn" in
+    /// a silhouette this small.
+    public var root: Float = 0
+    /// Discs: a process on each one, as a multiple of its radius. 0 leaves plain discs.
+    ///
+    /// Scattered discs read as spilled dots. A vertebra has a neural spine, and giving each
+    /// disc one turns a scatter of coins into a scatter of recognisable *bones*.
+    public var process: Float = 0
 
     public init() {}
 }
@@ -339,6 +361,24 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
             let halfWidth = p.taperFrom + (p.taperTo - p.taperFrom) * pow(u, 0.75)
             vertices.append((Vec2(x, y), max(0.012, halfWidth)))
         }
+        if p.root > 0 {
+            // Root flare at the wide end, set slightly behind the shaft so it reads as a
+            // shoulder rather than a bulge, plus the hollow root cavity's outline.
+            let r = max(0.02, p.taperFrom)
+            return [
+                .stroke(vertices: vertices),
+                .ellipse(
+                    center: Vec2(-0.86, p.bend * 0.06),
+                    radii: Vec2(r * p.root * 0.9, r * p.root),
+                    rotation: 0
+                ),
+                .ellipse(
+                    center: Vec2(-0.99, p.bend * 0.02),
+                    radii: Vec2(r * p.root * 0.55, r * p.root * 0.78),
+                    rotation: 0
+                ),
+            ]
+        }
         guard p.knobEnds > 0 else { return [.stroke(vertices: vertices)] }
 
         // Epiphyses. Sized off the shaft at each end rather than a constant, so a slender
@@ -381,15 +421,58 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
     /// transform varies.
     private static func discs(_ p: ShapeParams) -> [ShapePrimitive] {
         let n = max(2, p.count)
+        let chain = min(max(p.chain, 0), 1)
         var out: [ShapePrimitive] = []
         out.reserveCapacity(n)
+
+        guard chain > 0 else {
+            // Scattered: ichthyosaur vertebrae really are found like dropped coins, and
+            // fish scales really are strewn.
+            for i in 0..<n {
+                let u = Float(i) / Float(n - 1)
+                let wobble = sin(Float(i) * 2.399_963)   // golden-angle-ish, no PRNG
+                let drift = sin(Float(i) * 1.713 + 0.6)
+                let center = Vec2(-1 + 2 * u + p.jitter * wobble * 0.3, p.jitter * drift * 1.6)
+                let r = p.thickness * (1 + p.jitter * wobble * 0.5)
+                out.append(.ellipse(
+                    center: center, radii: Vec2(r, r * 0.86), rotation: drift * 0.4
+                ))
+                guard p.process > 0 else { continue }
+                // A neural spine, angled differently on each so they do not line up and
+                // read as a comb. This is what makes scattered discs read as vertebrae
+                // rather than as spilled coins.
+                let angle = drift * 0.9 - 1.5
+                out.append(.stroke(vertices: [
+                    (center, r * 0.5),
+                    (
+                        center + Vec2(cos(angle), sin(angle)) * (r * p.process),
+                        r * 0.22
+                    ),
+                ]))
+            }
+            return out
+        }
+
+        // A column: ossicles stacked along an axis, seen edge-on, with a groove between
+        // each one. The grooves are the whole point -- every bone cell renders the same
+        // colour, so segmentation has to be an absence of bone, exactly as it is for the
+        // trilobite thorax below.
+        //
+        // The first attempt drew overlapping discs on a connecting stroke, which filled
+        // every groove and produced one flat bar. Spacing is derived from the count so a
+        // stem of 14 segments and one of 5 both read as segmented.
+        let spacing = 2 / Float(n)
+        let halfWidth = spacing * 0.36        // the rest of the spacing is the groove
         for i in 0..<n {
-            let u = Float(i) / Float(n - 1)
-            let wobble = sin(Float(i) * 2.399_963)      // golden-angle-ish, no PRNG
-            let drift = sin(Float(i) * 1.713 + 0.6)
-            let center = Vec2(-1 + 2 * u + p.jitter * wobble * 0.3, p.jitter * drift * 1.6)
-            let r = p.thickness * (1 + p.jitter * wobble * 0.5)
-            out.append(.ellipse(center: center, radii: Vec2(r, r * 0.86), rotation: drift * 0.4))
+            let u = (Float(i) + 0.5) / Float(n)
+            let wobble = sin(Float(i) * 2.399_963)
+            let x = -1 + 2 * u
+            let y = p.jitter * (1 - chain) * wobble * 1.2
+            // Taper slightly toward one end, because a stem is not a cylinder.
+            let height = p.thickness * (1 - 0.22 * u)
+            out.append(.ellipse(
+                center: Vec2(x, y), radii: Vec2(halfWidth, height), rotation: 0
+            ))
         }
         return out
     }

@@ -261,6 +261,56 @@ case "golden":
         Data("wrote \(derivations.count) derivations to \(path)\n".utf8)
     )
 
+case "sheet":
+    // Every species tiled into one image, so the whole catalogue can be judged at a
+    // glance rather than one PNG at a time.
+    //
+    // Looking at them is the only test that matters for whether a shape reads as an
+    // animal. ShapeSanityTests can tell you a fossil is between 60 cells and a third of
+    // the slab; it cannot tell you it looks like a wrench.
+    let sheetPath = arguments.count > 1 ? arguments[1] : "build/sheet.ppm"
+    let cols = Int(arguments.count > 2 ? arguments[2] : "9") ?? 9
+    let catalogue = ContentCatalog.shared.fossils
+    let cw = SlabGrid.width / 2, ch = SlabGrid.height / 2
+    let rows = (catalogue.count + cols - 1) / cols
+    var sheet = [UInt8](repeating: 24, count: cols * cw * rows * ch * 3)
+
+    for (index, fossil) in catalogue.enumerated() {
+        var grid = SlabGrid()
+        for i in 0..<SlabGrid.cellCount { grid.cells[i].depth = 0 }
+        _ = ShapeRasterizer.rasterize(
+            fossil.shape.expand(),
+            transform: ShapeTransform(
+                scale: fossil.shape.spanCells / 2, rotation: 0,
+                center: Vec2(Float(SlabGrid.width) / 2, Float(SlabGrid.height) / 2)
+            ),
+            flag: SlabGrid.Flag.bone, into: &grid
+        )
+        var renderer = SlabRenderer()
+        renderer.redrawEverything(grid)
+
+        let col = index % cols, row = index / cols
+        // Halved by point sampling, which keeps the pixel edges honest.
+        for y in 0..<ch {
+            for x in 0..<cw {
+                let src = ((y * 2) * SlabGrid.width + x * 2) * 4
+                let dx = col * cw + x, dy = row * ch + y
+                let dst = (dy * cols * cw + dx) * 3
+                sheet[dst] = renderer.pixels[src]
+                sheet[dst + 1] = renderer.pixels[src + 1]
+                sheet[dst + 2] = renderer.pixels[src + 2]
+            }
+        }
+    }
+    var header = Data("P6\n\(cols * cw) \(rows * ch)\n255\n".utf8)
+    header.append(contentsOf: sheet)
+    try header.write(to: URL(fileURLWithPath: sheetPath))
+    print("wrote \(catalogue.count) species to \(sheetPath) (\(cols) across)")
+    for (i, f) in catalogue.enumerated() where i % cols == 0 {
+        let line = catalogue[i..<min(i + cols, catalogue.count)].map(\.id).joined(separator: ", ")
+        print("  row \(i / cols): \(line)")
+    }
+
 case "shapes":
     // One PNG per species, the fossil centred and alone.
     //

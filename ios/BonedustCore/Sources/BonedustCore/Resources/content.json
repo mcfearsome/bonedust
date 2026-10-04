@@ -50,7 +50,8 @@
         "params": {
           "count": 6,
           "thickness": 0.17,
-          "jitter": 0.22
+          "jitter": 0.22,
+          "process": 2.2
         }
       }
     },
@@ -63,13 +64,13 @@
       "setID": "ichthyosaur",
       "note": "A long curve. Easy to catch the end of.",
       "shape": {
-        "kind": "taper",
+        "kind": "ribcage",
         "spanCells": 92,
         "params": {
-          "taperFrom": 0.075,
-          "taperTo": 0.02,
-          "bend": 0.34,
-          "knobEnds": 2.6
+          "ribs": 8,
+          "thickness": 0.055,
+          "aspect": 0.64,
+          "bend": 1
         }
       }
     },
@@ -82,11 +83,12 @@
       "setID": "ichthyosaur",
       "note": "Phalanges packed like cobbles.",
       "shape": {
-        "kind": "fan",
-        "spanCells": 54,
+        "kind": "foot",
+        "spanCells": 80,
         "params": {
-          "ribs": 6,
-          "thickness": 0.075
+          "count": 4,
+          "thickness": 0.062,
+          "aspect": 0.3
         }
       }
     },
@@ -103,8 +105,9 @@
         "spanCells": 88,
         "params": {
           "count": 14,
-          "thickness": 0.085,
-          "jitter": 0.08
+          "thickness": 0.14,
+          "jitter": 0.1,
+          "chain": 1.0
         }
       }
     },
@@ -278,11 +281,12 @@
       "note": "Small, dense, and the reason you came.",
       "shape": {
         "kind": "taper",
-        "spanCells": 46,
+        "spanCells": 54,
         "params": {
           "taperFrom": 0.2,
           "taperTo": 0.03,
-          "bend": 0.16
+          "bend": 0.16,
+          "root": 2.4
         }
       }
     },
@@ -295,13 +299,13 @@
       "setID": "trex",
       "note": "Runs corner to corner. Budget your daylight.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 104,
+        "kind": "ribcage",
+        "spanCells": 96,
         "params": {
-          "taperFrom": 0.085,
-          "taperTo": 0.025,
-          "bend": 0.32,
-          "knobEnds": 2.6
+          "ribs": 7,
+          "thickness": 0.062,
+          "aspect": 0.66,
+          "bend": 1
         }
       }
     },
@@ -314,12 +318,13 @@
       "setID": "trex",
       "note": "Three fused drums of bone.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 58,
+        "kind": "tail",
+        "spanCells": 84,
         "params": {
-          "count": 3,
-          "thickness": 0.3,
-          "jitter": 0.12
+          "count": 5,
+          "bend": 0.2,
+          "thickness": 0.11,
+          "aspect": 0.44
         }
       }
     },
@@ -384,11 +389,12 @@
       "note": "Striated, slightly curved, and sharper than it has any right to be.",
       "shape": {
         "kind": "taper",
-        "spanCells": 46,
+        "spanCells": 54,
         "params": {
           "taperFrom": 0.085,
           "taperTo": 0.012,
-          "bend": 0.22
+          "bend": 0.22,
+          "root": 2.4
         }
       }
     },
@@ -435,11 +441,11 @@
       "note": "A cup on a stalk. The stalk is the part that goes.",
       "shape": {
         "kind": "fan",
-        "spanCells": 58,
+        "spanCells": 60,
         "params": {
-          "rays": 9,
-          "spread": 0.72,
-          "thickness": 0.05
+          "rays": 7,
+          "spread": 0.6,
+          "thickness": 0.07
         }
       }
     },
@@ -452,12 +458,13 @@
       "note": "Two shields and no shell between them. Rare and soft.",
       "crackMultiplier": 1.35,
       "shape": {
-        "kind": "segmentedBody",
-        "spanCells": 38,
+        "kind": "ribcage",
+        "spanCells": 48,
         "params": {
-          "segments": 4,
-          "width": 0.48,
-          "taper": 0.12
+          "ribs": 6,
+          "thickness": 0.05,
+          "aspect": 0.5,
+          "bend": 1
         }
       }
     },
@@ -521,12 +528,13 @@
       "crackMultiplier": 1.25,
       "note": "Claws out, as if it saw the lake turning.",
       "shape": {
-        "kind": "segmentedBody",
-        "spanCells": 56,
+        "kind": "ribcage",
+        "spanCells": 62,
         "params": {
-          "segments": 8,
-          "width": 0.3,
-          "taper": 0.42
+          "ribs": 8,
+          "thickness": 0.045,
+          "aspect": 0.46,
+          "bend": 1
         }
       }
     },
@@ -539,11 +547,12 @@
       "note": "One of a thousand in a jaw built for grinding.",
       "shape": {
         "kind": "taper",
-        "spanCells": 40,
+        "spanCells": 54,
         "params": {
           "taperFrom": 0.1,
           "taperTo": 0.03,
-          "bend": 0.08
+          "bend": 0.08,
+          "root": 2.4
         }
       }
     },
@@ -573,13 +582,13 @@
       "crackMultiplier": 1.2,
       "note": "Long, curved, and thin in the middle where it always breaks.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 92,
+        "kind": "ribcage",
+        "spanCells": 100,
         "params": {
-          "taperFrom": 0.07,
-          "taperTo": 0.03,
-          "bend": 0.38,
-          "knobEnds": 2.8
+          "ribs": 8,
+          "thickness": 0.058,
+          "aspect": 0.7,
+          "bend": 1
         }
       }
     },
@@ -591,12 +600,13 @@
       "baseValue": 150,
       "note": "A string of them, from something that outlived the asteroid.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 74,
+        "kind": "tail",
+        "spanCells": 88,
         "params": {
           "count": 7,
-          "thickness": 0.15,
-          "jitter": 0.18
+          "bend": 0.3,
+          "thickness": 0.085,
+          "aspect": 0.36
         }
       }
     },
@@ -730,12 +740,13 @@
       "baseValue": 165,
       "note": "Spool-shaped, deeply dished at both ends.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 72,
+        "kind": "tail",
+        "spanCells": 86,
         "params": {
-          "count": 5,
-          "thickness": 0.2,
-          "jitter": 0.16
+          "count": 6,
+          "bend": 0.22,
+          "thickness": 0.095,
+          "aspect": 0.38
         }
       }
     },
@@ -747,12 +758,12 @@
       "baseValue": 195,
       "note": "Finger bones fanned out like a dealt hand.",
       "shape": {
-        "kind": "fan",
-        "spanCells": 62,
+        "kind": "foot",
+        "spanCells": 86,
         "params": {
-          "rays": 5,
-          "spread": 0.42,
-          "thickness": 0.07
+          "count": 4,
+          "thickness": 0.07,
+          "aspect": 0.34
         }
       },
       "crackMultiplier": 1.2
@@ -765,13 +776,13 @@
       "baseValue": 185,
       "note": "Teeth in a line down a snout built for speed.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 96,
+        "kind": "skull",
+        "spanCells": 84,
         "params": {
-          "taperFrom": 0.09,
-          "taperTo": 0.02,
-          "bend": 0.12,
-          "knobEnds": 2.0
+          "aspect": 0.2,
+          "bend": 0.1,
+          "ribs": 14,
+          "thickness": 0.036
         }
       },
       "crackMultiplier": 1.25
@@ -842,7 +853,8 @@
         "params": {
           "count": 9,
           "thickness": 0.1,
-          "jitter": 0.3
+          "jitter": 0.3,
+          "process": 0.0
         }
       },
       "crackMultiplier": 1.3
@@ -860,7 +872,8 @@
         "params": {
           "count": 4,
           "thickness": 0.14,
-          "jitter": 0.4
+          "jitter": 0.4,
+          "process": 0.0
         }
       },
       "crackMultiplier": 1.2
@@ -891,13 +904,13 @@
       "baseValue": 45,
       "note": "Bored through by shipworm before it sank.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 84,
+        "kind": "ribcage",
+        "spanCells": 78,
         "params": {
-          "taperFrom": 0.12,
-          "taperTo": 0.06,
-          "bend": 0.18,
-          "knobEnds": 1.6
+          "ribs": 5,
+          "thickness": 0.07,
+          "aspect": 0.5,
+          "bend": 0
         }
       },
       "crackMultiplier": 0.8
@@ -1094,7 +1107,8 @@
         "params": {
           "count": 5,
           "thickness": 0.12,
-          "jitter": 0.35
+          "jitter": 0.35,
+          "process": 0.0
         }
       },
       "crackMultiplier": 1.2
@@ -1270,7 +1284,8 @@
         "params": {
           "count": 8,
           "thickness": 0.12,
-          "jitter": 0.28
+          "jitter": 0.28,
+          "process": 0.0
         }
       },
       "crackMultiplier": 1.15
@@ -1427,11 +1442,12 @@
       "note": "Conical, striated, and shed by the hundred.",
       "shape": {
         "kind": "taper",
-        "spanCells": 38,
+        "spanCells": 54,
         "params": {
           "taperFrom": 0.1,
           "taperTo": 0.02,
-          "bend": 0.15
+          "bend": 0.15,
+          "root": 2.4
         }
       },
       "crackMultiplier": 1.1
@@ -1461,11 +1477,13 @@
       "baseValue": 380,
       "note": "Thick, pitted bone. Part of something enormous.",
       "shape": {
-        "kind": "crescent",
-        "spanCells": 74,
+        "kind": "skull",
+        "spanCells": 72,
         "params": {
-          "thickness": 0.3,
-          "sweep": 1.2
+          "aspect": 0.36,
+          "bend": 0.14,
+          "ribs": 6,
+          "thickness": 0.06
         }
       },
       "crackMultiplier": 1.2
@@ -1497,11 +1515,12 @@
       "note": "A shearing tooth from a battery of hundreds.",
       "shape": {
         "kind": "taper",
-        "spanCells": 34,
+        "spanCells": 54,
         "params": {
           "taperFrom": 0.09,
           "taperTo": 0.03,
-          "bend": 0.06
+          "bend": 0.06,
+          "root": 2.4
         }
       }
     },
@@ -1514,11 +1533,12 @@
       "note": "Teeth stacked like coins in a roll. Lose one and the row is wrong.",
       "shape": {
         "kind": "discs",
-        "spanCells": 78,
+        "spanCells": 84,
         "params": {
-          "count": 10,
-          "thickness": 0.13,
-          "jitter": 0.1
+          "count": 12,
+          "thickness": 0.14,
+          "jitter": 0.1,
+          "chain": 1.0
         }
       },
       "crackMultiplier": 1.2
@@ -1567,11 +1587,12 @@
       "note": "Serrated on the back edge. Check it with a thumbnail, gently.",
       "shape": {
         "kind": "taper",
-        "spanCells": 42,
+        "spanCells": 54,
         "params": {
           "taperFrom": 0.12,
           "taperTo": 0.03,
-          "bend": 0.22
+          "bend": 0.22,
+          "root": 2.4
         }
       },
       "crackMultiplier": 1.25
@@ -1585,11 +1606,12 @@
       "note": "From the inland sea that cut the continent in half.",
       "shape": {
         "kind": "taper",
-        "spanCells": 44,
+        "spanCells": 54,
         "params": {
           "taperFrom": 0.11,
           "taperTo": 0.025,
-          "bend": 0.14
+          "bend": 0.14,
+          "root": 2.4
         }
       },
       "crackMultiplier": 1.1
@@ -1602,13 +1624,13 @@
       "baseValue": 245,
       "note": "Needle teeth in a gharial's snout.",
       "shape": {
-        "kind": "taper",
+        "kind": "skull",
         "spanCells": 92,
         "params": {
-          "taperFrom": 0.06,
-          "taperTo": 0.02,
-          "bend": 0.1,
-          "knobEnds": 2.2
+          "aspect": 0.16,
+          "bend": 0.06,
+          "ribs": 16,
+          "thickness": 0.03
         }
       },
       "crackMultiplier": 1.3
@@ -1655,13 +1677,13 @@
       "baseValue": 410,
       "note": "Smaller than your thumb, and worth more than the tyrannosaur.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 52,
+        "kind": "skull",
+        "spanCells": 56,
         "params": {
-          "taperFrom": 0.095,
-          "taperTo": 0.035,
-          "bend": 0.1,
-          "knobEnds": 2.2
+          "aspect": 0.26,
+          "bend": 0.05,
+          "ribs": 7,
+          "thickness": 0.045
         }
       },
       "crackMultiplier": 1.5
@@ -1679,7 +1701,8 @@
         "params": {
           "count": 8,
           "thickness": 0.09,
-          "jitter": 0.4
+          "jitter": 0.4,
+          "process": 0.0
         }
       },
       "crackMultiplier": 1.55
@@ -1692,13 +1715,13 @@
       "baseValue": 110,
       "note": "Agatised rings. Harder than the rock around it.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 90,
+        "kind": "ribcage",
+        "spanCells": 84,
         "params": {
-          "taperFrom": 0.16,
-          "taperTo": 0.1,
-          "bend": 0.06,
-          "knobEnds": 1.5
+          "ribs": 6,
+          "thickness": 0.075,
+          "aspect": 0.54,
+          "bend": 0
         }
       },
       "crackMultiplier": 0.7
@@ -1747,12 +1770,13 @@
       "baseValue": 335,
       "note": "Hollow-chambered and lighter than it should be.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 80,
+        "kind": "tail",
+        "spanCells": 82,
         "params": {
-          "count": 4,
-          "thickness": 0.24,
-          "jitter": 0.14
+          "count": 5,
+          "bend": 0.26,
+          "thickness": 0.1,
+          "aspect": 0.4
         }
       },
       "crackMultiplier": 1.1

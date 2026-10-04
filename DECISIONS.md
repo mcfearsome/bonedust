@@ -852,3 +852,38 @@ and would have passed every one of those three skulls.
 `knobEnds` adds epiphyses to a taper, defaulting to 0 so a tooth or belemnite stays the
 smooth cone it actually is. Ribs, jaws and limb bones get them, because a bone without them
 rasterises to a featureless line — which is what "a single long thin bone" was describing.
+
+## Looking at the whole catalogue at once
+
+`make sheet` tiles every species into one image. It is the only honest test of whether a
+shape reads as an animal — `ShapeSanityTests` can tell you a fossil is between 60 cells and
+a third of the slab, and would have passed all three of the T-rex skulls that looked like a
+blob, a wrench, and a braincase below the jaw.
+
+The first sheet made the problem obvious in a way no amount of reading the content file
+could: eighteen species read as creatures and ninety-nine read as sticks, lozenges and dots.
+
+**Reassigning beat tuning.** Adding `root` to teeth and `process` to vertebrae was nearly
+invisible at this resolution. Moving species onto generators that already produced
+silhouettes was not — and the fiction survives it, because a jaw *is* a tooth row, an
+ichthyosaur paddle *is* a fan of finger bones, and a rib *is* part of a ribcage. Thirty-five
+of 117 now carry a creature silhouette, up from eighteen.
+
+**What is still abstract**, and honestly so: 11 spirals (ammonites read fine), 12 fans
+(shells read fine), 10 fish, 10 trilobites, 7 leaves. The remaining weak set is about a
+dozen plain tapers — teeth, which genuinely are cones — and nine scattered disc fossils.
+
+## Crinoid stems are columns, not confetti
+
+"What is this supposed to be?" against a screenshot of a crinoid stem that had rendered as
+fourteen unconnected lumps. A crinoid stem is a stack of ossicles, and `discs` scattered
+them with jitter and nothing joining them.
+
+`chain` makes a column. The first attempt drew overlapping discs along a connecting stroke
+and produced one flat bar: the grooves are the whole point, because every bone cell renders
+the same colour, so segmentation has to be an *absence* of bone — the same thing the
+trilobite thorax has always done. Spacing is now derived from the segment count, so a stem
+of fourteen and a vertebral column of five both read as segmented.
+
+Scattering is still right for some. Ichthyosaur vertebrae really are found like dropped
+coins, so `chain` is a knob rather than a fix applied everywhere.
