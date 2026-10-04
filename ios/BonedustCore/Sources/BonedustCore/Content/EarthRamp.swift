@@ -13,7 +13,9 @@ public enum Earth {
     public static let s0 = RGB8(0xF6, 0xEF, 0xDE)
     /// The page.
     public static let s1 = RGB8(0xED, 0xE4, 0xCF)
-    /// Ruled box fill.
+    /// Non-text fills only: progress troughs, inactive track. Spec §4 makes cards
+    /// ruled boxes rather than filled panels, and s5-on-s2 is 4.25 — under AA. Text
+    /// surfaces are s1 and s0.
     public static let s2 = RGB8(0xDF, 0xD4, 0xBB)
     /// Grid, dividers, hairlines.
     public static let s3 = RGB8(0xC4, 0xB5, 0x96)
@@ -35,6 +37,14 @@ public enum Earth {
     public static let gem = RGB8(0x17, 0x65, 0x74)
     /// Speed and intact semantics only.
     public static let safe = RGB8(0x41, 0x64, 0x2F)
+
+    /// The accents again, for the night page. The day values sit at 2.2-2.5 against
+    /// `nightPage`, well under AA. gemNight and safeNight are the original values from
+    /// the pre-retune dark UI — that palette was not wrong, it was a dark-mode palette,
+    /// and it is correct again here.
+    public static let stampNight = RGB8(0xE0, 0x70, 0x5C)
+    public static let gemNight = RGB8(0x56, 0xB8, 0xC8)
+    public static let safeNight = RGB8(0x7F, 0xBF, 0x6A)
 
     /// The slab sits on this. Without it a cleared slab vanishes into the page.
     public static let mount = s6
