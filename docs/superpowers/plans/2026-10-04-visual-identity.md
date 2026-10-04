@@ -800,6 +800,29 @@ final class ThemeTests: XCTestCase {
         }
     }
 
+    /// Carried forward from Task 2's review. Task 2 pins each site's matrix
+    /// against the mount at full daylight — but night_dig renders at
+    /// `lightLevel` 0.55, and `SlabRenderer` scales every cell by it, so the
+    /// colour Task 2 measured for that site never reaches a screen. On screen
+    /// the matrix is (123, 112, 91) against a mount that has itself darkened
+    /// toward s8. That pair clears 3:1 by roughly 0.1, which is exactly the
+    /// kind of margin that regresses silently when someone nudges `nightFloor`.
+    ///
+    /// Iterates the catalog, like Task 2's test: no night_dig literal, so a
+    /// second dim site added later is covered.
+    func testEverySiteMatrixSeparatesFromTheMountAtItsOwnLightLevel() {
+        for site in ContentCatalog.shared.sites {
+            let level = site.modifiers.lightLevel
+            let onScreen = site.palette.matrix.scaled(level)
+            let mount = Earth.s6.lerp(to: Earth.s8, Float(Theme.nightFraction(for: level)))
+            let ratio = onScreen.contrastRatio(against: mount)
+            XCTAssertGreaterThanOrEqual(
+                ratio, 3.0,
+                "site '\(site.id)' at lightLevel \(level): slab and mount converge (\(ratio))"
+            )
+        }
+    }
+
     func testNaNLightLevelFallsBackToDaylight() {
         XCTAssertEqual(Theme.nightFraction(for: .nan), 0, accuracy: 0.0001)
     }
@@ -874,7 +897,7 @@ Note: `@Entry` requires iOS 17 with Xcode 16's macro, which this project has. If
 - [ ] **Step 4: Run the tests**
 
 Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/ThemeTests`
-Expected: PASS, 6 tests.
+Expected: PASS, 7 tests. night_dig is the thin one — expect roughly 3.12 against a 3.0 floor.
 
 - [ ] **Step 5: Commit**
 
