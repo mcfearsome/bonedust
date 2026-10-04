@@ -317,7 +317,7 @@ default moved.
 | `BonedustCore/Sources/BonedustCore/Content/ContentModels.swift` | **No change expected.** `SlabPalette` lives here, not in the renderer; see the note below on why it does not need retuning. |
 | `BonedustCore/Sources/BonedustCore/Resources/content.json` | **No change expected**, for the same reason. Three sites override the palette here (`wheeler`, `green_river`, `hell_creek`); `charmouth` and `night_dig` inherit. |
 | `Bonedust/Dig/SlabRenderer.swift` | Fracture hatching, plus the cel pass of §7: stepped wear, quantized shade, semantic ink edge, stipple tell. |
-| `BonedustCore/Sources/BonedustCore/Sim/SimTuning.swift` | Add `boneTellStipple: Float = 0.60` beside the existing `boneTellTint`, so the debug overlay gets a slider for each. |
+| `BonedustCore/Sources/BonedustCore/Sim/SimTuning.swift` | Add `boneTellStipple: Float = 0` beside `boneTellTint` (which stays 0.20), and a `DebugOverlay` row for each — its knob list is hand-written, not derived from this struct. |
 | `Bonedust/Dig/DigScene.swift` | Mount panel, grid texture, paper-fibre tile, page background, `lightLevel` coupling, zPosition order. Also removes the hardcoded `0x221813` at line 41, which duplicates `Ink.ground`. |
 | `Bonedust/Dig/DigView.swift` | Consume `Theme` from the environment; restyle. |
 | `Bonedust/UI/SpeedMeter.swift` | Restyle to the environment theme. |
