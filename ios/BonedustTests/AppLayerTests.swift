@@ -310,3 +310,66 @@ final class DesignTokenTests: XCTestCase {
         )
     }
 }
+
+/// Review Focus 1. Two guarantees, and the second matters more than the first:
+/// the faces should be registered, and if they are ever not, nothing breaks.
+final class FontRegistrationTests: XCTestCase {
+
+    func testDisplayFaceIsRegistered() {
+        XCTAssertTrue(
+            Typography.displayAvailable,
+            "\(Typography.displayFace) is not registered. Check the .ttf is in "
+            + "Resources/Fonts and listed under UIAppFonts in project.yml."
+        )
+    }
+
+    func testNumberFaceIsRegistered() {
+        XCTAssertTrue(
+            Typography.numberAvailable,
+            "\(Typography.numberFace) is not registered."
+        )
+    }
+
+    /// `Typography.number` picks this face by name for semibold and heavier. If the
+    /// file is missing, every bold numeral drops to the system face without a word.
+    func testNumberBoldFaceIsRegistered() {
+        XCTAssertTrue(
+            Typography.numberBoldAvailable,
+            "\(Typography.numberBoldFace) is not registered. Check it is listed under "
+            + "UIAppFonts in project.yml; bold numerals fall back to the system face without it."
+        )
+    }
+
+    /// The fallback path must produce a usable font, not a crash and not a zero
+    /// size. This exercises it directly rather than trusting that it compiles.
+    func testEveryAccessorReturnsAUsableFontForEveryStyle() {
+        let styles: [Font.TextStyle] = [
+            .largeTitle, .title, .title2, .title3, .headline,
+            .subheadline, .body, .callout, .footnote, .caption, .caption2,
+        ]
+        for style in styles {
+            XCTAssertGreaterThan(style.baseSize, 0, "\(style) has no base size")
+            _ = Typography.ui(style)
+            _ = Typography.label(style)
+            _ = Typography.number(style)
+        }
+        _ = Typography.display(40)
+    }
+
+    /// Both numeral faces: a bold readout that changes while you watch it must not
+    /// jitter its layout any more than a regular one.
+    func testTabularFiguresAreOnForNumerals() {
+        for face in [Typography.numberFace, Typography.numberBoldFace] {
+            guard let font = UIFont(name: face, size: 17) else {
+                XCTFail("numeral face \(face) missing")
+                continue
+            }
+            let wide = ("1111" as NSString).size(withAttributes: [.font: font])
+            let narrow = ("8888" as NSString).size(withAttributes: [.font: font])
+            XCTAssertEqual(
+                wide.width, narrow.width, accuracy: 0.5,
+                "\(face) numerals are not tabular; a changing readout will jitter its layout"
+            )
+        }
+    }
+}
