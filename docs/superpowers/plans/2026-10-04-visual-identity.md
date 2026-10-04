@@ -1569,6 +1569,35 @@ At the top of `DigView` and `SpeedMeter`:
 @Environment(\.theme) private var theme
 ```
 
+- [ ] **Step 2b: Move the page and grid into `DigView`**
+
+The cream page and its dot grid belong here, not in the SpriteKit scene. Task 6
+put them in `DigScene`, where they are unreachable: the scene is exactly the slab
+card and the mount fills it, so both sit behind an opaque panel. Give `DigView`'s
+root the page background instead —
+
+```swift
+.background(
+    theme.ink.page.overlay(
+        Canvas { context, size in
+            let dot = Path(ellipseIn: CGRect(x: 0, y: 0, width: 1, height: 1))
+            for y in stride(from: 0, to: size.height, by: 8) {
+                for x in stride(from: 0, to: size.width, by: 8) {
+                    context.fill(dot.offsetBy(dx: x, dy: y), with: .color(theme.ink.hairline.opacity(0.35)))
+                }
+            }
+        }
+        .allowsHitTesting(false)
+    )
+    .ignoresSafeArea()
+)
+```
+
+— and delete `gridNode`, `paperNode`, `gridTexture`, `paperTexture` and
+`paperTextureCache` from `DigScene`, along with the backdrop tests that cover
+only those two nodes. Keep the mount: it is the one backdrop layer that is
+reachable and load-bearing.
+
 - [ ] **Step 3: Apply the rename map**
 
 Work through all three files using the table above. After this step there must be zero matches for:
@@ -1596,9 +1625,14 @@ theme.lightLevel = engine.site.modifiers.lightLevel
 applyTheme(ink: theme.ink)
 ```
 
-`DigScene` needs the theme handed to it, since a scene has no SwiftUI environment.
-Add `var theme: Theme?` to the scene and set it from `DigView` where the scene is
-constructed, then guard the three lines above on it.
+**Task 6 already did the scene side of this.** `DigScene` has `var theme` and the
+`configureRenderer()` wiring. Task 9 only needs `scene.theme = theme` where
+`DigView` constructs the scene. The repaint method is **`applyTheme(ink:)`** —
+`apply(ink:)` was renamed because `DigScene.apply(_:at:engine:)` already exists
+for stroke results.
+
+**Until that one line lands, a real dig never reaches the night palette** — the
+night path is currently covered by injected `Theme`s in tests only.
 
 **Expected result for the one night site:** `night_dig` has `lightLevel: 0.55`,
 so `nightFraction(0.55)` is about 0.69 — a dusky page, not full night. The 0.35

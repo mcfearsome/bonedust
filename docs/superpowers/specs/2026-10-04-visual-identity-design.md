@@ -175,7 +175,11 @@ One `lightLevel` now drives both surfaces:
 - The palette **switches**, it does not blend. Below a threshold the page is
   `nightPage` and the ramp is inverted; above it, the day palette. No
   intermediate palette ever reaches a screen.
-- Grid alpha is higher in the night palette so the grid does not vanish.
+- Grid alpha stays the same in both palettes. An earlier draft raised it at
+  night to stop the grid vanishing; measured, the grid is *more* visible at
+  night, not less — dot-against-page contrast is 1.17:1 by day and 1.32:1 at
+  night, because `hairline` moves further from the page than the page moves
+  from it. The boost would have been solving a problem that does not exist.
 
 **Why a switch and not a crossfade.** Blending two inverted palettes drives
 text and page toward each other, and in the middle they meet. Measured on this
