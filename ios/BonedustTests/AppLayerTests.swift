@@ -939,4 +939,221 @@ final class DigSceneBackdropTests: XCTestCase {
             "dot columns are not an 8pt lattice counting across from the left"
         )
     }
+
+    // MARK: Fracture bloom
+
+    /// Where a grid point lands in the scene, worked out from the slab's own frame
+    /// rather than from `emitDust`'s formula. The bloom is held to the thing it has to
+    /// line up with, not to a second copy of the arithmetic that placed it.
+    private func scenePoint(forGrid point: Vec2, in scene: DigScene) throws -> CGPoint {
+        let frame = try XCTUnwrap(scene.slabNode).frame
+        return CGPoint(
+            x: frame.minX + CGFloat(point.x) / CGFloat(SlabGrid.width) * frame.width,
+            y: frame.maxY - CGFloat(point.y) / CGFloat(SlabGrid.height) * frame.height
+        )
+    }
+
+    private func blooms(in scene: DigScene) -> [SKShapeNode] {
+        (scene.slabNode?.children ?? []).compactMap { $0 as? SKShapeNode }
+    }
+
+    /// The bloom is 4pt across at birth and Task 6 inset the slab by `mountMargin`, so a
+    /// bloom positioned against the *scene* sits 6pt off at the corners and misses its
+    /// cell entirely. This renders the scene and reads the pixel where the cell is.
+    ///
+    /// What it does not cover is how the bloom looks: its size, softness and timing are
+    /// judged by eye. This pins where it lands and that it is drawn at all.
+    func testTheBloomIsDrawnOnTheGridPointItWasFiredAt() throws {
+        let subject = engine("green_river")
+        let (scene, view) = present(engine: subject, theme: Theme())
+        scene.update(1)
+
+        for point in [Vec2(0, 0), Vec2(96, 128), Vec2(0, 128), Vec2(96, 0), Vec2(48, 64)] {
+            let before = try render(scene, in: view)
+            scene.bloomFracture(at: point)
+            XCTAssertEqual(blooms(in: scene).count, 1, "bloom at \(point)")
+            let after = try render(scene, in: view)
+            blooms(in: scene).forEach { $0.removeFromParent() }
+
+            let scale = after.width / Int(sceneSize.width)
+            let at = try scenePoint(forGrid: point, in: scene)
+            let x = Int((at.x * CGFloat(scale)).rounded())
+            let y = Int(((sceneSize.height - at.y) * CGFloat(scale)).rounded())
+
+            // 0.9 alpha of the stamp over whatever was already there.
+            let stamp = [Int(Earth.stamp.r), Int(Earth.stamp.g), Int(Earth.stamp.b)]
+            let expected = zip(stamp, before.rgb(x, y)).map {
+                Int((0.9 * Double($0) + 0.1 * Double($1)).rounded())
+            }
+            assertPixel(
+                after.rgb(x, y), is: expected, "bloom at grid \(point.x), \(point.y)",
+                tolerance: 6
+            )
+            XCTAssertGreaterThan(
+                distance(after.rgb(x, y), before.rgb(x, y)), 40,
+                "grid \(point.x), \(point.y): nothing was drawn there, so the check above proves nothing"
+            )
+
+            // And it is a 4pt dot, not a wash: well away from it the scene is untouched.
+            let awayX = x + (x < after.width / 2 ? 12 : -12) * scale
+            let awayY = y + (y < after.height / 2 ? 12 : -12) * scale
+            XCTAssertLessThanOrEqual(
+                distance(after.rgb(awayX, awayY), before.rgb(awayX, awayY)), 3,
+                "grid \(point.x), \(point.y): the bloom reached 12pt from its centre"
+            )
+        }
+    }
+
+    /// A bloom is meant to be gone in 200ms, and one that never left would pile up a
+    /// shape node on the slab for every fracture of a long session.
+    ///
+    /// SpriteKit only advances actions while the view is on screen, so this puts the
+    /// view in a window and runs the loop until the bloom has gone. It does not put a
+    /// clock on the fade: the first frame can arrive a few hundred milliseconds late,
+    /// which would make any wall-clock bound flaky. The 200ms is pinned on the action
+    /// itself instead.
+    func testTheBloomRemovesItselfAndIsScheduledForTwoHundredMilliseconds() throws {
+        let (scene, view) = present()
+        let windowScene = try XCTUnwrap(
+            UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
+            "the test host has no window scene, so SpriteKit's clock cannot run"
+        )
+        let window = UIWindow(windowScene: windowScene)
+        window.frame = CGRect(origin: .zero, size: sceneSize)
+        window.addSubview(view)
+        window.isHidden = false
+        defer {
+            view.presentScene(nil)
+            window.isHidden = true
+        }
+
+        scene.bloomFracture(at: Vec2(48, 64))
+        let bloom = try XCTUnwrap(blooms(in: scene).first)
+        let fade = try XCTUnwrap(bloom.action(forKey: DigScene.bloomActionKey))
+        XCTAssertEqual(fade.duration, 0.2, accuracy: 0.001, "the bloom is meant to be gone in 200ms")
+
+        let deadline = Date().addingTimeInterval(3)
+        while !blooms(in: scene).isEmpty, Date() < deadline {
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.02))
+        }
+        XCTAssertTrue(blooms(in: scene).isEmpty, "the bloom never left the slab")
+    }
+
+    /// `StrokeResult.cracksStarted` is the signal `DigEngine` already uses for
+    /// `hasCracked`. If the one line that fires the bloom is deleted, the scene still
+    /// builds and every other test still passes, so this drives `apply` directly.
+    func testACrackBloomsAndAStrokeWithoutOneDoesNot() throws {
+        let subject = engine("green_river")
+        let (scene, _) = present(engine: subject, theme: Theme())
+
+        scene.apply(StrokeResult(), at: Vec2(48, 64), engine: subject)
+        XCTAssertEqual(blooms(in: scene).count, 0, "an uneventful stroke must not bloom")
+
+        var fractured = StrokeResult()
+        fractured.cracksStarted = 1
+        scene.apply(fractured, at: Vec2(48, 64), engine: subject)
+        XCTAssertEqual(blooms(in: scene).count, 1, "a fracture must bloom exactly once")
+    }
+}
+
+/// Fracture leaves a record on the page: a diagonal hatch over every cracked cell. The
+/// transient red bloom is the alarm, this is the annotation that stays. Spec §5.
+final class FractureHatchTests: XCTestCase {
+
+    /// The hatch is a 2-on-2-off diagonal, so two cells on the same diagonal band
+    /// render identically and two on adjacent bands do not. Testing the *pattern*
+    /// rather than an exact colour means a palette change does not break this.
+    func testHatchAlternatesAcrossDiagonalBands() {
+        XCTAssertTrue(SlabRenderer.isHatched(x: 0, y: 0))
+        XCTAssertTrue(SlabRenderer.isHatched(x: 1, y: 0))
+        XCTAssertFalse(SlabRenderer.isHatched(x: 2, y: 0))
+        XCTAssertFalse(SlabRenderer.isHatched(x: 3, y: 0))
+        XCTAssertTrue(SlabRenderer.isHatched(x: 4, y: 0))
+    }
+
+    func testHatchRunsDiagonallyNotVertically() {
+        // Moving one step down-right stays in the same band.
+        XCTAssertEqual(
+            SlabRenderer.isHatched(x: 5, y: 5),
+            SlabRenderer.isHatched(x: 6, y: 4)
+        )
+    }
+
+    /// Both cells in the test above are "off", so on its own it would also pass for a
+    /// horizontal stripe. This walks every cell of a patch, on both kinds of band, and
+    /// also requires that the pattern is not a flat fill.
+    func testEveryCellOnADiagonalSharesItsBand() {
+        for y in 0..<16 {
+            for x in 0..<16 {
+                XCTAssertEqual(
+                    SlabRenderer.isHatched(x: x, y: y),
+                    SlabRenderer.isHatched(x: x + 1, y: y - 1),
+                    "(\(x), \(y)) and (\(x + 1), \(y - 1)) are on different bands"
+                )
+            }
+        }
+        let bands = (0..<8).map { SlabRenderer.isHatched(x: $0, y: 0) }
+        XCTAssertTrue(bands.contains(true) && bands.contains(false), "the hatch is a flat fill")
+    }
+
+    func testCrackedBoneIsDarkenedOnHatchedColumnsOnly() {
+        let palette = SlabPalette.standard
+        let on = SlabRenderer.hatched(palette.crackedBone, x: 0, y: 0)
+        let off = SlabRenderer.hatched(palette.crackedBone, x: 2, y: 0)
+        XCTAssertEqual(off, palette.crackedBone, "unhatched cells must be untouched")
+        XCTAssertLessThan(
+            on.relativeLuminance, off.relativeLuminance,
+            "hatched cells must be darker, or the hatch is invisible"
+        )
+    }
+
+    private func pixel(_ renderer: SlabRenderer, _ x: Int, _ y: Int) -> RGB8 {
+        let offset = (y * SlabGrid.width + x) * SlabRenderer.bytesPerPixel
+        return RGB8(renderer.pixels[offset], renderer.pixels[offset + 1], renderer.pixels[offset + 2])
+    }
+
+    /// The tests above cover the helpers. Nothing in them would notice if `colour()`
+    /// stopped calling one, or called it on the wrong cells, so this renders a patch of
+    /// bone through the real pipeline: left half cracked, right half intact.
+    ///
+    /// Noise is zero, so the hatch is the only thing that can move a pixel. Only the
+    /// patch's interior is sampled, because its rim belongs to the renderer's edge
+    /// treatment, not to this feature.
+    func testTheRendererHatchesCrackedBoneAndLeavesIntactBoneAlone() {
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        for y in 20..<40 {
+            for x in 20..<40 {
+                var flags = SlabGrid.Flag.bone
+                if x < 30 { flags |= SlabGrid.Flag.cracked }
+                grid[x, y] = SlabGrid.Cell(depth: 0, flags: flags, wear: 0, noise: 0)
+            }
+        }
+        var renderer = SlabRenderer(palette: palette)
+        renderer.redrawEverything(grid)
+
+        var hatchedCells = 0
+        var plainCells = 0
+        for y in 22..<38 {
+            for x in 22..<28 {
+                let drawn = pixel(renderer, x, y)
+                if SlabRenderer.isHatched(x: x, y: y) {
+                    hatchedCells += 1
+                    XCTAssertEqual(drawn, SlabRenderer.hatched(palette.crackedBone, x: x, y: y),
+                                   "cracked cell (\(x), \(y)) is on a hatch stripe and was not hatched")
+                    XCTAssertLessThan(drawn.relativeLuminance, palette.crackedBone.relativeLuminance)
+                } else {
+                    plainCells += 1
+                    XCTAssertEqual(drawn, palette.crackedBone,
+                                   "cracked cell (\(x), \(y)) is between stripes and was changed")
+                }
+            }
+            for x in 32..<38 {
+                XCTAssertEqual(pixel(renderer, x, y), palette.bone,
+                               "intact bone at (\(x), \(y)) took the hatch")
+            }
+        }
+        XCTAssertGreaterThan(hatchedCells, 0, "no sampled cell was on a stripe")
+        XCTAssertGreaterThan(plainCells, 0, "every sampled cell was on a stripe")
+    }
 }

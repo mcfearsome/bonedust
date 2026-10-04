@@ -249,7 +249,7 @@ final class DigScene: SKScene {
     /// Repaints the page, the mount and the grid in `ink`.
     ///
     /// Named `applyTheme` rather than `apply` because `DigScene` already has a
-    /// private `apply(_:at:engine:)` for stroke results, and two unrelated methods
+    /// `apply(_:at:engine:)` for stroke results, and two unrelated methods
     /// called `apply` on one scene is a trap for whoever reads this next.
     func applyTheme(ink: Ink) {
         appliedInk = ink
@@ -381,7 +381,9 @@ final class DigScene: SKScene {
 
     // MARK: Feedback routing
 
-    private func apply(_ result: StrokeResult, at point: Vec2, engine: DigEngine) {
+    /// Internal rather than private so a test can hand it a `StrokeResult`. The touch
+    /// handlers that normally call it need a real `UITouch`, which a test cannot build.
+    func apply(_ result: StrokeResult, at point: Vec2, engine: DigEngine) {
         lastStrokeDidWork = result.didAnything
         lastRemovedLayer = result.dominantLayer ?? lastRemovedLayer
         lastBrushWasOverBone = engine.isOverBone(point)
@@ -389,6 +391,7 @@ final class DigScene: SKScene {
         if result.cracksStarted > 0 {
             haptics?.crack()
             audio?.playCrack()
+            bloomFracture(at: point)
             if !hasReportedCrack {
                 hasReportedCrack = true
                 onFirstCrack?()
@@ -432,6 +435,39 @@ final class DigScene: SKScene {
         // bare matrix throws dust and a stroke over bone barely does.
         emitter.particleBirthRate = min(260, CGFloat(result.layersRemoved) * 9)
     }
+
+    /// A red ink bleed at the point of fracture.
+    ///
+    /// This is the *motion* half of spec §5. It exists for 200ms and then it is gone,
+    /// which is what lets the same red sit flat and permanent on a button without the
+    /// two reading as the same thing. The lasting record is the hatch, in SlabRenderer.
+    func bloomFracture(at point: Vec2) {
+        // A child of the slab, placed with the same grid-to-node conversion as
+        // `emitDust`. Task 6 inset the slab by `mountMargin` so the mount can show
+        // around it, so anything positioned against the scene instead lands up to 6pt
+        // off, which is more than the bloom's own 4pt radius.
+        guard let slab = slabNode else { return }
+        let bloom = SKShapeNode(circleOfRadius: 4)
+        bloom.fillColor = SKColor(Earth.stamp)
+        bloom.strokeColor = .clear
+        bloom.alpha = 0.9
+        bloom.position = CGPoint(
+            x: (CGFloat(point.x) / CGFloat(SlabGrid.width) - 0.5) * slab.size.width,
+            y: (0.5 - CGFloat(point.y) / CGFloat(SlabGrid.height)) * slab.size.height
+        )
+        bloom.zPosition = 2
+        slab.addChild(bloom)
+        bloom.run(
+            .sequence([
+                .group([.scale(to: 5, duration: 0.2), .fadeOut(withDuration: 0.2)]),
+                .removeFromParent(),
+            ]),
+            withKey: DigScene.bloomActionKey
+        )
+    }
+
+    /// The key the bloom's fade runs under, so a test can read its duration back.
+    static let bloomActionKey = "bloom"
 
     private func makeDust() -> SKEmitterNode {
         let emitter = SKEmitterNode()
