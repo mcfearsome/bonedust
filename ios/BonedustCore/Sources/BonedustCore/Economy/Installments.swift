@@ -17,9 +17,13 @@ public enum Installments {
     /// simulated player who could not be matched by hand, so it was simultaneously too
     /// hard to actually play and too easy for the model once the brush worked.
     ///
-    /// Means the sweep reports per tier are roughly 540, 555, 760, 1060, 1100, 1160, 1240,
-    /// 1380. The ramp has to cross those: below the mean early, above it later, which is
-    /// what turns a 70% week into a 30% one.
+    /// The ramp has to cross the mean income per tier: below it early, above it later,
+    /// which is what turns a 70% week into a 30% one.
+    ///
+    /// It climbs much faster than it used to because a week is no longer a fixed five days.
+    /// `RunLength` gives later tiers more of them, and run income scales with days while
+    /// the money per slab stays roughly flat -- so the amount owed has to scale with days
+    /// too, or the extra time is a pure gift and the difficulty curve inverts.
     /// Fitted to §9's two stated numbers — tier 1 near 70%, tier 5 near 30% — and
     /// geometric in between rather than fitted tier by tier.
     ///
@@ -27,7 +31,7 @@ public enum Installments {
     /// $1,170 at tier 4 because a site unlocks there, so smooth win rates would need a
     /// ramp that jumps to match. A difficulty curve that lurches to flatten a graph is
     /// fitting the model player rather than the game.
-    public static let table = [425, 575, 775, 1050, 1425, 1650, 1875, 2175]
+    public static let table = [450, 550, 1150, 1825, 2900, 3150, 3700, 4000]
     public static let growth: Float = 1.22
 
     /// `tier` is 1-based: tier 1 is a player's first run.

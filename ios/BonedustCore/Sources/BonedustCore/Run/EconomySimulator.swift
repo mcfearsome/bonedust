@@ -240,6 +240,7 @@ public enum EconomySimulator {
             wholeGems: sim.wholeGems,
             clearedNodules: 0,
             daylightRemaining: daylightLeft,
+            totalDaylight: daylight,
             modifiers: modifiers,
             tuning: tuning
         ))

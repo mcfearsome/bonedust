@@ -86,6 +86,33 @@ public struct SimTuning: Sendable, Codable, Equatable {
     public var fossilScaleMax: Float = 1.15
     public var fossilOffsetX: Int = 7
     public var fossilOffsetY: Int = 13
+    // MARK: Grade
+
+    /// Weights for the finished-slab grade. They sum to 1.
+    ///
+    /// Care outweighs speed on purpose: a grade that paid mostly for finishing early would
+    /// argue against the thing the game is about. The clock still carries 20% because it is
+    /// the only term that moves -- a competent dig lands near 0.97 exposure and 0.99 intact
+    /// whatever else happened, so those two cannot separate good play from great.
+    public var gradeExposureWeight: Float = 0.4
+    public var gradeIntactWeight: Float = 0.4
+    public var gradeSpeedWeight: Float = 0.2
+
+    public var gradeThresholdS: Float = 0.95
+    public var gradeThresholdA: Float = 0.85
+    public var gradeThresholdB: Float = 0.70
+    public var gradeThresholdC: Float = 0.50
+
+    /// What each grade multiplies fossil and gem money by, as a rate above 1.
+    ///
+    /// Small, and small on purpose. These compound: a bonus that makes money easier pays
+    /// the debt faster, which reaches the next reward sooner. B is the ordinary case, so
+    /// its 5% is close to being the baseline -- the real reward is the 25% at S, which
+    /// needs a slab cleared, unbroken, and finished with daylight to spare.
+    public var gradeBonusS: Float = 0.25
+    public var gradeBonusA: Float = 0.12
+    public var gradeBonusB: Float = 0.05
+
     // MARK: Breath
 
     /// Patches a full-strength breath lifts, scattered over the whole slab.

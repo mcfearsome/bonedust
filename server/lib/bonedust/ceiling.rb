@@ -111,7 +111,12 @@ module Bonedust
 
       fossil_pay = (fossil.fetch("baseValue") * [1, instances].max).to_f
       gems = (tuning.fetch("gemsMax") * tuning.fetch("gemValue")).to_f * gem_multiplier
-      multiplier = payout_multiplier * rush_multiplier
+      # Best possible grade, as with everything else here: a slab cleared, unbroken and
+      # bagged early earns gradeBonusS on top of fossil and gem money. A ceiling that
+      # ignored it would reject the exact slab a player is proudest of, at the moment the
+      # dig went perfectly -- the worst possible time to accuse somebody of cheating.
+      # Mirrors ServerCeiling.ceiling; the two move together or golden_spec fails.
+      multiplier = payout_multiplier * rush_multiplier * (1 + tuning.fetch("gradeBonusS"))
       scaled = ((fossil_pay + gems) * multiplier).round
 
       nodules = tuning.fetch("rockNodulesMax") + (site.dig("modifiers", "extraRockNodules") || 0)

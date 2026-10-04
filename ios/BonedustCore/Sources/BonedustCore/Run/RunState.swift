@@ -127,6 +127,15 @@ public struct RunState: Sendable, Codable, Equatable {
     public var tier: Int
     public var installment: Int
     public var totalDays: Int
+    /// Days this run has earned by digging an S-grade slab.
+    ///
+    /// Optional on the wire so a save written before days could be earned still decodes;
+    /// `RunStore` discards anything the decoder throws on.
+    private var earnedDaysRaw: Int?
+    public var earnedDays: Int {
+        get { earnedDaysRaw ?? 0 }
+        set { earnedDaysRaw = newValue }
+    }
     public var cash: Int
     /// What tools, charms and restocks have cost this run, net of anything sold back.
     ///
@@ -187,7 +196,8 @@ public struct RunState: Sendable, Codable, Equatable {
         seed: UInt64,
         siteID: String,
         tier: Int = 1,
-        totalDays: Int = 5,
+        /// Defaults to the tier's own length. Passing it explicitly is for tests.
+        totalDays: Int? = nil,
         toolIDs: [String] = [BrushTool.brush.id],
         charmIDs: [String] = [],
         startedAt: Date = Date()
@@ -197,8 +207,9 @@ public struct RunState: Sendable, Codable, Equatable {
         self.siteID = siteID
         self.tier = max(1, tier)
         self.installment = Installments.amount(tier: max(1, tier))
-        self.totalDays = max(1, totalDays)
+        self.totalDays = max(1, totalDays ?? RunLength.days(tier: max(1, tier)))
         self.cash = 0
+        self.earnedDaysRaw = 0
         self.spentOnKitRaw = 0
         self.unsettledKitRaw = 0
         self.paidToCrewRaw = 0
@@ -279,10 +290,25 @@ public struct RunState: Sendable, Codable, Equatable {
     /// Returns what the crew debt should be paid for it: the slab's payout less any kit
     /// still owed from earlier in the week. The caller sends that, not `payout.total`, or
     /// the server's debt and the player's own total disagree about the same dollars.
+    /// Set by `completeSlab` when the slab just bagged bought another day, so the results
+    /// card can say so. Cleared on the next slab.
+    public private(set) var lastSlabEarnedADay = false
+
     @discardableResult
     public mutating func completeSlab(_ record: SlabRecord) -> Int {
         guard case .digging(let day) = phase, day == record.day else { return 0 }
         slabs.append(record)
+
+        // A museum-quality specimen buys another day's light. Checked before the phase
+        // moves, so the day it adds is one the run can actually reach.
+        lastSlabEarnedADay = false
+        if RunLength.earnsADay(record.payout.grade),
+           earnedDays < RunLength.maximumEarnedDays,
+           totalDays < RunLength.maximumDays {
+            earnedDays += 1
+            totalDays += 1
+            lastSlabEarnedADay = true
+        }
         cash += record.payout.total
         let payment = max(0, record.payout.total - unsettledKit)
         unsettledKit -= record.payout.total

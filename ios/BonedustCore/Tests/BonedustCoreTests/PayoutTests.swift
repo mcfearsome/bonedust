@@ -15,8 +15,30 @@ final class PayoutTests: XCTestCase {
         )
     }
 
+    /// What a context's grade multiplies fossil and gem money by.
+    ///
+    /// Derived rather than written in. These tests are about the *order* the payout
+    /// formula applies things in, and hardcoding totals meant that adding grading at all
+    /// failed four of them for reasons with nothing to do with ordering.
+    private func gradeBonus(_ ctx: PayoutContext) -> Float {
+        SlabGrade.of(
+            exposure: ctx.exposure,
+            intact: Payout.intact(
+                crackedCells: ctx.crackedCells, boneCells: ctx.boneCells,
+                modifiers: ctx.modifiers, tuning: ctx.tuning
+            ),
+            daylightRemaining: ctx.daylightRemaining,
+            totalDaylight: ctx.totalDaylight,
+            tuning: ctx.tuning
+        ).bonusMultiplier
+    }
+
     func testPerfectSlabPaysBase() {
-        XCTAssertEqual(Payout.evaluate(context()).total, 100)
+        let ctx = context()
+        let result = Payout.evaluate(ctx)
+        XCTAssertEqual(result.grade, SlabGrade.Letter.b,
+                       "fully exposed, unbroken, no daylight left is the ordinary case")
+        XCTAssertEqual(result.total, Int((100 * gradeBonus(ctx)).rounded()))
     }
 
     func testExposureIsRaisedToThreeHalves() {
@@ -75,20 +97,27 @@ final class PayoutTests: XCTestCase {
         var mods = ModifierSet()
         mods.rushMultiplier = 1.4
         mods.rushThreshold = 20
-        XCTAssertFalse(Payout.evaluate(context(daylight: 19, modifiers: mods)).rushApplied)
-        XCTAssertEqual(Payout.evaluate(context(daylight: 19, modifiers: mods)).total, 100)
-        let rushed = Payout.evaluate(context(daylight: 20, modifiers: mods))
+        let short = context(daylight: 19, modifiers: mods)
+        XCTAssertFalse(Payout.evaluate(short).rushApplied)
+        XCTAssertEqual(Payout.evaluate(short).total, Int((100 * gradeBonus(short)).rounded()))
+
+        let inTime = context(daylight: 20, modifiers: mods)
+        let rushed = Payout.evaluate(inTime)
         XCTAssertTrue(rushed.rushApplied)
-        XCTAssertEqual(rushed.total, 140)
+        XCTAssertEqual(rushed.total, Int((100 * 1.4 * gradeBonus(inTime)).rounded()))
     }
 
     func testRockHoundIsAFlatBonusAfterMultipliers() {
         var mods = ModifierSet()
         mods.rockNodulePayout = 8
         mods.payoutMultiplier = 1.5
-        let result = Payout.evaluate(context(nodules: 3, modifiers: mods))
+        let ctx = context(nodules: 3, modifiers: mods)
+        let result = Payout.evaluate(ctx)
         XCTAssertEqual(result.bonuses, 24)
-        XCTAssertEqual(result.total, 150 + 24, "flat money must not be multiplied")
+        XCTAssertEqual(
+            result.total, Int((150 * gradeBonus(ctx)).rounded()) + 24,
+            "flat money must not be multiplied, by the site's multiplier or by the grade"
+        )
     }
 
     func testModifiersAreOrderIndependent() {

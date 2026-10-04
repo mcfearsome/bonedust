@@ -558,3 +558,83 @@ refusing costs nothing but the mechanic.
 **The player's music keeps playing.** Recording normally forces `.playAndRecord` and stops
 whatever they were listening to; `.mixWithOthers` avoids that. Silencing someone's music to
 add a hidden mechanic they did not ask for is not a trade worth making.
+
+## A grade, a longer week, and a day you can earn
+
+The slab results card already carried exposure, intactness and daylight left, and a player
+had to hold all three at once to know whether they had done well. The grade collapses them
+into the judgement the game is actually making: exposure and intactness 40% each, the clock
+20%.
+
+**Care outweighs speed deliberately** — a grade paying mostly for finishing early would
+argue against the one thing the game is about. But **the clock is what discriminates**: a
+competent dig lands near 0.97 exposure and 0.99 intact whatever else happened, so those two
+are nearly constant across good play. Daylight left is the term that moves, which is why 20%
+is enough to matter. An S needs a slab cleared *and* unbroken *and* finished with time
+spare.
+
+The bonus multiplies fossil and gem money rather than adding a flat sum. A flat bonus is
+worth proportionally more on a cheap slab, so the best way to farm it would be to dig the
+least valuable fossil available.
+
+### The bug grading nearly shipped
+
+`ServerCeiling` is a *separate implementation* from `Payout.maxPayout`, written entirely in
+`Double` so Ruby reaches the same integer. Adding a bonus to the payout formula therefore
+does not raise it. For one commit a slab cleared, unbroken and bagged early could out-earn
+its own ceiling by 25% and be rejected as a forgery — at exactly the moment the dig had gone
+perfectly, which is the worst conceivable time to accuse somebody of cheating.
+
+Both ceilings now assume the best grade, as they already assume a perfect dig and the rush
+bonus. `testNoGradeCanOutEarnTheServerCeiling` checks a flawless slab against the ceiling
+across four sites and twenty-five seeds, and would have caught it immediately.
+
+### Weeks, and earning a day
+
+Five days was a constant for six milestones and too short to acquire anything: the tent
+opens four times and kit is lost on a failed run, so most of what a player bought they
+barely used. Length now rises with the tier via `RunLength`, so the ramp gives time as well
+as taking money. Tier 1 stays at five, because a first run has to end quickly — what a new
+player most needs is to find out they lost and start again.
+
+**An S-grade slab earns another day**, capped at three a run. Without a cap an extra day is
+pure profit — more income at no extra cost — so a good enough player extends forever and the
+installment stops being a deadline. It also gives the grade real stakes: a 25% cash bonus
+alone was not worth changing how you dig for.
+
+Installments were re-fitted to [450, 550, 1150, 1825, 2900, …]: 72%, 49%, 41%, 50%, 29%
+against targets of 70, 60, 48, 38, 30. Tier 2 was briefly at 15.7% because the ramp was
+geometric while income between tiers 1 and 2 is flat — nothing unlocks there — which is a
+real defect rather than the lumpiness the middle tiers are allowed.
+
+One thing the sweep taught while being fitted: it plays *careers*, so raising early
+installments means only luckier runs reach tier 5, and the mean income there rises as a
+result. Tier 5's win rate is measured on a self-selected population, so chasing an exact
+number there has diminishing returns.
+
+## The shop sells safety, and safety is free
+
+Reported from play as "i see no incentive to actually buy anything". Measured, on identical
+slabs, each tool held at its own safe speed:
+
+| tool | payout | exposure | daylight left | cracked |
+|---|---|---|---|---|
+| Brush (free) | $124 | 0.939 | 0.2s | 0 |
+| Fine brush ($55) | $18 | 0.239 | 0.0s | 0 |
+| Air blower ($80) | $131 | 0.993 | 33.4s | 0 |
+
+`cracked: 0` everywhere is the finding. **At safe speed nothing cracks at all**, so every
+anti-crack tool and charm defends against something that is not happening. The fine brush
+buys `crackMultiplier: 0.35` and a high safe speed with 57% of the brush's radius — a real
+cost in coverage for an imaginary benefit — and earns a seventh of the brush you start with.
+The air blower's `crackMultiplier: 2.6` is meant to be its drawback and never bites, making
+it strictly dominant.
+
+So a careful player is *correct* that there is nothing worth buying, and the economy sweep
+could never report it: its model picks a tool per sample for free, so it measures a player
+who already owns everything.
+
+`ToolValueTests` records this with `XCTExpectFailure`, so the suite stays green while the
+defect stays visible and flips to a hard failure the moment it is fixed. Not fixed here,
+because the fix is a design decision — either cracking has to be possible at safe speed, or
+the shop has to sell coverage rather than safety.

@@ -157,7 +157,16 @@ public enum ServerCeiling {
         let fossilPay = Double(fossil.baseValue * max(1, instances))
         let gems = Double(tuning.gemsMax * tuning.gemValue) * gemMultiplier
         // The rush bonus is assumed to have landed.
-        let multiplier = payoutMultiplier * rushMultiplier
+        // The best possible grade is assumed, as everything else here is. A slab cleared,
+        // unbroken and bagged early earns gradeBonusS on top of fossil and gem money, so a
+        // ceiling that ignored it would reject the exact slab a player is proudest of --
+        // and would do it the moment the dig went perfectly, which is the worst possible
+        // time to accuse somebody of cheating.
+        //
+        // 0.25 is exactly representable in binary, so Float -> Double here and Ruby's own
+        // 0.25 are the same number. A rate that is not exact would have to go through the
+        // same f32 narrowing the other constants do.
+        let multiplier = payoutMultiplier * rushMultiplier * (1 + Double(tuning.gradeBonusS))
         let scaled = ((fossilPay + gems) * multiplier).rounded()
 
         let nodules = tuning.rockNodulesMax + site.modifiers.extraRockNodules

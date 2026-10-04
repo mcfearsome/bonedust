@@ -21,6 +21,9 @@ public struct PayoutContext: Sendable, Equatable {
     public var clearedNodules: Int
     /// Daylight left when the slab was bagged.
     public var daylightRemaining: Float
+    /// Daylight the slab started with, which charms and the night-dig twist both move.
+    /// Grading against a fixed sixty seconds would mark down every night dig.
+    public var totalDaylight: Float
     public var modifiers: ModifierSet
     public var tuning: SimTuning
 
@@ -33,6 +36,7 @@ public struct PayoutContext: Sendable, Equatable {
         wholeGems: Int,
         clearedNodules: Int = 0,
         daylightRemaining: Float = 0,
+        totalDaylight: Float = SimTuning.standard.daylightSeconds,
         modifiers: ModifierSet = ModifierSet(),
         tuning: SimTuning = .standard
     ) {
@@ -44,6 +48,7 @@ public struct PayoutContext: Sendable, Equatable {
         self.wholeGems = wholeGems
         self.clearedNodules = clearedNodules
         self.daylightRemaining = daylightRemaining
+        self.totalDaylight = totalDaylight
         self.modifiers = modifiers
         self.tuning = tuning
     }
@@ -68,12 +73,27 @@ public struct PayoutBreakdown: Sendable, Codable, Equatable {
     /// The multiplier that was actually applied, for the "x1.5 night dig" line.
     public var multiplier: Float
     public var rushApplied: Bool
+    /// The grade's letter, and what it added. Optional on the wire so a slab record written
+    /// before grading existed still decodes -- `RunStore` discards anything the decoder
+    /// throws on, so a new non-optional field is indistinguishable from a corrupt save.
+    private var gradeRaw: String?
+    public var grade: SlabGrade.Letter {
+        get { SlabGrade.Letter(rawValue: gradeRaw ?? "") ?? .c }
+        set { gradeRaw = newValue.rawValue }
+    }
+    private var gradeBonusRaw: Int?
+    /// Dollars the grade added, for the results card to show on its own line.
+    public var gradeBonus: Int {
+        get { gradeBonusRaw ?? 0 }
+        set { gradeBonusRaw = newValue }
+    }
     public var total: Int
 
     public init(
         baseValue: Int = 0,
         exposure: Float, intact: Float, fossil: Int, gems: Int,
-        bonuses: Int, multiplier: Float, rushApplied: Bool, total: Int
+        bonuses: Int, multiplier: Float, rushApplied: Bool,
+        grade: SlabGrade.Letter = .c, gradeBonus: Int = 0, total: Int
     ) {
         self.baseValue = baseValue
         self.exposure = exposure
@@ -83,6 +103,8 @@ public struct PayoutBreakdown: Sendable, Codable, Equatable {
         self.bonuses = bonuses
         self.multiplier = multiplier
         self.rushApplied = rushApplied
+        self.gradeRaw = grade.rawValue
+        self.gradeBonusRaw = gradeBonus
         self.total = total
     }
 }
@@ -126,7 +148,20 @@ public enum Payout {
         var multiplier = mods.payoutMultiplier
         if rushApplied { multiplier *= mods.rushMultiplier }
 
-        let scaled = Int((Float(fossilPay + gemPay) * multiplier).rounded())
+        // Graded on what the slab came out like, then paid on it. Kept out of
+        // `multiplier` so the results card can still print "x1.5 night dig" as the site's
+        // own number rather than a figure with the grade silently folded into it.
+        let grade = SlabGrade.of(
+            exposure: exposure,
+            intact: intact,
+            daylightRemaining: context.daylightRemaining,
+            totalDaylight: context.totalDaylight,
+            tuning: tuning
+        )
+        let ungraded = Int((Float(fossilPay + gemPay) * multiplier).rounded())
+        let scaled = Int(
+            (Float(fossilPay + gemPay) * multiplier * grade.bonusMultiplier).rounded()
+        )
         let bonuses = context.clearedNodules * mods.rockNodulePayout + mods.flatBonus
 
         return PayoutBreakdown(
@@ -138,6 +173,8 @@ public enum Payout {
             bonuses: bonuses,
             multiplier: multiplier,
             rushApplied: rushApplied,
+            grade: grade.letter,
+            gradeBonus: scaled - ungraded,
             total: max(0, scaled + bonuses)
         )
     }

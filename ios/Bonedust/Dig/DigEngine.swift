@@ -269,6 +269,7 @@ final class DigEngine {
             wholeGems: sim.wholeGems,
             clearedNodules: clearedNodules(),
             daylightRemaining: max(0, daylightRemaining),
+            totalDaylight: totalDaylight,
             modifiers: modifiers,
             tuning: sim.tuning
         ))
@@ -401,6 +402,7 @@ final class DigEngine {
             wholeGems: sim.wholeGems,
             clearedNodules: 0,
             daylightRemaining: 0,
+            totalDaylight: totalDaylight,
             modifiers: quiet,
             tuning: sim.tuning
         )).total
