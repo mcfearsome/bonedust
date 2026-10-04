@@ -473,6 +473,38 @@ final class ThemeTests: XCTestCase {
         XCTAssertEqual(theme.ink, Ink.day)
     }
 
+    /// A flag a `@Sendable` observation closure can set.
+    private final class Notified: @unchecked Sendable { var value = false }
+
+    /// `RootView` sets the light level when a dig starts, and `DigScene.configureRenderer()`
+    /// sets the same value again once the scene is up. A write that changes nothing should
+    /// publish nothing: `ink` is what `NotebookPage` reads, and its grid is some five
+    /// thousand dots that it redraws whenever `ink` is published.
+    ///
+    /// This is a contract pin, not a red-then-green test, and it passes without `Theme`'s
+    /// guard. `@Observable` already drops a same-value write to an Equatable property, and
+    /// `Ink` is Equatable, so on this toolchain `ink` was never re-published (probed: an
+    /// Equatable property stays silent, a non-Equatable one always fires, and the `didSet`
+    /// body runs either way). It fails the day `Ink` stops being Equatable or the macro stops
+    /// comparing, if the guard is ever removed; with it, the contract no longer rests on that.
+    func testWritingTheLightLevelItAlreadyHasPublishesNothing() {
+        let theme = Theme()
+        theme.lightLevel = 0.55
+
+        let sameValue = Notified()
+        withObservationTracking { _ = theme.ink } onChange: { sameValue.value = true }
+        theme.lightLevel = 0.55
+        XCTAssertFalse(sameValue.value, "writing the light level it already has published `ink` again")
+
+        // The control: a real change is noticed, so the silence above is the guard's and not
+        // a tracker that never fires.
+        let realChange = Notified()
+        withObservationTracking { _ = theme.ink } onChange: { realChange.value = true }
+        theme.lightLevel = 1
+        XCTAssertTrue(realChange.value, "the tracker did not notice a real change, so the check above proves nothing")
+        XCTAssertEqual(theme.ink, Ink.day)
+    }
+
     /// The palette is only ever one of the two presets. A blended palette would
     /// put text and page at 1.09:1 in the middle; this asserts no third value
     /// can reach a screen, at any light level a site could hold.
