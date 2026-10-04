@@ -76,3 +76,26 @@ final class EarthRampTests: XCTestCase {
         }
     }
 }
+
+extension EarthRampTests {
+
+    /// Review Focus 2. This iterates the catalog rather than a hardcoded list, so a
+    /// site added later with no palette override is covered without anyone
+    /// remembering to come back here.
+    ///
+    /// `matrix` is the top layer — a fully-excavated slab is this colour across its
+    /// whole face. It is the colour most at risk of vanishing, which is why it, and
+    /// not `topsoil`, is what gets pinned.
+    func testEverySiteMatrixSeparatesFromTheMount() {
+        let sites = ContentCatalog.shared.sites
+        XCTAssertFalse(sites.isEmpty, "catalog failed to load; the rest proves nothing")
+
+        for site in sites {
+            let ratio = site.palette.matrix.contrastRatio(against: Earth.mount)
+            XCTAssertGreaterThanOrEqual(
+                ratio, 3.0,
+                "site '\(site.id)': a cleared slab vanishes into the mount at \(ratio)"
+            )
+        }
+    }
+}
