@@ -579,57 +579,22 @@ final class DigSceneBackdropTests: XCTestCase {
 
     // MARK: Layers
 
-    func testTheBackdropSitsBehindTheSlabInTheBriefsDepthOrder() {
+    func testTheMountSitsOneLayerBehindTheSlab() {
         let (scene, _) = present()
-        scene.buildBackdrop(contrastRaised: false)
-        XCTAssertEqual(scene.gridNode?.zPosition, -3)
-        XCTAssertEqual(scene.paperNode?.zPosition, -2)
+        scene.buildBackdrop()
         XCTAssertEqual(scene.mountNode?.zPosition, -1)
         XCTAssertEqual(scene.slabNode?.zPosition, 0)
     }
 
-    /// The brief drops the two low-contrast layers under Increase Contrast and keeps
-    /// the mount: Increase Contrast makes it more necessary, not less.
-    func testIncreaseContrastDropsTheGridAndPaperButNeverTheMount() {
-        let (scene, _) = present()
-
-        scene.buildBackdrop(contrastRaised: true)
-        XCTAssertNil(scene.gridNode)
-        XCTAssertNil(scene.paperNode)
-        XCTAssertNotNil(scene.mountNode, "the mount is what separates a cleared slab from the page")
-        XCTAssertEqual(scene.children.count, 2, "mount and slab only; the old grid and paper must leave the scene")
-
-        scene.buildBackdrop(contrastRaised: false)
-        XCTAssertNotNil(scene.gridNode)
-        XCTAssertNotNil(scene.paperNode)
-        XCTAssertNotNil(scene.mountNode)
-        XCTAssertEqual(scene.children.count, 4, "grid, paper, mount and slab")
-    }
-
-    /// The default for `contrastRaised` is the live system setting. The suite cannot
-    /// flip that setting, so this asserts whichever state the run is in. To see the
-    /// other branch, run it with `xcrun simctl ui booted increase_contrast enabled`.
-    func testTheDefaultBackdropFollowsTheSystemSetting() {
-        let (scene, _) = present()
-        scene.buildBackdrop()
-        let raised = UIAccessibility.isDarkerSystemColorsEnabled
-        XCTAssertEqual(scene.gridNode == nil, raised, "Increase Contrast is \(raised ? "on" : "off")")
-        XCTAssertEqual(scene.paperNode == nil, raised, "Increase Contrast is \(raised ? "on" : "off")")
-        XCTAssertNotNil(scene.mountNode)
-    }
-
-    /// A rebuild replaces the layers. A leak here would stack a screen-sized
-    /// texture per resize.
+    /// A rebuild replaces the mount. A leak here would stack a node per resize, and the
+    /// count also pins that the scene no longer carries the page's grid and paper: those
+    /// moved to `NotebookPage`, because behind an opaque mount nobody could see them.
     func testResizingRebuildsTheBackdropInsteadOfStackingIt() {
         let (scene, _) = present()
         for width in [390, 768, 1024] {
             scene.size = CGSize(width: width, height: width * 4 / 3)
         }
-        let expected = UIAccessibility.isDarkerSystemColorsEnabled ? 2 : 4
-        XCTAssertEqual(scene.children.count, expected)
-        if let grid = scene.gridNode {
-            XCTAssertEqual(grid.size, scene.size, "the grid is rebuilt at the new size, never stretched")
-        }
+        XCTAssertEqual(scene.children.count, 2, "the mount and the slab, and nothing left from an earlier size")
     }
 
     // MARK: Mount
@@ -714,7 +679,7 @@ final class DigSceneBackdropTests: XCTestCase {
 
     func testThePageBehindTheSlabIsCreamNotDarkUmber() throws {
         let (scene, view) = present()
-        scene.buildBackdrop(contrastRaised: true)
+        scene.buildBackdrop()
         scene.mountNode?.isHidden = true
         scene.slabNode?.isHidden = true
         let pixels = try render(scene, in: view)
@@ -726,14 +691,13 @@ final class DigSceneBackdropTests: XCTestCase {
         XCTAssertGreaterThan(distance(pixels.rgb(0, 0), [0x22, 0x18, 0x13]), 100)
     }
 
-    func testApplyThemeRepaintsThePageTheMountAndTheGrid() throws {
+    func testApplyThemeRepaintsThePageAndTheMount() throws {
         let (scene, _) = present()
-        scene.buildBackdrop(contrastRaised: false)
+        scene.buildBackdrop()
         for ink in [Ink.night, Ink.day] {
             scene.applyTheme(ink: ink)
             XCTAssertEqual(rgb(scene.backgroundColor), rgb(ink.page))
             XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(ink.mount))
-            XCTAssertEqual(rgb(try XCTUnwrap(scene.gridNode).color), rgb(ink.hairline))
         }
     }
 
@@ -742,14 +706,11 @@ final class DigSceneBackdropTests: XCTestCase {
     /// day colours the first time the view changed size.
     func testAResizeKeepsThePaletteTheSceneWasPaintedIn() throws {
         let (scene, _) = present()
-        scene.buildBackdrop(contrastRaised: false)
+        scene.buildBackdrop()
         scene.applyTheme(ink: .night)
         scene.size = CGSize(width: 768, height: 1024)
         XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.night.page))
         XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.night.mount))
-        if let grid = scene.gridNode {
-            XCTAssertEqual(rgb(grid.color), rgb(Ink.night.hairline))
-        }
     }
 
     /// `lightLevel` is static per site: set once in `configureRenderer()`, with
@@ -795,63 +756,6 @@ final class DigSceneBackdropTests: XCTestCase {
         scene.configureRenderer()
         XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.day.page))
         XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.day.mount))
-    }
-
-    // MARK: Grid
-
-    /// The grid is an image drawn top-down, which is `SlabGrid`'s convention, while
-    /// SpriteKit's own y runs up. This pins which way round it lands: a dot in the
-    /// top-left corner of the screen, then an 8pt lattice counting down and across.
-    ///
-    /// A marker placed high in SpriteKit's y-up space calibrates the readback first,
-    /// so the test cannot pass by two flips cancelling. The height is chosen so a
-    /// bottom-anchored lattice would land on different rows.
-    func testTheGridIsAnEightPointLatticeAnchoredAtTheTopLeft() throws {
-        let size = CGSize(width: 361, height: 485)
-        let (scene, view) = present(size: size)
-        scene.buildBackdrop(contrastRaised: false)
-        scene.mountNode?.isHidden = true
-        scene.slabNode?.isHidden = true
-        scene.paperNode?.isHidden = true
-
-        let marker = SKSpriteNode(color: .red, size: CGSize(width: 20, height: 20))
-        marker.position = CGPoint(x: 100, y: size.height - 30)
-        marker.zPosition = 5
-        scene.addChild(marker)
-        let marked = try render(scene, in: view)
-        marker.removeFromParent()
-        let pixels = try render(scene, in: view)
-
-        let scale = pixels.width / Int(size.width)
-        let markerRow = (0..<marked.height).first {
-            let pixel = marked.rgb(100 * scale, $0)
-            return pixel[0] > 200 && pixel[1] < 60
-        }
-        XCTAssertLessThan(
-            markerRow ?? .max, marked.height / 5,
-            "a node near the top of SpriteKit's y-up space did not read back near row 0"
-        )
-
-        let page = pixels.rgb(4 * scale, 4 * scale)
-        // The dots are the hairline colour at 0.35 alpha over the page. Drawn white and
-        // left untinted they would still count as lit below, but in the wrong colour,
-        // and the theme would never reach them.
-        let expectedDot = zip(rgb(Ink.day.hairline), page).map {
-            Int((0.35 * Double($0) + 0.65 * Double($1)).rounded())
-        }
-        assertPixel(pixels.rgb(scale / 2, scale / 2), is: expectedDot, "the first dot", tolerance: 4)
-        func isDot(_ x: Int, _ y: Int) -> Bool { distance(pixels.rgb(x, y), page) > 12 }
-        let rowStarts = (0..<pixels.height).filter { isDot(0, $0) && ($0 == 0 || !isDot(0, $0 - 1)) }
-        let columnStarts = (0..<pixels.width).filter { isDot($0, 0) && ($0 == 0 || !isDot($0 - 1, 0)) }
-
-        XCTAssertEqual(
-            rowStarts, stride(from: 0, to: Int(size.height), by: 8).map { $0 * scale },
-            "dot rows are not an 8pt lattice counting down from the top"
-        )
-        XCTAssertEqual(
-            columnStarts, stride(from: 0, to: Int(size.width), by: 8).map { $0 * scale },
-            "dot columns are not an 8pt lattice counting across from the left"
-        )
     }
 
     // MARK: Fracture bloom
@@ -1540,6 +1444,373 @@ final class CelShadingTests: XCTestCase {
                 }
             }
             XCTAssertEqual(stale, [], "\(name): cells left stale by an incremental redraw")
+        }
+    }
+}
+
+// MARK: - The migrated views
+
+/// A SwiftUI view as pixels, read back through `ImageRenderer`. Row 0 is the top row.
+private struct RenderedPixels {
+    let width: Int
+    let height: Int
+    let scale: Int
+    let bytes: [UInt8]
+
+    func rgb(_ x: Int, _ y: Int) -> [Int] {
+        let i = (y * width + x) * 4
+        return [Int(bytes[i]), Int(bytes[i + 1]), Int(bytes[i + 2])]
+    }
+}
+
+@MainActor
+private func renderPixels<V: View>(
+    _ view: V, width: CGFloat, height: CGFloat? = nil, scale: Int = 3
+) throws -> RenderedPixels {
+    let renderer = ImageRenderer(
+        content: AnyView(view.frame(width: width, height: height))
+    )
+    renderer.scale = CGFloat(scale)
+    let image = try XCTUnwrap(renderer.cgImage, "ImageRenderer produced no image")
+    return try readPixels(image, scale: scale)
+}
+
+private func readPixels(_ image: CGImage, scale: Int) throws -> RenderedPixels {
+    var bytes = [UInt8](repeating: 0, count: image.width * image.height * 4)
+    let space = try XCTUnwrap(CGColorSpace(name: CGColorSpace.sRGB))
+    let drawn = bytes.withUnsafeMutableBytes { buffer -> Bool in
+        guard let context = CGContext(
+            data: buffer.baseAddress, width: image.width, height: image.height,
+            bitsPerComponent: 8, bytesPerRow: image.width * 4, space: space,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return false }
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        return true
+    }
+    XCTAssertTrue(drawn, "could not read the rendered view back")
+    return RenderedPixels(width: image.width, height: image.height, scale: scale, bytes: bytes)
+}
+
+private func rgb255(_ colour: Color) -> [Int] {
+    var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+    UIColor(colour).getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+    return [red, green, blue].map { Int(($0 * 255).rounded()) }
+}
+
+private func distance(_ a: [Int], _ b: [Int]) -> Int {
+    zip(a, b).map { abs($0 - $1) }.reduce(0, +)
+}
+
+/// The page and its dot grid. Task 6 built them in the SpriteKit scene, where they were
+/// unreachable: the scene is exactly the slab's card, and the mount fills all of it. They
+/// are a SwiftUI view now, so these tests render that view and read pixels back, which is
+/// the only way to see that a dot is on the page and not merely in the view tree.
+@MainActor
+final class NotebookPageTests: XCTestCase {
+
+    private let size = CGSize(width: 361, height: 485)
+
+    /// The grid is an 8pt lattice counting down from the top and across from the left, with
+    /// a dot at the origin. A flipped or offset lattice still looks like a grid, so this
+    /// reads the positions of the dots rather than counting them.
+    func testTheGridIsAnEightPointLatticeAnchoredAtTheTopLeft() throws {
+        let pixels = try renderPixels(
+            NotebookPageDrawing(ink: .day, showsGrid: true), width: size.width, height: size.height
+        )
+        let scale = pixels.scale
+        let page = rgb255(Ink.day.page)
+        func isDot(_ x: Int, _ y: Int) -> Bool { distance(pixels.rgb(x, y), page) > 12 }
+
+        // Down the column through the first dot's centre, and across the row through it.
+        let centre = scale / 2
+        let rowStarts = (0..<pixels.height).filter { isDot(centre, $0) && ($0 == 0 || !isDot(centre, $0 - 1)) }
+        let columnStarts = (0..<pixels.width).filter { isDot($0, centre) && ($0 == 0 || !isDot($0 - 1, centre)) }
+        XCTAssertEqual(
+            rowStarts, stride(from: 0, to: Int(size.height), by: 8).map { $0 * scale },
+            "dot rows are not an 8pt lattice counting down from the top"
+        )
+        XCTAssertEqual(
+            columnStarts, stride(from: 0, to: Int(size.width), by: 8).map { $0 * scale },
+            "dot columns are not an 8pt lattice counting across from the left"
+        )
+    }
+
+    /// The dots are the theme's hairline at 0.35 over its page. A grid drawn in a fixed
+    /// colour would still count as lit above and the theme would never reach it, so this
+    /// checks the colour, in both palettes.
+    func testTheDotsAndThePageTakeTheirColoursFromTheInk() throws {
+        for (name, ink) in [("day", Ink.day), ("night", Ink.night)] {
+            let pixels = try renderPixels(
+                NotebookPageDrawing(ink: ink, showsGrid: true), width: size.width, height: size.height
+            )
+            let scale = pixels.scale
+            let page = rgb255(ink.page)
+            XCTAssertLessThanOrEqual(
+                distance(pixels.rgb(4 * scale, 4 * scale), page), 3, "\(name): the page between the dots"
+            )
+            let expectedDot = zip(rgb255(ink.hairline), page).map {
+                Int((NotebookPageDrawing.dotOpacity * Double($0) + (1 - NotebookPageDrawing.dotOpacity) * Double($1)).rounded())
+            }
+            let first = pixels.rgb(scale / 2, scale / 2)
+            XCTAssertLessThanOrEqual(
+                distance(first, expectedDot), 8, "\(name): the first dot is \(first), expected \(expectedDot)"
+            )
+            XCTAssertGreaterThan(
+                distance(first, page), 12, "\(name): the dot is indistinguishable from the page, so the check above proves nothing"
+            )
+        }
+    }
+
+    /// Increase Contrast removes the grid and keeps the page: a 0.35-alpha dot pattern is
+    /// exactly the low-contrast decoration that setting exists to remove. The environment's
+    /// contrast value is read-only, so this drives the drawing's own input.
+    func testWithoutTheGridThePageIsPlainStock() throws {
+        for (name, ink) in [("day", Ink.day), ("night", Ink.night)] {
+            let pixels = try renderPixels(
+                NotebookPageDrawing(ink: ink, showsGrid: false), width: size.width, height: size.height
+            )
+            let page = rgb255(ink.page)
+            let strays = (0..<pixels.height).flatMap { y in
+                (0..<pixels.width).compactMap { x in distance(pixels.rgb(x, y), page) > 3 ? (x, y) : nil }
+            }
+            XCTAssertTrue(strays.isEmpty, "\(name): \(strays.count) pixels are not the page, first at \(strays.first.map { "\($0)" } ?? "-")")
+        }
+    }
+}
+
+/// Spec §5: red at rest means "press this", red in motion means "you are breaking it".
+/// Once the old danger red and the accent became one `stamp`, over-the-limit had to be
+/// carried by motion, and these hold the motion to the numbers the brief gave.
+@MainActor
+final class AlarmPulseTests: XCTestCase {
+
+    func testThePulseRunsBetweenSixtyFivePercentAndFull() {
+        XCTAssertEqual(AlarmPulse.opacity(at: 0), 1, accuracy: 1e-9)
+        XCTAssertEqual(AlarmPulse.opacity(at: 0.5), 0.65, accuracy: 1e-9, "half a second in is the dim end")
+        XCTAssertEqual(AlarmPulse.opacity(at: 1.0), 1, accuracy: 1e-9, "and a second in is back to full")
+
+        var lowest = 1.0, highest = 0.0
+        for step in 0...300 {
+            let opacity = AlarmPulse.opacity(at: Double(step) / 100)
+            lowest = min(lowest, opacity)
+            highest = max(highest, opacity)
+            XCTAssertGreaterThanOrEqual(opacity, 0.65 - 1e-9, "t=\(Double(step) / 100)")
+            XCTAssertLessThanOrEqual(opacity, 1 + 1e-9, "t=\(Double(step) / 100)")
+        }
+        XCTAssertEqual(lowest, 0.65, accuracy: 1e-3, "the pulse never reaches its floor")
+        XCTAssertEqual(highest, 1, accuracy: 1e-3, "the pulse never reaches full opacity")
+    }
+
+    /// Absolute time, not time since the view appeared: two views pulsing at once beat together.
+    func testThePulseIsAFunctionOfAbsoluteTimeWithAOneSecondCycle() {
+        for time in [0.13, 0.4, 0.77, 3.21, 1_000.5] {
+            XCTAssertEqual(
+                AlarmPulse.opacity(at: time), AlarmPulse.opacity(at: time + 1), accuracy: 1e-6, "t=\(time)"
+            )
+        }
+    }
+
+    // MARK: Wiring
+
+    /// Renders `view` repeatedly across a bit more than one cycle and reads one pixel each
+    /// time. A pulsing view's pixel moves; a view at rest does not move at all.
+    private func samples<V: View>(
+        of view: V, width: CGFloat, at point: (x: Int, y: (Int) -> Int)
+    ) throws -> [[Int]] {
+        var seen: [[Int]] = []
+        for _ in 0..<14 {
+            let pixels = try renderPixels(view, width: width)
+            seen.append(pixels.rgb(point.x, point.y(pixels.height)))
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.09))
+        }
+        return seen
+    }
+
+    /// How far the red channel moved across `samples`.
+    private func spread(_ samples: [[Int]]) -> Int {
+        let reds = samples.map { $0[0] }
+        return (reds.max() ?? 0) - (reds.min() ?? 0)
+    }
+
+    /// 20pt in, which is inside the fill whether the brush is slow (the fill is 50pt) or fast
+    /// (all 300), left of the safe-limit notch at 100pt, and in the middle of the 8pt bar at
+    /// the bottom of the meter. 50pt was the first choice, and it is the very end of the slow
+    /// fill: it read the static trough beside it, so "the bar does not pulse" passed for a
+    /// bar that pulsed all the time.
+    private func barPoint(scale: Int = 3) -> (x: Int, y: (Int) -> Int) {
+        (x: 20 * scale, y: { height in height - 4 * scale })
+    }
+
+    /// Speed only breaks anything over bone, so that is the only place the bar is alarmed. Fast over
+    /// bone is stamp red and its opacity moves. Fast over bare rock breaks nothing, so the bar stays
+    /// the safe green and still. Slow on bone is stamp red but at rest: red at rest is not an alarm.
+    /// Over the pale trough the red channel moves by about 25 levels across the pulse for stamp and
+    /// about 60 for the green: a number near 0 is not pulsing.
+    func testTheSpeedMeterBarPulsesOnlyWhenTooFastOverBone() throws {
+        let over = try samples(
+            of: SpeedMeter(speed: 6, safeSpeed: 1, overBone: true), width: 300, at: barPoint()
+        )
+        XCTAssertGreaterThan(spread(over), 10, "the over-limit bar does not pulse")
+        // Red in motion, spec §5: at its fullest the pulsing bar is the stamp red itself. The
+        // pulse says "you are breaking it", and red at rest would say "press this".
+        let fullest = try XCTUnwrap(over.min { $0[0] < $1[0] })
+        XCTAssertLessThanOrEqual(
+            distance(fullest, rgb255(Ink.day.stamp)), 45,
+            "at full opacity the over-limit bar is \(fullest), not the stamp red"
+        )
+
+        // Fast, but over rock: nothing there can crack, so the meter stays calm.
+        let rock = try samples(
+            of: SpeedMeter(speed: 6, safeSpeed: 1, overBone: false), width: 300, at: barPoint()
+        )
+        XCTAssertLessThanOrEqual(
+            distance(rock[0], rgb255(Ink.day.safe)), 6, "fast over bare rock is not the safe green"
+        )
+        XCTAssertLessThanOrEqual(spread(rock), 1, "the bar pulses over bare rock, where speed breaks nothing")
+
+        // On bone and inside the safe speed: the stamp red, flat.
+        let slow = try samples(
+            of: SpeedMeter(speed: 0.5, safeSpeed: 1, overBone: true), width: 300, at: barPoint()
+        )
+        XCTAssertLessThanOrEqual(
+            distance(slow[0], rgb255(Ink.day.stamp)), 6, "slow on bone is not the stamp red"
+        )
+        XCTAssertLessThanOrEqual(spread(slow), 1, "the bar pulses while the brush is inside the safe speed")
+
+        let under = try samples(of: SpeedMeter(speed: 0.5, safeSpeed: 1), width: 300, at: barPoint())
+        XCTAssertLessThanOrEqual(
+            distance(under[0], rgb255(Ink.day.safe)), 6,
+            "the sample is not on the safe-green fill, so the check below proves nothing"
+        )
+        XCTAssertLessThanOrEqual(spread(under), 1, "the bar pulses while the brush is inside the safe speed")
+    }
+
+    /// The Intact readout pulses when told it is alarmed and not otherwise. Measured over the
+    /// whole number: the total ink on the page rises and falls with the opacity.
+    func testAReadoutPulsesOnlyWhenAlarmed() throws {
+        func inkMass(_ pixels: RenderedPixels) -> Int {
+            let page = rgb255(Ink.day.page)
+            var total = 0
+            for y in 0..<pixels.height {
+                for x in 0..<pixels.width { total += distance(pixels.rgb(x, y), page) }
+            }
+            return total
+        }
+        func swing(alarmed: Bool) throws -> Double {
+            var masses: [Int] = []
+            for _ in 0..<14 {
+                let view = Readout(label: "Intact", value: "52%", tint: Ink.day.stamp, isAlarmed: alarmed)
+                    .background(Ink.day.page)
+                masses.append(inkMass(try renderPixels(view, width: 120)))
+                RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.09))
+            }
+            let high = Double(masses.max() ?? 0), low = Double(masses.min() ?? 0)
+            return high == 0 ? 0 : (high - low) / high
+        }
+        XCTAssertGreaterThan(try swing(alarmed: true), 0.04, "the alarmed readout does not pulse")
+        XCTAssertLessThan(try swing(alarmed: false), 0.005, "a readout that is not alarmed is moving")
+    }
+}
+
+/// Until `DigView` hands the scene its theme, a real dig never reaches the night palette:
+/// every test above it drives the scene with a `Theme` it built itself. These host a real
+/// `DigView` in a window and let it appear, so the one line that connects them is covered.
+@MainActor
+final class DigViewThemeWiringTests: XCTestCase {
+
+    /// Puts a `DigView` on a site in a full-screen window, so the safe areas are the device's
+    /// own, and hands the window to `body`.
+    private func withDig<T>(
+        site siteID: String, theme: Theme, _ body: (UIWindow) throws -> T
+    ) throws -> T {
+        let site = try XCTUnwrap(ContentCatalog.shared.site(siteID), "\(siteID) left the catalog; update this test")
+        let engine = DigEngine(seed: 11, site: site)
+        let settings = GameSettings(
+            defaults: UserDefaults(suiteName: "bonedust.tests.\(UUID().uuidString)")!
+        )
+        let host = UIHostingController(
+            rootView: DigView(engine: engine).environment(settings).environment(\.theme, theme)
+        )
+        let windowScene = try XCTUnwrap(
+            UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
+            "the test host has no window scene, so the view cannot appear"
+        )
+        let window = UIWindow(windowScene: windowScene)
+        window.frame = windowScene.screen.bounds
+        window.rootViewController = host
+        window.isHidden = false
+        defer {
+            window.isHidden = true
+            window.rootViewController = nil
+            withExtendedLifetime(engine) {}
+        }
+        return try body(window)
+    }
+
+    /// Runs the loop until `done` or three seconds.
+    private func spin(until done: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(3)
+        while !done(), Date() < deadline {
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.02))
+        }
+        return done()
+    }
+
+    @discardableResult
+    private func dig(site siteID: String, theme: Theme, until done: () -> Bool) throws -> Bool {
+        try withDig(site: siteID, theme: theme) { _ in spin(until: done) }
+    }
+
+    /// The single most valuable check in the migration: a dig on `night_dig` really does
+    /// switch the shared theme, through the view and not through a test's own wiring.
+    func testADigOnTheNightSiteSwitchesTheSharedThemeToNight() throws {
+        let theme = Theme()
+        XCTAssertTrue(theme.ink == Ink.day, "the theme must start on day for this to prove anything")
+        let switched = try dig(site: "night_dig", theme: theme) { theme.ink == Ink.night }
+        XCTAssertTrue(switched, "a night_dig run never reached the night palette")
+        let level = try XCTUnwrap(ContentCatalog.shared.site("night_dig")).modifiers.lightLevel
+        XCTAssertEqual(theme.lightLevel, level, "the theme was not given the site's own light level")
+    }
+
+    /// The other half: it is the dig that sets the light, not something that happened to be
+    /// left in the theme. A theme already at night goes back to day for a day site.
+    func testADigOnADaySiteBringsANightThemeBackToDay() throws {
+        let theme = Theme()
+        theme.lightLevel = 0.2
+        XCTAssertTrue(theme.ink == Ink.night, "the theme must start on night for this to prove anything")
+        let switched = try dig(site: "charmouth", theme: theme) { theme.ink == Ink.day }
+        XCTAssertTrue(switched, "a day-site dig left the theme on night")
+    }
+
+    /// The slab is width-limited at 3:4, so the dig screen's content is shorter than the
+    /// screen and floats a little inside the safe area. `ignoresSafeArea` only extends an
+    /// edge that touches the safe area, so the page once stopped short and left a white
+    /// band above and below it. A view rendered with `ImageRenderer` has no safe area, so
+    /// this needs a real window, and it reads the pixels inside the bands themselves.
+    func testThePageReachesTheScreenEdgesAboveAndBelowTheContent() throws {
+        try withDig(site: "charmouth", theme: Theme()) { window in
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.6))
+            let insets = window.safeAreaInsets
+            try XCTSkipIf(
+                insets.top == 0 || insets.bottom == 0,
+                "this simulator has no top and bottom safe areas, so there is no band to check"
+            )
+            let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            let pixels = try readPixels(try XCTUnwrap(image.cgImage), scale: Int(image.scale))
+            let page = rgb255(Ink.day.page)
+            // 4pt in from the left and midway between two rows of grid dots, which sit on an
+            // 8pt lattice from the top of the screen.
+            let bottomPoint = 8 * ((Int(window.bounds.height) - 5) / 8) + 4
+            XCTAssertGreaterThan(CGFloat(bottomPoint), window.bounds.height - insets.bottom, "not inside the bottom band")
+            for (name, point) in [("top", 4), ("bottom", bottomPoint)] {
+                let pixel = pixels.rgb(4 * pixels.scale, point * pixels.scale)
+                XCTAssertLessThanOrEqual(
+                    distance(pixel, page), 3,
+                    "the page does not reach the \(name) edge of the screen: \(pixel), not \(page)"
+                )
+            }
         }
     }
 }
