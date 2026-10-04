@@ -391,7 +391,7 @@ struct Ink: Equatable {
         raised: Color(Earth.s7),
         hairline: Color(Earth.s5),
         ink: Color(Earth.s1),
-        muted: Color(Earth.s4),
+        muted: Color(Earth.s3),   // s4 is 4.49:1 on nightPage — under AA
         stamp: Color(Earth.stampNight),
         gem: Color(Earth.gemNight),
         safe: Color(Earth.safeNight),
