@@ -95,8 +95,16 @@ same problem to a lesser degree.
 
 The fix is a **mount**: an `earth6 #4A3D2E` panel behind the slab, extending 6pt
 past it on every side. A specimen pinned to dark card is the correct notebook
-object, and it separates the slab from the page at 8.3:1 while clearing the
-palest site matrix at 5.8:1 — regardless of which site is loaded.
+object. **By day** it separates the slab from the page at 8.3:1 while clearing
+the palest site matrix at 5.8:1, whatever site is loaded.
+
+**At night the mount is `earth1`, not `earth8`.** The night page is dark, so a
+dark mount disappears into it — `s8` on `nightPage` measures 1.15:1, and page,
+mount and uncleared topsoil all land within that of each other. Inverting the
+mount to the cream `s1` gives 11.9:1 against the page and 3.9:1 against the
+matrix: better on both pairs, and a pale card under a headlamp is the right
+object anyway. Both pairs are now tested; the absence of a mount-versus-page
+test is why the dark version shipped.
 
 The mount also removes three changes an earlier draft of this spec called for.
 Bone stays at its current `RGB8(242, 233, 214)`, and the slab needs no drawn
@@ -139,9 +147,11 @@ renders blank.
 
 ### 4. Texture
 
-- **Graph grid.** 8pt dotted rule in `earth3` at 0.35 alpha. Generated once as
-  a single screen-sized texture in `DigScene.didChangeSize`, drawn at
-  `zPosition -2`. Shows through behind the slab.
+- **Graph grid.** 8pt dotted rule in `earth3` at 0.35 alpha, drawn as a SwiftUI
+  `Canvas` in `NotebookPage` behind `DigView`'s content. It was specified into
+  the SpriteKit scene first, which was wrong: the scene is exactly the slab card
+  and the mount fills it, so anything behind the mount is unreachable. The page
+  is a SwiftUI surface and the grid belongs on it.
 - **Paper fibre: cut.** It was specified into the SpriteKit scene, where it turned
   out to be unreachable — the scene is exactly the slab card and the mount fills
   it, so the fibre sat behind an opaque panel. Moving it to `DigView` with the
@@ -215,9 +225,12 @@ a struct with instance properties and `Ink.day` / `Ink.night` presets. A small
 the SwiftUI environment. `Ink.lerp` exists for a future animated crossfade and is
 tested, but nothing drives the live palette through it — see the table above.
 
-Scope control: only `DigView` and `DigScene` consume the dynamic theme in this
-pass. `RootView`, `SpeedMeter`, and `DebugOverlay` read `Ink.day` directly.
-Wiring them to the environment is a later, mechanical change.
+**Every view reads the theme.** An earlier draft scoped this to `DigView` and
+`DigScene` and left the others on `Ink.day`; that is not what shipped. No
+`Ink.day` read survives in any view — `RootView`, `SpeedMeter`, `FieldLabel` and
+`SpecimenRule` all take the environment theme, because day `muted` is 2.4:1 on
+the night page and a half-themed app is worse than either whole one.
+`DebugOverlay` references no design token and is out of scope.
 
 ### 7. Cel shading
 
@@ -295,7 +308,7 @@ default moved.
 
 | File | Change |
 |---|---|
-| `BonedustCore/Sources/BonedustCore/UI/EarthRamp.swift` | **New.** Ramp and accent values as plain `(r,g,b)` tuples. No SwiftUI. |
+| `BonedustCore/Sources/BonedustCore/Content/EarthRamp.swift` | **New.** Ramp and accent values as `RGB8`, beside the other content types. No SwiftUI. |
 | `Bonedust/UI/DesignTokens.swift` | Rewrite. `Ink` becomes a struct over the ramp; `Typography` gains the fallback chain; `Measure.cardRadius` to 0. |
 | `Bonedust/UI/Theme.swift` | **New.** Observable deriving `Ink` from `lightLevel`; environment key. |
 | `BonedustCore/Sources/BonedustCore/Content/ContentModels.swift` | **No change expected.** `SlabPalette` lives here, not in the renderer; see the note below on why it does not need retuning. |
@@ -304,8 +317,8 @@ default moved.
 | `BonedustCore/Sources/BonedustCore/Sim/SimTuning.swift` | Add `boneTellStipple: Float = 0.60` beside the existing `boneTellTint`, so the debug overlay gets a slider for each. |
 | `Bonedust/Dig/DigScene.swift` | Mount panel, grid texture, paper-fibre tile, page background, `lightLevel` coupling, zPosition order. Also removes the hardcoded `0x221813` at line 41, which duplicates `Ink.ground`. |
 | `Bonedust/Dig/DigView.swift` | Consume `Theme` from the environment; restyle. |
-| `Bonedust/UI/SpeedMeter.swift` | Restyle to `Ink.day`. |
-| `Bonedust/App/RootView.swift` | Restyle to `Ink.day`; install `Theme` in the environment. |
+| `Bonedust/UI/SpeedMeter.swift` | Restyle to the environment theme. |
+| `Bonedust/App/RootView.swift` | Restyle to the environment theme; install `Theme`. |
 | `Bonedust/Resources/Fonts/` | Add `BebasNeue-Regular.ttf`, `CourierPrime-Regular.ttf`, `CourierPrime-Bold.ttf`; update README and the `UIAppFonts` entry in `project.yml`. |
 | `Resources/Assets.xcassets/LaunchBackground.colorset` | `earth1`. |
 | `Resources/Assets.xcassets/AppIcon.appiconset` | Regenerate against the new ground. |
