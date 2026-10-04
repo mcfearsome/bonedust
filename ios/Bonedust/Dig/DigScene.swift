@@ -1,6 +1,23 @@
 import BonedustCore
+import CoreImage
 import SpriteKit
+import SwiftUI
 import UIKit
+
+extension SKColor {
+    /// `Earth` is plain bytes so BonedustCore stays free of UIKit; this is the scene's
+    /// way back out of them. The scene's own backdrop reads `Ink`, which already holds
+    /// the ramp as `Color`, so this is for the one-off colours drawn from `Earth`
+    /// directly, such as the fracture bloom.
+    convenience init(_ rgb: RGB8) {
+        self.init(
+            red: CGFloat(rgb.r) / 255,
+            green: CGFloat(rgb.g) / 255,
+            blue: CGFloat(rgb.b) / 255,
+            alpha: 1
+        )
+    }
+}
 
 /// The slab, on screen and under the finger.
 ///
@@ -19,14 +36,25 @@ final class DigScene: SKScene {
     weak var engine: DigEngine?
     var haptics: HapticEngine?
     var audio: DigAudio?
+    /// The palette the page is drawn in. A scene has no SwiftUI environment, so the
+    /// view hands it over; `configureRenderer()` then sets its light level.
+    var theme: Theme?
     /// Suppresses particle bursts, per §7.
     var reducedMotion = false
     /// Fires the first time a crack happens, for the single diegetic hint in §9.
     var onFirstCrack: (() -> Void)?
 
     private var renderer = SlabRenderer()
-    private var slabNode: SKSpriteNode?
+    private(set) var slabNode: SKSpriteNode?
     private var slabTexture: SKMutableTexture?
+    /// The page furniture behind the slab, back to front. `private(set)` so a test
+    /// can read the layer order and geometry; only this class builds them.
+    private(set) var gridNode: SKSpriteNode?
+    private(set) var paperNode: SKSpriteNode?
+    private(set) var mountNode: SKSpriteNode?
+    /// The palette the backdrop is drawn in. Kept so that a rebuild on resize
+    /// repaints in the same colours instead of falling back to day.
+    private var appliedInk = Ink.day
     private var dust: SKEmitterNode?
     private var lastUpdateTime: TimeInterval = 0
     private var lastTouchTimestamp: TimeInterval?
@@ -38,9 +66,10 @@ final class DigScene: SKScene {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
         scaleMode = .resizeFill
-        backgroundColor = SKColor(red: 0x22 / 255, green: 0x18 / 255, blue: 0x13 / 255, alpha: 1)
+        backgroundColor = SKColor(appliedInk.page)
         view.isMultipleTouchEnabled = false
         configureRenderer()
+        buildBackdrop()
         buildSlab()
     }
 
@@ -49,6 +78,12 @@ final class DigScene: SKScene {
         renderer.palette = engine.site.palette
         renderer.tuning = engine.sim.tuning
         renderer.lightLevel = engine.site.modifiers.lightLevel
+        // One light level dims the slab and the page together. It is static per site
+        // and read once, here; there is no stream to observe.
+        if let theme {
+            theme.lightLevel = engine.site.modifiers.lightLevel
+            applyTheme(ink: theme.ink)
+        }
         pendingFullRedraw = true
     }
 
@@ -61,7 +96,7 @@ final class DigScene: SKScene {
         let node = SKSpriteNode(texture: texture)
         node.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         node.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        node.size = size
+        node.size = slabSize
         node.zPosition = 0
         addChild(node)
         slabNode = node
@@ -69,10 +104,158 @@ final class DigScene: SKScene {
         pendingFullRedraw = true
     }
 
+    /// The scene less the mount's margin on every side.
+    ///
+    /// The scene is exactly the slab's card, and an `SKView` draws nothing past its own
+    /// edge. A slab that filled the scene would cover the whole backdrop, and a mount
+    /// "extending past" it would be clipped away, so the slab is inset and the mount
+    /// fills the space it leaves. `gridPoint(for:)` and `emitDust` both read the
+    /// slab node's size, so touches and dust follow the inset without any change.
+    private var slabSize: CGSize {
+        let inset = Measure.mountMargin * 2
+        return CGSize(
+            width: max(0, size.width - inset),
+            height: max(0, size.height - inset)
+        )
+    }
+
     override func didChangeSize(_ oldSize: CGSize) {
         super.didChangeSize(oldSize)
-        slabNode?.size = size
+        slabNode?.size = slabSize
         slabNode?.position = CGPoint(x: size.width / 2, y: size.height / 2)
+
+        // The grid is baked at a specific size, so it is rebuilt rather than scaled —
+        // stretching it would turn round dots into ovals.
+        buildBackdrop()
+    }
+
+    // MARK: Backdrop
+
+    /// The page furniture behind the slab, back to front: grid `-3`, paper fibre
+    /// `-2`, mount `-1`. The slab sits at `0` and the dust emitter at `1`.
+    ///
+    /// The grid and paper are regenerated on resize rather than tiled with a shader,
+    /// because a resize happens about twice in a session and a shader would be a lot
+    /// of machinery for that.
+    ///
+    /// `contrastRaised` is a parameter, not a read of `UIAccessibility` in the body,
+    /// so a test can drive both branches. The default is the real setting.
+    func buildBackdrop(contrastRaised: Bool = UIAccessibility.isDarkerSystemColorsEnabled) {
+        gridNode?.removeFromParent()
+        paperNode?.removeFromParent()
+        mountNode?.removeFromParent()
+        gridNode = nil
+        paperNode = nil
+        mountNode = nil
+
+        let centre = CGPoint(x: size.width / 2, y: size.height / 2)
+
+        // Graph grid. Dropped entirely under Increase Contrast: a 0.35-alpha dot
+        // pattern is exactly the low-contrast decoration that setting exists to
+        // remove, and leaving it in would be noise.
+        if !contrastRaised, let texture = DigScene.gridTexture(size: size) {
+            let node = SKSpriteNode(texture: texture)
+            node.size = size
+            node.position = centre
+            node.zPosition = -3
+            // The dots are drawn white and tinted here, so repainting for a new
+            // palette is a property write rather than a new texture.
+            node.color = SKColor(appliedInk.hairline)
+            node.colorBlendFactor = 1
+            node.alpha = 0.35
+            addChild(node)
+            gridNode = node
+        }
+
+        // Paper fibre. Same reasoning, and it is 3% alpha, so it is the first thing
+        // to go.
+        if !contrastRaised, let texture = DigScene.paperTexture {
+            let node = SKSpriteNode(texture: texture)
+            node.position = centre
+            node.size = size
+            node.alpha = 0.03
+            node.zPosition = -2
+            addChild(node)
+            paperNode = node
+        }
+
+        // The mount. This one is never optional: it is what stops a cleared slab
+        // from vanishing into the page, so Increase Contrast makes it more
+        // necessary, not less. It is the slab plus the margin on every side.
+        let inset = Measure.mountMargin * 2
+        let slab = slabSize
+        let mount = SKSpriteNode(
+            color: SKColor(appliedInk.mount),
+            size: CGSize(width: slab.width + inset, height: slab.height + inset)
+        )
+        mount.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        mount.position = centre
+        mount.zPosition = -1
+        addChild(mount)
+        mountNode = mount
+    }
+
+    /// An 8pt dotted rule. One screen-sized texture beats hundreds of nodes.
+    ///
+    /// Drawn through `UIGraphicsImageRenderer`, so its space is UIKit's: origin
+    /// top-left, y down. That is the same convention as `SlabGrid`, and the opposite
+    /// of SpriteKit's scene space. `SKTexture(image:)` keeps the image upright, so row
+    /// 0 lands at the top of the sprite and nothing here needs flipping. `emitDust`
+    /// flips because it converts *cell coordinates* into scene points; this is an
+    /// image, not a coordinate conversion.
+    static func gridTexture(size: CGSize) -> SKTexture? {
+        guard size.width > 0, size.height > 0 else { return nil }
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let image = renderer.image { context in
+            let cg = context.cgContext
+            cg.setFillColor(UIColor.white.cgColor)
+            let step: CGFloat = 8
+            var y: CGFloat = 0
+            while y < size.height {
+                var x: CGFloat = 0
+                while x < size.width {
+                    cg.fill(CGRect(x: x, y: y, width: 1, height: 1))
+                    x += step
+                }
+                y += step
+            }
+        }
+        return SKTexture(image: image)
+    }
+
+    /// A 256x256 noise tile, generated once and reused.
+    ///
+    /// Generated rather than shipped so the bundle stays flat. `CIRandomGenerator` is
+    /// high-frequency on its own, so it is blurred and desaturated before use; raw it
+    /// looks like television static.
+    private static let paperTexture: SKTexture? = {
+        let extent = CGRect(x: 0, y: 0, width: 256, height: 256)
+        guard let noise = CIFilter(name: "CIRandomGenerator")?.outputImage,
+              let mono = CIFilter(
+                  name: "CIColorControls",
+                  parameters: [kCIInputImageKey: noise, kCIInputSaturationKey: 0]
+              )?.outputImage,
+              let blurred = CIFilter(
+                  name: "CIGaussianBlur",
+                  parameters: [kCIInputImageKey: mono, kCIInputRadiusKey: 0.6]
+              )?.outputImage
+        else { return nil }
+
+        let context = CIContext()
+        guard let cgImage = context.createCGImage(blurred, from: extent) else { return nil }
+        return SKTexture(image: UIImage(cgImage: cgImage))
+    }()
+
+    /// Repaints the page, the mount and the grid in `ink`.
+    ///
+    /// Named `applyTheme` rather than `apply` because `DigScene` already has a
+    /// private `apply(_:at:engine:)` for stroke results, and two unrelated methods
+    /// called `apply` on one scene is a trap for whoever reads this next.
+    func applyTheme(ink: Ink) {
+        appliedInk = ink
+        backgroundColor = SKColor(ink.page)
+        mountNode?.color = SKColor(ink.mount)
+        gridNode?.color = SKColor(ink.hairline)
     }
 
     // MARK: Frame
