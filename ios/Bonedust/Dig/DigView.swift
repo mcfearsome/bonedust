@@ -181,6 +181,23 @@ struct DigView: View {
                 .tracking(1.0)
                 .foregroundStyle(Ink.ivory)
             SpecimenRule().frame(width: 92)
+            // Identifying a fossil early is only worth paying for if the name tells you
+            // something you can act on. These two lines are that: whether the slab is worth
+            // half as much again, and how easily it breaks under the brush.
+            if engine.isIdentified {
+                if engine.isFirstFind {
+                    Text("NEVER CATALOGUED · PAYS MORE")
+                        .font(Typography.label(.caption2))
+                        .tracking(0.9)
+                        .foregroundStyle(Ink.accent)
+                }
+                Text(engine.fragilityNote)
+                    .font(Typography.label(.caption2))
+                    .tracking(0.9)
+                    .foregroundStyle(
+                        engine.fossil.crackMultiplier > 1.15 ? Ink.danger : Ink.muted
+                    )
+            }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)

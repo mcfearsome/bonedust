@@ -55,6 +55,14 @@ final class DigEngine {
     /// going fast costs nothing — and a meter that said otherwise sent careful players into
     /// the one strategy that cannot pay an installment.
     private(set) var isBrushOverBone = false
+    /// Whether this species is not yet in the Collection, and so pays the first-find bonus.
+    ///
+    /// Shown the moment the specimen is identified, which is what makes identifying it
+    /// early worth paying for. Knowing the *name* at 10% exposure changed no decision --
+    /// reported from play as "so what, still have to uncover it". Knowing that this slab is
+    /// worth half as much again, and how easily it breaks, changes two: how carefully to
+    /// brush it, and whether to push for full exposure or bag early for the grade.
+    var isFirstFind = false
     @ObservationIgnored private var lastGustAt: TimeInterval = -.greatestFiniteMagnitude
     private(set) var safeSpeed: Float = 1.4
     private(set) var isIdentified = false
@@ -187,8 +195,6 @@ final class DigEngine {
 
     // MARK: Derived
 
-    var layout: SlabLayout { sim.layout }
-
     // Read-only windows onto the simulation, so the scene can render and route
     // feedback without being handed a mutable reference to the dig.
     var grid: SlabGrid { sim.grid }
@@ -200,6 +206,15 @@ final class DigEngine {
     func consumeDirtyRegion() -> DirtyRegion { sim.consumeDirty() }
 
     func markEverythingDirty() { sim.markEverythingDirty() }
+
+    var layout: SlabLayout { sim.layout }
+
+    /// Repaints a rectangle without changing it, for the gem shimmer.
+    func markDirty(x0: Int, y0: Int, x1: Int, y1: Int) {
+        for y in y0...max(y0, y1) {
+            for x in x0...max(x0, x1) { sim.markDirty(x: x, y: y) }
+        }
+    }
 
     /// True when the brush is currently over an exposed bone cell, for haptic grain.
     func isOverBone(_ point: Vec2) -> Bool {
@@ -213,6 +228,19 @@ final class DigEngine {
 
     /// §3: hidden until exposure reaches the identify threshold.
     var specimenName: String { isIdentified ? fossil.name : "Unidentified" }
+
+    /// How much care this species wants, in words rather than a multiplier.
+    ///
+    /// The number means nothing to a player mid-dig; "brittle" tells them to reach for the
+    /// fine brush, which is the decision the identification is supposed to inform.
+    var fragilityNote: String {
+        switch fossil.crackMultiplier {
+        case ..<0.95: return "TOUGH · BRUSH FREELY"
+        case ..<1.15: return "ORDINARY BONE"
+        case ..<1.3: return "BRITTLE · GO GENTLY"
+        default: return "VERY BRITTLE · FINE BRUSH"
+        }
+    }
 
     /// Seconds of daylight spent so far, for the slab record's duration.
     var elapsedSeconds: Float { max(0, totalDaylight - daylightRemaining) }

@@ -686,3 +686,59 @@ targets of 70, 60, 48, 38, 30 — the closest fit the ramp has had.
 
 The hot loop lost its early-out, since pressure is never zero now: 4.3 us/frame mean and
 83.5 us worst, which is 0.5% of a 60 Hz frame.
+
+## Kit is rented, Reputation is owned
+
+Five things from one play session, and four of them were the same problem.
+
+**Kit no longer carries.** "Once i made my purchases i never really looked at the store
+again" — a brush bought in week one was still doing the job in week nine, so the tent had
+nothing left to say and the middle of the game had no decisions in it. Every week now starts
+with the plain brush.
+
+That is why it was added, though: without it the installment ramp is unwinnable, because
+income could never grow while the amount owed did. What replaces it is **Camp**, where
+Reputation buys six permanent upgrades. Two reasons it is the right home:
+
+- **Reputation survives a failed week.** Tools never did — §4 has the Collector take them as
+  interest — so a bad run now costs a week rather than a career.
+- **It is earned, not bought.** Reputation comes from leftover cash and from clearing a
+  tier, so it accrues from *surviving* rather than from income, and cannot compound the way
+  a cash-priced permanent upgrade would.
+
+**Sites other than the richest now have a reason.** A species not in the Collection pays
+1.5x. Fossils are site-specific, so a poorer site is worth a week whenever it holds something
+new — and the incentive expires by itself as the Collection fills, rather than needing a
+cooldown or a penalty for repeats. 1.5 rather than 1.6 because it is exactly representable
+in binary, so the Swift and Ruby ceilings agree without f32 narrowing.
+
+**Identifying a fossil early now tells you something.** "So what, still have to uncover it"
+was exactly right: `collectors_eye` changed a label and nothing else. The chip now shows
+whether the species is uncatalogued — and so worth half as much again — and how brittle it
+is, which is the difference between reaching for the fine brush and not. Both are decisions
+the identification can inform; the name alone was not.
+
+**Breath was most of a dig.** Sixteen patches at radius 7 lift about 2,460 cells, which with
+a 2.5s cooldown is more than a slab's three layers inside one daylight — so a player who
+blew steadily never had to brush. Seven patches at radius 5 is about 550 cells: a real help
+on the overburden, nowhere near a substitute.
+
+**Gems shimmer.** A static teal square at 96x128 reads as another mineral stain, and a gem
+is worth going carefully around only if it gets noticed. Each cell twinkles on its own
+schedule, phased by the noise field already in the grid — a cluster flashing in unison reads
+as a UI element blinking, while cells catching light one after another reads as a facet.
+
+### The ramp had to be rebuilt, not adjusted
+
+Removing carried kit dropped tier 4 income from $1,877 to $885 and collapsed the upper
+tiers to zero. The ramp had been fitted when kit accumulated, so income grew with it; now it
+grows only from site unlocks and upgrades, and the curve is far flatter:
+[425, 500, 850, 900, 1450, …] gives 73%, 54%, 33%, 38%, 25% against targets of 70, 60, 48,
+38, 30.
+
+`EconomySimulator` had to learn to visit the camp first. It models a career, and a career
+that never buys an upgrade is a player with no permanent progression at all — fitting
+installments against that would make the ramp unwinnable for anyone who does. It buys
+cheapest-first rather than optimally, because the point is a plausible baseline: a sweep that
+modelled perfect purchasing would flatter the curve exactly as its free tool-switching once
+did.

@@ -929,12 +929,12 @@
   "installments" : [
     425,
     500,
-    950,
-    1700,
-    2550,
-    2800,
-    3200,
-    3500
+    850,
+    900,
+    1450,
+    1625,
+    1900,
+    2150
   ],
   "schema" : 1,
   "sets" : [
@@ -1505,6 +1505,7 @@
     "emaAlpha" : 0.25,
     "emaIdleDecay" : 0.85,
     "exposureExponent" : 1.5,
+    "firstFindMultiplier" : 1.5,
     "fossilOffsetX" : 7,
     "fossilOffsetY" : 13,
     "fossilRotation" : 0.7,
@@ -1525,11 +1526,11 @@
     "gradeThresholdB" : 0.7,
     "gradeThresholdC" : 0.5,
     "gradeThresholdS" : 0.95,
-    "gustCooldownSeconds" : 2.5,
+    "gustCooldownSeconds" : 4,
     "gustCrackRate" : 0.5,
     "gustFloorDepth" : 1,
-    "gustPatchesAtFullStrength" : 16,
-    "gustRadius" : 7,
+    "gustPatchesAtFullStrength" : 7,
+    "gustRadius" : 5,
     "identifyExposure" : 0.25,
     "intactCrackWeight" : 5,
     "layerHardness" : [

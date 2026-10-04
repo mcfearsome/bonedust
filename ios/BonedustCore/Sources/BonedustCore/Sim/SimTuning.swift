@@ -100,6 +100,21 @@ public struct SimTuning: Sendable, Codable, Equatable {
     public var fossilScaleMax: Float = 1.15
     public var fossilOffsetX: Int = 7
     public var fossilOffsetY: Int = 13
+    /// What a species you have never catalogued pays on top.
+    ///
+    /// Reported from play as "theres never any incentive to pick other sites besides the
+    /// most expensive", which was true: sites differ by a payout multiplier, so the richest
+    /// one dominates every choice forever and the other four are scenery.
+    ///
+    /// Fossils are site-specific, so paying for a *first* find makes a poorer site worth a
+    /// week whenever it holds something new -- and the incentive expires by itself as the
+    /// Collection fills, instead of needing a cooldown or a penalty for repeats. Wheeler
+    /// pays more for a species he has not seen because that is what a collector does.
+    /// 1.5 rather than 1.6 on purpose: it is exactly representable in binary, so this
+    /// `Float` and Ruby's `Float` are the same number and the two ceilings agree without
+    /// going through the f32 narrowing the other shared constants need.
+    public var firstFindMultiplier: Float = 1.5
+
     // MARK: Grade
 
     /// Weights for the finished-slab grade. They sum to 1.
@@ -130,9 +145,18 @@ public struct SimTuning: Sendable, Codable, Equatable {
     // MARK: Breath
 
     /// Patches a full-strength breath lifts, scattered over the whole slab.
-    public var gustPatchesAtFullStrength: Int = 16
+    /// Was 16, which made breath most of a dig.
+    ///
+    /// Sixteen patches at radius 7 lift about 2,460 cells, and with a 2.5s cooldown that is
+    /// more than a slab's entire three layers inside one daylight -- so a player who blew
+    /// steadily never had to brush, and the timer stopped meaning anything. Reported as
+    /// "way too much time given, no tension".
+    ///
+    /// Seven at radius 5 is about 550 cells a gust, which is a real help on the overburden
+    /// and nowhere near a substitute for the brush.
+    public var gustPatchesAtFullStrength: Int = 7
     /// Radius of one patch, in cells.
-    public var gustRadius: Float = 7
+    public var gustRadius: Float = 5
     /// The depth a gust will not take a cell below.
     ///
     /// 1, not 0. Breath moves loose overburden; it never uncovers the fossil for you, so
@@ -146,7 +170,7 @@ public struct SimTuning: Sendable, Codable, Equatable {
     /// use it the whole decision.
     public var gustCrackRate: Float = 0.5
     /// Seconds before another gust can land.
-    public var gustCooldownSeconds: Float = 2.5
+    public var gustCooldownSeconds: Float = 4
 
     /// Side of a gem cluster, in cells.
     ///

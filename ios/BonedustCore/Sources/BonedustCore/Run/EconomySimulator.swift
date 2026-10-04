@@ -324,13 +324,15 @@ public enum EconomySimulator {
         tuning: SimTuning = .standard,
         extraModifiers: ModifierSet = ModifierSet(),
         toolIDs: [String] = [BrushTool.brush.id],
-        charmIDs: [String] = []
+        charmIDs: [String] = [],
+        extraDays: Int = 0
     ) -> RunState {
         // A fixed start date, not Date(). A simulated run has no business carrying a
         // wall clock: it makes two sweeps of the same seed differ, which defeats the
         // point of a reproducible balance tool.
         var run = RunState(
             seed: seed, siteID: siteID, tier: tier,
+            totalDays: RunLength.days(tier: tier) + extraDays,
             toolIDs: toolIDs, charmIDs: charmIDs,
             startedAt: Date(timeIntervalSince1970: 0)
         )
@@ -441,16 +443,40 @@ public enum EconomySimulator {
                 let run = playRun(
                     seed: runSeed, siteID: site, tier: tier, policy: policy,
                     catalog: catalog, tuning: tuning,
-                    toolIDs: meta.carriedToolIDs, charmIDs: meta.carriedCharmIDs
+                    // Everything bought at camp, which is now the whole of a career's
+                    // permanent progression.
+                    extraModifiers: meta.upgradeModifiers(catalog: catalog),
+                    toolIDs: meta.carriedToolIDs, charmIDs: meta.carriedCharmIDs,
+                    extraDays: meta.upgradeExtraDays(catalog: catalog)
                 )
                 tally.record(tier: tier, run: run)
                 meta.absorb(run)
+                // Visit the camp. Kit no longer carries between runs, so the permanent
+                // track *is* the progression -- a model that never buys an upgrade is a
+                // player with none, and fitting installments against it would make the
+                // ramp unwinnable for anyone who does.
+                buyAffordableUpgrades(&meta, catalog: catalog)
                 if case .succeeded = run.phase { continue }
                 break
             }
         }
 
         return tally.reports(tiers: 1...maxTier)
+    }
+
+    /// Spends Reputation on upgrades, cheapest first.
+    ///
+    /// Cheapest-first rather than best-value because value depends on a player's style and
+    /// the point here is a plausible baseline, not an optimal one. A sweep that modelled
+    /// perfect purchasing would flatter the curve the same way its tool-switching model
+    /// once did.
+    static func buyAffordableUpgrades(
+        _ meta: inout MetaProgress, catalog: ContentCatalog
+    ) {
+        for upgrade in catalog.upgrades where !meta.ownedUpgradeIDs.contains(upgrade.id) {
+            guard meta.reputation >= upgrade.reputation else { continue }
+            try? meta.buy(upgrade: upgrade.id, catalog: catalog)
+        }
     }
 
     /// Highest-paying site the given Reputation has unlocked.

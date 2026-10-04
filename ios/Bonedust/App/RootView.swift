@@ -130,6 +130,13 @@ struct RootView: View {
         case .collection:
             CollectionView(meta: coordinator.meta) { coordinator.showTitle() }
 
+        case .camp:
+            CampView(
+                meta: coordinator.meta,
+                onBuy: { coordinator.buy(upgrade: $0) },
+                onLeave: { coordinator.showTitle() }
+            )
+
         case .crewLedger:
             CrewLedgerView(
                 store: coordinator.ledger,

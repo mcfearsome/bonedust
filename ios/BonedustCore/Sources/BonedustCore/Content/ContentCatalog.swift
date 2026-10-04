@@ -13,6 +13,8 @@ public struct ContentCatalog: Sendable, Codable {
     /// Awarded from the player's own lifetime total, so they ship with the app and
     /// work with no network. Outfit and crew ladders come over the wire instead.
     public var personalMilestones: [ContributionMilestone]
+    /// Permanent, Reputation-priced. See `Upgrade`.
+    public var upgrades: [Upgrade]
 
     /// Built once in `init`, because the dig loop looks fossils up by id on every
     /// slab and a linear scan over nineteen entries inside generation is waste.
@@ -21,10 +23,11 @@ public struct ContentCatalog: Sendable, Codable {
     public let setsByID: [String: SkeletonSet]
     public let toolsByID: [String: Tool]
     public let charmsByID: [String: Charm]
+    public let upgradesByID: [String: Upgrade]
 
     private enum CodingKeys: String, CodingKey {
         case version, fossils, sites, sets, tools, charms, achievements, trails
-        case personalMilestones
+        case personalMilestones, upgrades
     }
 
     public init(
@@ -36,7 +39,8 @@ public struct ContentCatalog: Sendable, Codable {
         charms: [Charm] = [],
         achievements: [Achievement] = [],
         trails: [BrushTrail] = [],
-        personalMilestones: [ContributionMilestone] = []
+        personalMilestones: [ContributionMilestone] = [],
+        upgrades: [Upgrade] = []
     ) {
         self.version = version
         self.fossils = fossils
@@ -47,6 +51,9 @@ public struct ContentCatalog: Sendable, Codable {
         self.achievements = achievements
         self.trails = trails
         self.personalMilestones = personalMilestones.sorted { $0.amount < $1.amount }
+        // Sorted by price so the camp screen reads as a ladder without the view sorting it.
+        self.upgrades = upgrades.sorted { $0.reputation < $1.reputation }
+        self.upgradesByID = Dictionary(uniqueKeysWithValues: upgrades.map { ($0.id, $0) })
         self.fossilsByID = Dictionary(uniqueKeysWithValues: fossils.map { ($0.id, $0) })
         self.sitesByID = Dictionary(uniqueKeysWithValues: sites.map { ($0.id, $0) })
         self.setsByID = Dictionary(uniqueKeysWithValues: sets.map { ($0.id, $0) })
@@ -67,7 +74,8 @@ public struct ContentCatalog: Sendable, Codable {
             trails: try c.decodeIfPresent([BrushTrail].self, forKey: .trails) ?? [],
             personalMilestones: try c.decodeIfPresent(
                 [ContributionMilestone].self, forKey: .personalMilestones
-            ) ?? []
+            ) ?? [],
+            upgrades: try c.decodeIfPresent([Upgrade].self, forKey: .upgrades) ?? []
         )
     }
 
@@ -85,6 +93,7 @@ public struct ContentCatalog: Sendable, Codable {
             .sorted { $0.reputationRequired < $1.reputationRequired }
     }
     public func charm(_ id: String) -> Charm? { charmsByID[id] }
+    public func upgrade(_ id: String) -> Upgrade? { upgradesByID[id] }
 
     /// The tool every run starts with.
     public var startingTool: Tool {

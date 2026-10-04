@@ -95,6 +95,19 @@ final class DigScene: SKScene {
 
         engine.tick(delta: delta)
         engine.publish()
+
+        // Gems shimmer, so their cells are repainted every frame regardless of whether the
+        // brush touched them. At most four clusters of nine cells, which is nothing against
+        // the 48 KB that goes up anyway.
+        renderer.sparkleTime += Float(delta)
+        for origin in engine.layout.gemClusters {
+            let x = origin % SlabGrid.width
+            let y = origin / SlabGrid.width
+            let side = engine.sim.tuning.gemSize
+            engine.markDirty(
+                x0: x, y0: y, x1: x + side - 1, y1: y + side - 1
+            )
+        }
         // X-ray goggles. Flipping this forces a full redraw on the frame it changes,
         // which is why it is checked before the upload rather than inside it.
         if renderer.revealBuriedBone != engine.isRevealing {

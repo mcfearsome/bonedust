@@ -156,6 +156,7 @@ struct TitleView: View {
             } else {
                 primary("New run") { coordinator.beginNewRun() }
             }
+            secondary("Camp") { coordinator.showCamp() }
             secondary("Collection") { coordinator.showCollection() }
             secondary("Crew Ledger") { coordinator.showCrewLedger() }
             secondary("Settings") { showSettings = true }

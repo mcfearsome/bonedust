@@ -1003,5 +1003,59 @@
         "frame:prestige"
       ]
     }
+  ],
+  "upgrades": [
+    {
+      "id": "steady_grip",
+      "name": "Steady grip",
+      "reputation": 120,
+      "blurb": "Years of this. Your hand knows the weight now.",
+      "modifiers": {
+        "safeSpeedMultiplier": 1.15
+      }
+    },
+    {
+      "id": "good_light",
+      "name": "A better lamp",
+      "reputation": 160,
+      "blurb": "Not a luxury. The last hour of a day is worth two of the first.",
+      "modifiers": {
+        "daylightDelta": 5.0
+      }
+    },
+    {
+      "id": "soft_bristles",
+      "name": "Soft bristles",
+      "reputation": 220,
+      "blurb": "He laughed at the price. He stopped laughing at the ribs.",
+      "modifiers": {
+        "crackMultiplier": 0.85
+      }
+    },
+    {
+      "id": "second_pocket",
+      "name": "A second pocket",
+      "reputation": 300,
+      "blurb": "Room for one more charm, and the nerve to use it.",
+      "modifiers": {},
+      "extraCharmSlot": true
+    },
+    {
+      "id": "wheelers_patience",
+      "name": "Wheeler's patience",
+      "reputation": 420,
+      "blurb": "He will wait a day longer. He will not say why.",
+      "modifiers": {},
+      "extraDays": 1
+    },
+    {
+      "id": "practised_eye",
+      "name": "A practised eye",
+      "reputation": 560,
+      "blurb": "You see the shape under the sandstone before the sandstone knows.",
+      "modifiers": {
+        "payoutMultiplier": 1.08
+      }
+    }
   ]
 }

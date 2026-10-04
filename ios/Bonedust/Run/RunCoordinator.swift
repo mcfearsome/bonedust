@@ -20,6 +20,7 @@ final class RunCoordinator {
         case supplyTent
         case runEnd
         case collection
+        case camp
         case crewLedger
         case outfit
     }
@@ -104,6 +105,21 @@ final class RunCoordinator {
         return preview
     }
 
+    /// Camp, where Reputation is spent. Reachable between runs, never during one: the
+    /// upgrades fold into a run's modifiers when it starts, so buying mid-week would either
+    /// do nothing or change the physics under a dig in progress.
+    func showCamp() {
+        screen = .camp
+    }
+
+    /// Buys a permanent upgrade and saves immediately. Failures are silent by design --
+    /// the button is disabled when it cannot be afforded, so a thrown error here means a
+    /// race the player cannot see and does not need told about.
+    func buy(upgrade: Upgrade) {
+        guard (try? meta.buy(upgrade: upgrade.id, catalog: catalog)) != nil else { return }
+        store.save(meta: meta)
+    }
+
     func showCollection() {
         screen = .collection
     }
@@ -119,9 +135,29 @@ final class RunCoordinator {
     /// Everything contribution has earned: the player's own lifetime rungs and the
     /// outfit's shared ones, folded through the same ModifierSet as charms and site twists.
     private var contributionModifiers: ModifierSet {
-        ContributionPerks.modifiers(
-            for: meta.personalUnlocks(catalog: catalog) + ledger.outfitUnlocks
-        )
+        ModifierSet.combining([
+            ContributionPerks.modifiers(
+                for: meta.personalUnlocks(catalog: catalog) + ledger.outfitUnlocks
+            ),
+            // Permanent, Reputation-bought, and the reason kit no longer carries.
+            meta.upgradeModifiers(catalog: catalog),
+        ])
+    }
+
+    /// A species not yet in the Collection pays more, which is what makes a poorer site
+    /// worth a week. Resolved per slab, since it depends on the fossil that generated.
+    /// `ServerCeiling.derive` reads the fossil out of the seed without generating a grid,
+    /// which is the only reason this can be known before the engine exists.
+    private func isFirstFind(seed: UInt64, site: Site) -> Bool {
+        let fossilID = ServerCeiling.derive(seed: seed, site: site, catalog: catalog).fossilID
+        return meta.collection.record(for: fossilID) == nil
+    }
+
+    private func firstFindModifiers(seed: UInt64, site: Site) -> ModifierSet {
+        guard isFirstFind(seed: seed, site: site) else { return ModifierSet() }
+        var set = ModifierSet()
+        set.payoutMultiplier = SimTuning.standard.firstFindMultiplier
+        return set
     }
 
     /// Item pools opened by contribution. The vault opens either by paying enough yourself
@@ -164,9 +200,14 @@ final class RunCoordinator {
             seed: UInt64.random(in: 1...(UInt64.max >> 2)),
             siteID: siteID,
             tier: meta.nextTier,
-            // The kit survives a successful run and is seized after a failed one, so it
-            // comes from meta rather than starting from the brush every time. Without
-            // this the installment ramp is unwinnable by construction.
+            // Every week starts with the plain brush. Kit used to carry, which made the
+            // supply tent irrelevant after the first few purchases -- a brush bought in
+            // week one was still doing the job in week nine. The ramp is kept winnable by
+            // the Reputation upgrades below, which are permanent and survive a failed run
+            // as tools never did.
+            totalDays: RunLength.days(tier: meta.nextTier) + meta.upgradeExtraDays(
+                catalog: catalog
+            ),
             toolIDs: meta.carriedToolIDs,
             charmIDs: meta.carriedCharmIDs
         )
@@ -238,15 +279,21 @@ final class RunCoordinator {
             settings.gentleModeModifiers,
             meta.setPerks(forSite: siteID, catalog: catalog),
             contributionModifiers,
+            // A species not yet catalogued pays more, which is what gives a poorer site a
+            // reason to be chosen. Expires by itself as the Collection fills.
+            firstFindModifiers(seed: run.slabSeed(forDay: day), site: site),
         ])
         let loadout = run.loadout(catalog: catalog)
+        let firstFind = isFirstFind(seed: run.slabSeed(forDay: day), site: site)
 
         if restoring, let snapshot = store.loadSlab(), snapshot.day == day {
             do {
                 let restored = try snapshot.restore(catalog: catalog, tuning: .standard)
-                digEngine = DigEngine(
+                let engine = DigEngine(
                     restored: restored, site: site, loadout: loadout, extraModifiers: extra
                 )
+                engine.isFirstFind = firstFind
+                digEngine = engine
                 resumeProblem = nil
                 screen = .dig
                 return
@@ -258,7 +305,7 @@ final class RunCoordinator {
             }
         }
 
-        digEngine = DigEngine(
+        let engine = DigEngine(
             seed: run.effectiveSeed(forDay: day),
             site: site,
             day: day,
@@ -266,6 +313,8 @@ final class RunCoordinator {
             catalog: catalog,
             extraModifiers: extra
         )
+        engine.isFirstFind = firstFind
+        digEngine = engine
         screen = .dig
     }
 
@@ -429,6 +478,12 @@ extension RunCoordinator {
     /// Tests about *what a tool does* should not also depend on what the shop happened
     /// to roll or on whether the run could afford it. Kept out of the shopping path so
     /// it cannot be reached by accident.
+    /// Tests only: hands over Reputation without playing for it.
+    func debugGrantReputation(_ amount: Int) {
+        meta.reputation += amount
+        store.save(meta: meta)
+    }
+
     func debugGrantTool(_ id: String) {
         guard var current = run, !current.toolIDs.contains(id) else { return }
         current.toolIDs.append(id)

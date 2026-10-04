@@ -166,7 +166,12 @@ public enum ServerCeiling {
         // 0.25 is exactly representable in binary, so Float -> Double here and Ruby's own
         // 0.25 are the same number. A rate that is not exact would have to go through the
         // same f32 narrowing the other constants do.
-        let multiplier = payoutMultiplier * rushMultiplier * (1 + Double(tuning.gradeBonusS))
+        // Assume a first find too, as every other term here assumes its best case. A
+        // ceiling that did not would reject the first specimen of a species -- the single
+        // most memorable slab a player digs -- as a forgery.
+        let multiplier = payoutMultiplier * rushMultiplier
+            * (1 + Double(tuning.gradeBonusS))
+            * Double(tuning.firstFindMultiplier)
         let scaled = ((fossilPay + gems) * multiplier).rounded()
 
         let nodules = tuning.rockNodulesMax + site.modifiers.extraRockNodules

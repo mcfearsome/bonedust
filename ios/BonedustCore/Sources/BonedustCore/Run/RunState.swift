@@ -550,6 +550,15 @@ public struct MetaProgress: Sendable, Codable, Equatable {
     /// they survive when you do not. Without this the installment ramp is unwinnable by
     /// construction: every run would begin with the starting brush, so income could
     /// never grow while the amount owed did.
+    /// Permanent upgrades bought with Reputation. See `Upgrade`.
+    ///
+    /// Optional on the wire so a save written before the camp existed still decodes.
+    private var ownedUpgradeIDsRaw: [String]?
+    public var ownedUpgradeIDs: [String] {
+        get { ownedUpgradeIDsRaw ?? [] }
+        set { ownedUpgradeIDsRaw = newValue }
+    }
+
     public var carriedToolIDs: [String]
     public var carriedCharmIDs: [String]
 
@@ -573,8 +582,45 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         self.brushTrailID = nil
         self.claimedPersonalMilestoneIDs = []
         self.outfit = nil
+        self.ownedUpgradeIDsRaw = []
         self.carriedToolIDs = [BrushTool.brush.id]
         self.carriedCharmIDs = []
+    }
+
+    public enum UpgradeFailure: Error, Equatable {
+        case unknown
+        case alreadyOwned
+        case tooExpensive(cost: Int, reputation: Int)
+    }
+
+    /// Buys a permanent upgrade with Reputation.
+    ///
+    /// Reputation is *spent*, not merely required. A threshold would mean every upgrade
+    /// arrives at once the moment the number is high enough, which is a notification rather
+    /// than a decision -- and the whole point of this track is to give the player something
+    /// to choose between while the tent is selling run-scoped kit.
+    public mutating func buy(
+        upgrade id: String, catalog: ContentCatalog = .shared
+    ) throws {
+        guard let upgrade = catalog.upgrade(id) else { throw UpgradeFailure.unknown }
+        guard !ownedUpgradeIDs.contains(id) else { throw UpgradeFailure.alreadyOwned }
+        guard reputation >= upgrade.reputation else {
+            throw UpgradeFailure.tooExpensive(
+                cost: upgrade.reputation, reputation: reputation
+            )
+        }
+        reputation -= upgrade.reputation
+        ownedUpgradeIDs.append(id)
+    }
+
+    /// Everything owned, as one modifier set to fold into a run.
+    public func upgradeModifiers(catalog: ContentCatalog = .shared) -> ModifierSet {
+        Upgrade.combined(ownedUpgradeIDs, catalog: catalog)
+    }
+
+    /// Days every week gets from owned upgrades.
+    public func upgradeExtraDays(catalog: ContentCatalog = .shared) -> Int {
+        Upgrade.extraDays(ownedUpgradeIDs, catalog: catalog)
     }
 
     /// What a finished run added, for the end screen to show.
@@ -656,8 +702,18 @@ public struct MetaProgress: Sendable, Codable, Equatable {
             longestStreak = max(longestStreak, currentStreak)
             highestTierCleared = max(highestTierCleared, run.tier)
             nextTier = run.tier + 1
-            carriedToolIDs = run.toolIDs
-            carriedCharmIDs = run.charmIDs
+            // Kit does not carry. Reported from play as "once i made my purchases i never
+            // really looked at the store again" -- a tool bought in week one was still
+            // doing its job in week nine, so the tent had nothing left to offer and the
+            // whole middle of the game had no decisions in it.
+            //
+            // It was added for a real reason: without it the installment ramp is
+            // unwinnable, because income could never grow while the amount owed did. What
+            // replaces it is Reputation, which buys permanent upgrades and is kept whether
+            // a week is survived or not -- so progression lives somewhere a single bad run
+            // cannot take it, and the tent stays a weekly decision.
+            carriedToolIDs = [BrushTool.brush.id]
+            carriedCharmIDs = []
         case .failed:
             runsFailed += 1
             currentStreak = 0

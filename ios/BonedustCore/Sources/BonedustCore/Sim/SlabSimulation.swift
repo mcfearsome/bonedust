@@ -171,6 +171,14 @@ public struct SlabSimulation: Sendable {
 
     public mutating func markEverythingDirty() { dirty = .everything }
 
+    /// Marks one cell for repaint without changing it.
+    ///
+    /// For the gem shimmer, which animates cells the brush never touched.
+    public mutating func markDirty(x: Int, y: Int) {
+        guard SlabGrid.contains(x, y) else { return }
+        dirty.insert(x: x, y: y)
+    }
+
     /// Sets a cell's depth directly. Only for rendering reference frames, where the point
     /// is to see a specific layer rather than to simulate reaching it.
     public mutating func setDepthForRendering(_ index: Int, depth: UInt8) {

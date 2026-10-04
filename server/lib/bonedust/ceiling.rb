@@ -116,7 +116,11 @@ module Bonedust
       # ignored it would reject the exact slab a player is proudest of, at the moment the
       # dig went perfectly -- the worst possible time to accuse somebody of cheating.
       # Mirrors ServerCeiling.ceiling; the two move together or golden_spec fails.
-      multiplier = payout_multiplier * rush_multiplier * (1 + tuning.fetch("gradeBonusS"))
+      # A first find too, as every other term here assumes its best case -- otherwise the
+      # first specimen of a species, the most memorable slab a player digs, is rejected as
+      # a forgery. Mirrors ServerCeiling.ceiling; the two move together or golden_spec fails.
+      multiplier = payout_multiplier * rush_multiplier *
+        (1 + tuning.fetch("gradeBonusS")) * tuning.fetch("firstFindMultiplier")
       scaled = ((fossil_pay + gems) * multiplier).round
 
       nodules = tuning.fetch("rockNodulesMax") + (site.dig("modifiers", "extraRockNodules") || 0)

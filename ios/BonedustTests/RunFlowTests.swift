@@ -267,21 +267,42 @@ final class RunCoordinatorTests: XCTestCase {
         XCTAssertFalse(engine.isRevealing)
     }
 
-    func testAKitSurvivesASuccessfulRunAndIsSeizedAfterAFailure() async {
+    /// Kit is bought for a week and gone with it, win or lose.
+    ///
+    /// It used to survive a successful run, which meant a brush bought in week one was
+    /// still doing the job in week nine and the supply tent had nothing left to offer.
+    /// Permanent progression lives in the Reputation upgrades instead, which also survive a
+    /// *failed* week -- so a bad run costs a week rather than a career, which carried kit
+    /// never managed.
+    func testKitIsBoughtForAWeekAndGoneWithIt() async {
         let (coordinator, _, _) = makeCoordinator()
         await coordinator.startRun(siteID: "charmouth")
         coordinator.debugGrantTool("fine_brush")
-        // Force a win, then check the tool carries.
         await coordinator.debugSettleRun(succeed: true)
-        XCTAssertTrue(coordinator.meta.carriedToolIDs.contains("fine_brush"))
+        XCTAssertEqual(
+            coordinator.meta.carriedToolIDs, [BrushTool.brush.id],
+            "winning a week should not hand the next one a free tool"
+        )
         coordinator.acknowledgeRunEnd()
 
         await coordinator.startRun(siteID: "charmouth")
-        XCTAssertTrue(coordinator.run?.toolIDs.contains("fine_brush") ?? false,
-                      "a successful run should keep its kit")
+        XCTAssertEqual(coordinator.run?.toolIDs, [BrushTool.brush.id],
+                       "every week starts with the plain brush")
+    }
+
+    func testReputationUpgradesSurviveAFailedWeek() async throws {
+        let (coordinator, _, _) = makeCoordinator()
+        coordinator.debugGrantReputation(500)
+        let upgrade = try XCTUnwrap(ContentCatalog.shared.upgrades.first)
+        coordinator.buy(upgrade: upgrade)
+        XCTAssertEqual(coordinator.meta.ownedUpgradeIDs, [upgrade.id])
+
+        await coordinator.startRun(siteID: "charmouth")
         await coordinator.debugSettleRun(succeed: false)
-        XCTAssertEqual(coordinator.meta.carriedToolIDs, [BrushTool.brush.id],
-                       "the Collector takes your tools as interest")
+        XCTAssertEqual(
+            coordinator.meta.ownedUpgradeIDs, [upgrade.id],
+            "the Collector takes tools, not what you have learned"
+        )
     }
 
     func testGentleModeReachesTheDig() async {
@@ -291,7 +312,13 @@ final class RunCoordinatorTests: XCTestCase {
         guard let engine = coordinator.digEngine else { return XCTFail() }
         // 0.5 from gentle mode, times the site and fossil multipliers.
         XCTAssertLessThan(engine.modifiers.crackMultiplier, 1)
-        XCTAssertEqual(engine.modifiers.payoutMultiplier, 0.8, accuracy: 0.0001)
+        // Gentle mode's 0.8, times the first-find bonus -- every species is new on a fresh
+        // save, so the slab a new player opens is always a first find. Asserting the bare
+        // 0.8 made this a test of what else happens to be multiplying in.
+        let firstFind = SimTuning.standard.firstFindMultiplier
+        XCTAssertEqual(
+            engine.modifiers.payoutMultiplier, 0.8 * firstFind, accuracy: 0.0001
+        )
     }
 }
 

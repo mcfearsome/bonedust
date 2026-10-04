@@ -65,9 +65,15 @@ final class GustTests: XCTestCase {
         XCTAssertGreaterThan(sim.exposedBone, 0, "could not expose any bone to test with")
 
         let crackedBefore = sim.crackedBone
+        // Enough attempts that a gust is bound to land on the exposed patch. Seven
+        // patches at radius 5 cover a small share of a 96x128 slab, so a fixed handful of
+        // blows is a coin flip rather than a test -- and the patch count is tuned against
+        // play, so it will move again.
         var cracks = 0
-        for _ in 0..<6 where cracks == 0 {
+        var blows = 0
+        while cracks == 0, blows < 60 {
             cracks += sim.gust(strength: 1).cracksStarted
+            blows += 1
         }
         XCTAssertGreaterThan(cracks, 0, "breath across an open slab did no damage at all")
         XCTAssertGreaterThan(sim.crackedBone, crackedBefore)

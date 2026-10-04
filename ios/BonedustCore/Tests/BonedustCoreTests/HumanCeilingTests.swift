@@ -23,6 +23,41 @@ final class HumanCeilingTests: XCTestCase {
         travel budget: \(Int(budget)) cells
         """)
 
+        // How long a careful sweep actually needs, which is the question behind "way too
+        // much time given, no tension".
+        for siteID in ["charmouth", "hell_creek"] {
+            guard let site = catalog.site(siteID) else { continue }
+            var secondsTo90: [Float] = []
+            for seed in UInt64(0)..<10 {
+                var sim = SlabSimulation(seed: seed, site: site)
+                let step = brush.safeSpeed
+                let gap = brush.radius * 0.9
+                var used = 0
+                var y = Float(1)
+                var ltr = true
+                outer: while used < 60 * 60 {
+                    let xs = Array(stride(from: Float(1),
+                                          through: Float(SlabGrid.width) - 1, by: step))
+                    let row = ltr ? xs : xs.reversed()
+                    sim.beginStroke(at: Vec2(row[0], y), tool: brush)
+                    for x in row.dropFirst() {
+                        sim.moveStroke(to: Vec2(x, y), deltaMillis: 1000.0 / 60, tool: brush)
+                        used += 1
+                        if sim.exposure >= 0.9 || used >= 60 * 60 { break outer }
+                    }
+                    sim.endStroke()
+                    y += gap
+                    if y >= Float(SlabGrid.height) { y = 1 }
+                    ltr.toggle()
+                }
+                sim.endStroke()
+                secondsTo90.append(Float(used) / 60)
+            }
+            let mean = secondsTo90.reduce(0, +) / Float(secondsTo90.count)
+            print(String(format: "  %-12@ reaches 0.90 exposure in %.1fs of %.0fs",
+                         siteID as NSString, mean, tuning.daylightSeconds))
+        }
+
         var worst: Float = 1
         for siteID in ["charmouth", "green_river", "hell_creek"] {
             guard let site = catalog.site(siteID) else { continue }

@@ -41,6 +41,12 @@ public struct SlabRenderer {
     /// Red across the top six rows, green down the left six columns. Where those land on a
     /// real screen is not ambiguous.
     public var orientationProbe = false
+    /// Advances the gem shimmer. Seconds since the dig began.
+    ///
+    /// A gem is worth going carefully around, so it has to be *noticed* — and a static
+    /// teal square at 96x128 reads as another mineral stain. Catching the light is what
+    /// makes it read as a gem rather than a colour.
+    public var sparkleTime: Float = 0
 
     public private(set) var pixels: [UInt8]
 
@@ -65,6 +71,7 @@ public struct SlabRenderer {
         let lightLevel: Float
         let revealBuriedBone: Bool
         let orientationProbe: Bool
+        let sparkleTime: Float
     }
 
     private var style: Style {
@@ -73,7 +80,8 @@ public struct SlabRenderer {
             tuning: tuning,
             lightLevel: lightLevel,
             revealBuriedBone: revealBuriedBone,
-            orientationProbe: orientationProbe
+            orientationProbe: orientationProbe,
+            sparkleTime: sparkleTime
         )
     }
 
@@ -175,7 +183,17 @@ public struct SlabRenderer {
                     ? palette.crackedBone
                     : palette.bone
             }
-            if cell.flags & SlabGrid.Flag.gem != 0 { return palette.gem }
+            if cell.flags & SlabGrid.Flag.gem != 0 {
+                // Each cell twinkles on its own schedule, phased by the noise field that
+                // is already there. A cluster flashing in unison reads as a UI element
+                // blinking; cells catching the light one after another reads as a facet.
+                let phase = style.sparkleTime * 2.4 + cell.noise * 12
+                let twinkle = sinf(phase)
+                // Sharpened so it is dark most of the time and bright briefly, which is
+                // what a facet does. A plain sine just looks like it is pulsing.
+                let glint = max(0, twinkle * twinkle * twinkle)
+                return palette.gem.scaled(1 + glint * 0.55)
+            }
             var matrix = palette.matrix
             if cell.flags & SlabGrid.Flag.rock != 0 {
                 matrix = matrix.lerp(to: palette.rock, 0.5)
