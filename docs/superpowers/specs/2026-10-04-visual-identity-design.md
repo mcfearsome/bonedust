@@ -51,7 +51,7 @@ covered by the existing test target.
 |---|---|---|
 | `earth0` | `#F6EFDE` | Pasted-label / raised surface |
 | `earth1` | `#EDE4CF` | Page — the ground |
-| `earth2` | `#DFD4BB` | Ruled box fill |
+| `earth2` | `#DFD4BB` | Non-text fills only: progress troughs, inactive track |
 | `earth3` | `#C4B596` | Grid, dividers, hairlines |
 | `earth4` | `#9C8A6E` | Hairlines, disabled state, decorative. **Never text.** |
 | `earth5` | `#6E5E48` | Secondary text; slab topsoil |
@@ -66,6 +66,25 @@ Accents, all retuned for a light ground:
 | `stamp` | `#B03A2B` | The single accent. See §5. |
 | `gem` | `#176574` | Gems only. Darkened from `#56B8C8`, which is both too weak and below AA on cream. |
 | `safe` | `#41642F` | Speed and intact semantics only. Darkened from `#7FBF6A`, same reason. |
+
+The night page needs its own accents. The day values sit at 2.2–2.5:1 against
+`nightPage`, far under AA, and an earlier draft had `Ink.night` reuse them — the
+contrast rule had only ever been checked against the cream page.
+
+| Token | Hex | On `nightPage` |
+|---|---|---|
+| `stampNight` | `#E0705C` | 4.75:1 |
+| `gemNight` | `#56B8C8` | 6.51:1 |
+| `safeNight` | `#7FBF6A` | 6.85:1 |
+
+`gemNight` and `safeNight` are the *original* values from the dark UI this
+redesign replaces. That palette was never wrong; it was a dark-mode palette, and
+it is correct again at night.
+
+**Nothing above `earth5` carries text, and `earth2` carries none at all.**
+`earth5`-on-`earth2` is 4.25:1 and `stamp`-on-`earth2` is 4.09:1, both under AA.
+§4 already makes cards ruled boxes rather than filled panels, so `earth2` is a
+fill for troughs and inactive tracks. Text sits on `earth1` or `earth0`.
 
 **The specimen mount.** A cleared slab is *light*, not dark — `matrix` is the
 top layer and every site paints it pale. Against a cream page this is fatal:
@@ -257,6 +276,11 @@ automate and go in the existing `BonedustCore` suite:
    to `earth8`. Catches a mistyped hex during any future retune.
 2. **Contrast.** Every text-on-surface pair the design uses meets WCAG AA
    (4.5:1 for body, 3:1 for large display), in both the day and night presets.
+   The night pairs are tested against `nightPage` with the night accents, not the
+   day ones. The suite also pins the luminance function itself against WCAG
+   reference values (`#595959` on white = 7.00, pure-red Y = 0.2126, pure-blue
+   Y = 0.0722): without those, a simplified `channel()` or a one-digit threshold
+   typo passes every ratio assertion while inflating contrast throughout.
    This constraint is why no text sits above `earth5`: against a page at
    `earth1`, `earth4` reaches only 2.7:1, and `earth5` is the first stop that
    clears 4.5:1. The test exists to stop a future retune from quietly
