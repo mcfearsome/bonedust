@@ -887,3 +887,36 @@ of fourteen and a vertebral column of five both read as segmented.
 
 Scattering is still right for some. Ichthyosaur vertebrae really are found like dropped
 coins, so `chain` is a knob rather than a fix applied everywhere.
+
+## Three more silhouettes, and the one worth a whole week
+
+`vertebra`, `toothRow` and `skeleton`. 49 of 120 species now carry a creature silhouette,
+up from 18 two commits ago.
+
+**`toothRow` instead of single teeth.** A tooth is a cone, and a cone at 96×128 is a thorn.
+A jaw fragment with five teeth still in it is read instantly — and it is a better dig as
+well as a better shape, because it puts several fragile things on one slab rather than one.
+
+**`vertebra` instead of a disc.** A single vertebra drawn as a disc is a disc. Drawn with a
+centrum, a neural arch, a spine and transverse processes it is unmistakable, and it is the
+one bone most people can name on sight. The spine is thin, so a hurried brush takes it off
+and leaves exactly the disc it would have been.
+
+**`skeleton` is the payoff.** Spine arcing across the slab, ribs hanging off it, a folded
+limb and the skull at the far end. Three articulated species — Tyrannosaurus, dromaeosaur,
+plesiosaur — at weight 2 against a 4–14 scale, so roughly one slab in sixty. Everything
+about them is thin, which makes the best thing in the ground also the easiest to ruin.
+
+### Two process notes
+
+The first skeleton render was identical to the one before it, because `make constants`
+regenerates the *shared* file from Swift and does not rebuild the binary that carries
+`content.json` as a bundled resource. A shape edit needs `swift build` before the renderer
+shows it, and an unchanged image is the tell — the same one that caught `siteCrackMultiplier`
+being dead code.
+
+`testFossilDrawRespectsWeights` had a flat 35% tolerance, which cannot hold for species that
+are rare on purpose. Draws are Poisson, so the spread goes as `sqrt(expected)`: a common
+species expected 600 times lands within a few percent, while a skeleton expected 13 times has
+a sigma of 3.6, and 35% of 13 is barely one of those. The tolerance is now
+`max(20%, 4·sqrt(expected))`, which is the same statement for both ends of the roster.

@@ -1,147 +1,147 @@
 [
   {
-    "baseCeiling" : 257,
-    "fossilID" : "nautilus",
+    "baseCeiling" : 144,
+    "fossilID" : "driftwood",
     "instances" : 1,
     "seed" : 2417876992,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 369,
-    "fossilID" : "plesiosaur_vertebra",
+    "baseCeiling" : 276,
+    "fossilID" : "asteroceras",
     "instances" : 1,
     "seed" : 11400714821203106837,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 182,
-    "fossilID" : "promicroceras",
+    "baseCeiling" : 144,
+    "fossilID" : "gryphaea",
     "instances" : 1,
     "seed" : 4354685562520148010,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 1148,
-    "fossilID" : "dimorphodon_skull",
+    "baseCeiling" : 276,
+    "fossilID" : "asteroceras",
     "instances" : 1,
     "seed" : 15755400386137199679,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 351,
+    "fossilID" : "ichthyo_paddle",
+    "instances" : 1,
+    "seed" : 8709371127458435156,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 351,
+    "fossilID" : "ichthyo_paddle",
+    "instances" : 1,
+    "seed" : 1663341877365673065,
     "siteID" : "charmouth"
   },
   {
     "baseCeiling" : 407,
     "fossilID" : "ichthyo_jaw",
     "instances" : 1,
-    "seed" : 8709371127458435156,
+    "seed" : 13064056692392790142,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 257,
+    "fossilID" : "microderoceras",
+    "instances" : 1,
+    "seed" : 6018027442303960211,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 238,
+    "fossilID" : "belemnite_cluster",
+    "instances" : 1,
+    "seed" : 17418742257331077288,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 135,
+    "fossilID" : "bivalve",
+    "instances" : 1,
+    "seed" : 10372713007238331581,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 126,
+    "fossilID" : "coprolite",
+    "instances" : 1,
+    "seed" : 3326683748559567058,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 126,
+    "fossilID" : "coprolite",
+    "instances" : 1,
+    "seed" : 14727398572176618727,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 266,
+    "fossilID" : "nautiloid_straight",
+    "instances" : 1,
+    "seed" : 7681369313493659900,
     "siteID" : "charmouth"
   },
   {
     "baseCeiling" : 144,
     "fossilID" : "driftwood",
     "instances" : 1,
-    "seed" : 1663341877365673065,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 173,
-    "fossilID" : "fish_scales",
-    "instances" : 1,
-    "seed" : 13064056692392790142,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 182,
-    "fossilID" : "promicroceras",
-    "instances" : 1,
-    "seed" : 6018027442303960211,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 848,
-    "fossilID" : "ichthyo_tail",
-    "instances" : 1,
-    "seed" : 17418742257331077288,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 257,
-    "fossilID" : "microderoceras",
-    "instances" : 1,
-    "seed" : 10372713007238331581,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 519,
-    "fossilID" : "ichthyo_skull",
-    "instances" : 1,
-    "seed" : 3326683748559567058,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 941,
-    "fossilID" : "plesiosaur_ribcage",
-    "instances" : 1,
-    "seed" : 14727398572176618727,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 257,
-    "fossilID" : "microderoceras",
-    "instances" : 1,
-    "seed" : 7681369313493659900,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 182,
-    "fossilID" : "promicroceras",
-    "instances" : 1,
     "seed" : 635340063405092113,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 126,
-    "fossilID" : "coprolite",
-    "instances" : 1,
-    "seed" : 12036054878432209190,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 126,
-    "fossilID" : "coprolite",
-    "instances" : 1,
-    "seed" : 4990025628339184955,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 182,
-    "fossilID" : "promicroceras",
-    "instances" : 1,
-    "seed" : 16390740443370496336,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 285,
-    "fossilID" : "plesiosaur_tooth",
-    "instances" : 1,
-    "seed" : 9344711193277750629,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 304,
-    "fossilID" : "dapedium",
-    "instances" : 1,
-    "seed" : 2298681934594791802,
     "siteID" : "charmouth"
   },
   {
     "baseCeiling" : 369,
     "fossilID" : "plesiosaur_vertebra",
     "instances" : 1,
+    "seed" : 12036054878432209190,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 304,
+    "fossilID" : "dapedium",
+    "instances" : 1,
+    "seed" : 4990025628339184955,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 341,
+    "fossilID" : "ammonite_pyrite",
+    "instances" : 1,
+    "seed" : 16390740443370496336,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 163,
+    "fossilID" : "belemnite",
+    "instances" : 1,
+    "seed" : 9344711193277750629,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 1110,
+    "fossilID" : "plesiosaur_skull",
+    "instances" : 1,
+    "seed" : 2298681934594791802,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 173,
+    "fossilID" : "fish_scales",
+    "instances" : 1,
     "seed" : 13699396758216037775,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 154,
-    "fossilID" : "gastropod_shell",
+    "baseCeiling" : 407,
+    "fossilID" : "ichthyo_jaw",
     "instances" : 1,
     "seed" : 6653367499533078948,
     "siteID" : "charmouth"
@@ -154,85 +154,85 @@
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 369,
-    "fossilID" : "plesiosaur_vertebra",
+    "baseCeiling" : 229,
+    "fossilID" : "ammonite",
     "instances" : 1,
     "seed" : 11008053064471628238,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 407,
-    "fossilID" : "ichthyo_jaw",
+    "baseCeiling" : 294,
+    "fossilID" : "ichthyo_rib",
     "instances" : 1,
     "seed" : 3962023814915474915,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 182,
+    "fossilID" : "promicroceras",
+    "instances" : 1,
+    "seed" : 15362738629942591992,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 304,
+    "fossilID" : "pentacrinites",
+    "instances" : 1,
+    "seed" : 8316709379854040589,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 229,
+    "fossilID" : "ammonite",
+    "instances" : 1,
+    "seed" : 1270680121171081762,
     "siteID" : "charmouth"
   },
   {
     "baseCeiling" : 163,
     "fossilID" : "belemnite",
     "instances" : 1,
-    "seed" : 15362738629942591992,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 182,
-    "fossilID" : "promicroceras",
-    "instances" : 1,
-    "seed" : 8316709379854040589,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 351,
-    "fossilID" : "ichthyo_paddle",
-    "instances" : 1,
-    "seed" : 1270680121171081762,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 182,
-    "fossilID" : "promicroceras",
-    "instances" : 1,
     "seed" : 12671394944788133431,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 144,
-    "fossilID" : "driftwood",
+    "baseCeiling" : 182,
+    "fossilID" : "promicroceras",
     "instances" : 1,
     "seed" : 5625365686109368908,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 173,
-    "fossilID" : "fish_scales",
-    "instances" : 1,
-    "seed" : 17026080509726158433,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 210,
-    "fossilID" : "arnioceras",
-    "instances" : 1,
-    "seed" : 9980051251043723894,
     "siteID" : "charmouth"
   },
   {
     "baseCeiling" : 135,
     "fossilID" : "bivalve",
     "instances" : 1,
+    "seed" : 17026080509726158433,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 941,
+    "fossilID" : "plesiosaur_ribcage",
+    "instances" : 1,
+    "seed" : 9980051251043723894,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 163,
+    "fossilID" : "belemnite",
+    "instances" : 1,
     "seed" : 2934022000954893963,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 154,
-    "fossilID" : "gastropod_shell",
+    "baseCeiling" : 144,
+    "fossilID" : "driftwood",
     "instances" : 1,
     "seed" : 14334736815982011040,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 1204,
-    "fossilID" : "pterodactylus",
+    "baseCeiling" : 351,
+    "fossilID" : "ichthyo_paddle",
     "instances" : 1,
     "seed" : 7288707565889003189,
     "siteID" : "charmouth"
@@ -245,106 +245,106 @@
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 154,
-    "fossilID" : "gastropod_shell",
+    "baseCeiling" : 144,
+    "fossilID" : "gryphaea",
     "instances" : 1,
     "seed" : 11643393130827552479,
     "siteID" : "charmouth"
   },
   {
-    "baseCeiling" : 191,
-    "fossilID" : "crinoid",
+    "baseCeiling" : 1148,
+    "fossilID" : "dimorphodon_skull",
     "instances" : 1,
     "seed" : 4597363872144593652,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 173,
-    "fossilID" : "fish_scales",
-    "instances" : 1,
-    "seed" : 15998078695765839625,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 229,
-    "fossilID" : "ammonite",
-    "instances" : 1,
-    "seed" : 8952049437083142942,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 210,
-    "fossilID" : "arnioceras",
-    "instances" : 1,
-    "seed" : 1906020186990118707,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 126,
-    "fossilID" : "coprolite",
-    "instances" : 1,
-    "seed" : 13306735002021430088,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 163,
-    "fossilID" : "belemnite",
-    "instances" : 1,
-    "seed" : 6260705751928422237,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 135,
-    "fossilID" : "bivalve",
-    "instances" : 1,
-    "seed" : 17661420566955277170,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 163,
-    "fossilID" : "belemnite",
-    "instances" : 1,
-    "seed" : 10615391316866971527,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 135,
-    "fossilID" : "bivalve",
-    "instances" : 1,
-    "seed" : 3569362058184012700,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 276,
-    "fossilID" : "asteroceras",
-    "instances" : 1,
-    "seed" : 14970076881801064369,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 126,
-    "fossilID" : "coprolite",
-    "instances" : 1,
-    "seed" : 7924047622585691078,
-    "siteID" : "charmouth"
-  },
-  {
-    "baseCeiling" : 144,
-    "fossilID" : "gryphaea",
-    "instances" : 1,
-    "seed" : 878018372492666843,
     "siteID" : "charmouth"
   },
   {
     "baseCeiling" : 144,
     "fossilID" : "driftwood",
     "instances" : 1,
-    "seed" : 12278733187519783920,
+    "seed" : 15998078695765839625,
     "siteID" : "charmouth"
   },
   {
     "baseCeiling" : 154,
     "fossilID" : "gastropod_shell",
+    "instances" : 1,
+    "seed" : 8952049437083142942,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 201,
+    "fossilID" : "dactylioceras",
+    "instances" : 1,
+    "seed" : 1906020186990118707,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 257,
+    "fossilID" : "nautilus",
+    "instances" : 1,
+    "seed" : 13306735002021430088,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 210,
+    "fossilID" : "arnioceras",
+    "instances" : 1,
+    "seed" : 6260705751928422237,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 369,
+    "fossilID" : "plesiosaur_vertebra",
+    "instances" : 1,
+    "seed" : 17661420566955277170,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 257,
+    "fossilID" : "nautilus",
+    "instances" : 1,
+    "seed" : 10615391316866971527,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 294,
+    "fossilID" : "ichthyo_rib",
+    "instances" : 1,
+    "seed" : 3569362058184012700,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 154,
+    "fossilID" : "gastropod_shell",
+    "instances" : 1,
+    "seed" : 14970076881801064369,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 144,
+    "fossilID" : "driftwood",
+    "instances" : 1,
+    "seed" : 7924047622585691078,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 369,
+    "fossilID" : "plesiosaur_vertebra",
+    "instances" : 1,
+    "seed" : 878018372492666843,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 229,
+    "fossilID" : "ammonite",
+    "instances" : 1,
+    "seed" : 12278733187519783920,
+    "siteID" : "charmouth"
+  },
+  {
+    "baseCeiling" : 266,
+    "fossilID" : "nautiloid_straight",
     "instances" : 1,
     "seed" : 5232703937430953989,
     "siteID" : "charmouth"
@@ -1050,344 +1050,344 @@
     "siteID" : "green_river"
   },
   {
-    "baseCeiling" : 371,
-    "fossilID" : "edmontosaurus_tooth",
+    "baseCeiling" : 565,
+    "fossilID" : "dino_egg_shell",
     "instances" : 1,
     "seed" : 2417876992,
     "siteID" : "hell_creek"
   },
   {
-    "baseCeiling" : 468,
-    "fossilID" : "trex_rib",
+    "baseCeiling" : 392,
+    "fossilID" : "trike_tooth",
     "instances" : 1,
     "seed" : 11400714821203106837,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 511,
-    "fossilID" : "ammonite_sphenodiscus",
-    "instances" : 1,
-    "seed" : 4354685562520148010,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1449,
-    "fossilID" : "hadrosaur_ribcage",
-    "instances" : 1,
-    "seed" : 15755400386137199679,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 597,
-    "fossilID" : "champsosaur_jaw",
-    "instances" : 1,
-    "seed" : 8709371127458435156,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 953,
-    "fossilID" : "mammal_jaw",
-    "instances" : 1,
-    "seed" : 1663341877365673065,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 414,
-    "fossilID" : "hadrosaur_rib",
-    "instances" : 1,
-    "seed" : 13064056692392790142,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 2441,
-    "fossilID" : "trike_skull",
-    "instances" : 1,
-    "seed" : 6018027442303960211,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1621,
-    "fossilID" : "ankylosaur_skull",
-    "instances" : 1,
-    "seed" : 17418742257331077288,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 349,
-    "fossilID" : "turtle_scute",
-    "instances" : 1,
-    "seed" : 10372713007238331581,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 436,
-    "fossilID" : "raptor_claw",
-    "instances" : 1,
-    "seed" : 3326683748559567058,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1708,
-    "fossilID" : "trex_tail",
-    "instances" : 1,
-    "seed" : 14727398572176618727,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 392,
-    "fossilID" : "trike_tooth",
-    "instances" : 1,
-    "seed" : 7681369313493659900,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 392,
-    "fossilID" : "trike_tooth",
-    "instances" : 1,
-    "seed" : 635340063405092113,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 554,
-    "fossilID" : "mosasaur_tooth",
-    "instances" : 1,
-    "seed" : 12036054878432209190,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 716,
-    "fossilID" : "ankylosaur_spike",
-    "instances" : 1,
-    "seed" : 4990025628339184955,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 554,
-    "fossilID" : "mosasaur_tooth",
-    "instances" : 1,
-    "seed" : 16390740443370496336,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 511,
-    "fossilID" : "ammonite_sphenodiscus",
-    "instances" : 1,
-    "seed" : 9344711193277750629,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 274,
-    "fossilID" : "fossil_magnolia",
-    "instances" : 1,
-    "seed" : 2298681934594791802,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 306,
-    "fossilID" : "petrified_wood",
-    "instances" : 1,
-    "seed" : 13699396758216037775,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 382,
-    "fossilID" : "croc_osteoderm",
-    "instances" : 1,
-    "seed" : 6653367499533078948,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 349,
-    "fossilID" : "turtle_scute",
-    "instances" : 1,
-    "seed" : 18054082323149868473,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 511,
-    "fossilID" : "ammonite_sphenodiscus",
-    "instances" : 1,
-    "seed" : 11008053064471628238,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 468,
-    "fossilID" : "trex_rib",
-    "instances" : 1,
-    "seed" : 3962023814915474915,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 489,
-    "fossilID" : "raptor_tooth",
-    "instances" : 1,
-    "seed" : 15362738629942591992,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 953,
-    "fossilID" : "mammal_jaw",
-    "instances" : 1,
-    "seed" : 8316709379854040589,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 533,
-    "fossilID" : "trex_vertebra",
-    "instances" : 1,
-    "seed" : 1270680121171081762,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1837,
-    "fossilID" : "mosasaur_skull",
-    "instances" : 1,
-    "seed" : 12671394944788133431,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 630,
-    "fossilID" : "trike_horn",
-    "instances" : 1,
-    "seed" : 5625365686109368908,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 888,
-    "fossilID" : "trex_skull_frag",
-    "instances" : 1,
-    "seed" : 17026080509726158433,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 446,
-    "fossilID" : "ankylosaur_scute",
-    "instances" : 1,
-    "seed" : 9980051251043723894,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 554,
-    "fossilID" : "mosasaur_tooth",
-    "instances" : 1,
-    "seed" : 2934022000954893963,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 446,
-    "fossilID" : "ankylosaur_scute",
-    "instances" : 1,
-    "seed" : 14334736815982011040,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 468,
-    "fossilID" : "trex_rib",
-    "instances" : 1,
-    "seed" : 7288707565889003189,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 392,
-    "fossilID" : "trike_tooth",
-    "instances" : 1,
-    "seed" : 242678307210500810,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1945,
-    "fossilID" : "pterosaur_wing",
-    "instances" : 1,
-    "seed" : 11643393130827552479,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1945,
-    "fossilID" : "pterosaur_wing",
-    "instances" : 1,
-    "seed" : 4597363872144593652,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 716,
-    "fossilID" : "ankylosaur_spike",
-    "instances" : 1,
-    "seed" : 15998078695765839625,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1233,
-    "fossilID" : "raptor_foot",
-    "instances" : 1,
-    "seed" : 8952049437083142942,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1621,
-    "fossilID" : "ankylosaur_skull",
-    "instances" : 1,
-    "seed" : 1906020186990118707,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 371,
-    "fossilID" : "edmontosaurus_tooth",
-    "instances" : 1,
-    "seed" : 13306735002021430088,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 694,
-    "fossilID" : "hadrosaur_tooth_battery",
-    "instances" : 1,
-    "seed" : 6260705751928422237,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 489,
-    "fossilID" : "raptor_tooth",
-    "instances" : 1,
-    "seed" : 17661420566955277170,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 1104,
-    "fossilID" : "croc_skull",
-    "instances" : 1,
-    "seed" : 10615391316866971527,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 274,
-    "fossilID" : "fossil_magnolia",
-    "instances" : 1,
-    "seed" : 3569362058184012700,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 371,
-    "fossilID" : "edmontosaurus_tooth",
-    "instances" : 1,
-    "seed" : 14970076881801064369,
-    "siteID" : "hell_creek"
-  },
-  {
-    "baseCeiling" : 630,
-    "fossilID" : "trike_horn",
-    "instances" : 1,
-    "seed" : 7924047622585691078,
     "siteID" : "hell_creek"
   },
   {
     "baseCeiling" : 392,
     "fossilID" : "champsosaur_vertebra",
     "instances" : 1,
-    "seed" : 878018372492666843,
+    "seed" : 4354685562520148010,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 414,
+    "fossilID" : "hadrosaur_rib",
+    "instances" : 1,
+    "seed" : 15755400386137199679,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 759,
+    "fossilID" : "trex_claw",
+    "instances" : 1,
+    "seed" : 8709371127458435156,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 565,
+    "fossilID" : "dino_egg_shell",
+    "instances" : 1,
+    "seed" : 1663341877365673065,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 791,
+    "fossilID" : "theropod_vertebra",
+    "instances" : 1,
+    "seed" : 13064056692392790142,
     "siteID" : "hell_creek"
   },
   {
     "baseCeiling" : 834,
     "fossilID" : "pachycephalosaur_dome",
+    "instances" : 1,
+    "seed" : 6018027442303960211,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 500,
+    "fossilID" : "trex_tooth",
+    "instances" : 1,
+    "seed" : 17418742257331077288,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 834,
+    "fossilID" : "pachycephalosaur_dome",
+    "instances" : 1,
+    "seed" : 10372713007238331581,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 274,
+    "fossilID" : "fossil_magnolia",
+    "instances" : 1,
+    "seed" : 3326683748559567058,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 953,
+    "fossilID" : "mammal_jaw",
+    "instances" : 1,
+    "seed" : 14727398572176618727,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 500,
+    "fossilID" : "trex_tooth",
+    "instances" : 1,
+    "seed" : 7681369313493659900,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 414,
+    "fossilID" : "hadrosaur_rib",
+    "instances" : 1,
+    "seed" : 635340063405092113,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 392,
+    "fossilID" : "trike_tooth",
+    "instances" : 1,
+    "seed" : 12036054878432209190,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 382,
+    "fossilID" : "croc_osteoderm",
+    "instances" : 1,
+    "seed" : 4990025628339184955,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 630,
+    "fossilID" : "trike_horn",
+    "instances" : 1,
+    "seed" : 16390740443370496336,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 371,
+    "fossilID" : "edmontosaurus_tooth",
+    "instances" : 1,
+    "seed" : 9344711193277750629,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 511,
+    "fossilID" : "ammonite_sphenodiscus",
+    "instances" : 1,
+    "seed" : 2298681934594791802,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 489,
+    "fossilID" : "raptor_tooth",
+    "instances" : 1,
+    "seed" : 13699396758216037775,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 500,
+    "fossilID" : "trex_tooth",
+    "instances" : 1,
+    "seed" : 6653367499533078948,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 533,
+    "fossilID" : "trex_vertebra",
+    "instances" : 1,
+    "seed" : 18054082323149868473,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 759,
+    "fossilID" : "trex_claw",
+    "instances" : 1,
+    "seed" : 11008053064471628238,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 489,
+    "fossilID" : "raptor_tooth",
+    "instances" : 1,
+    "seed" : 3962023814915474915,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 349,
+    "fossilID" : "turtle_scute",
+    "instances" : 1,
+    "seed" : 15362738629942591992,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 392,
+    "fossilID" : "trike_tooth",
+    "instances" : 1,
+    "seed" : 8316709379854040589,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 306,
+    "fossilID" : "petrified_wood",
+    "instances" : 1,
+    "seed" : 1270680121171081762,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 565,
+    "fossilID" : "dino_egg_shell",
+    "instances" : 1,
+    "seed" : 12671394944788133431,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 371,
+    "fossilID" : "edmontosaurus_tooth",
+    "instances" : 1,
+    "seed" : 5625365686109368908,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 468,
+    "fossilID" : "trex_rib",
+    "instances" : 1,
+    "seed" : 17026080509726158433,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 274,
+    "fossilID" : "fossil_magnolia",
+    "instances" : 1,
+    "seed" : 9980051251043723894,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 468,
+    "fossilID" : "trex_rib",
+    "instances" : 1,
+    "seed" : 2934022000954893963,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 349,
+    "fossilID" : "turtle_scute",
+    "instances" : 1,
+    "seed" : 14334736815982011040,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 1557,
+    "fossilID" : "trex_foot",
+    "instances" : 1,
+    "seed" : 7288707565889003189,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 349,
+    "fossilID" : "turtle_scute",
+    "instances" : 1,
+    "seed" : 242678307210500810,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 306,
+    "fossilID" : "petrified_wood",
+    "instances" : 1,
+    "seed" : 11643393130827552479,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 446,
+    "fossilID" : "ankylosaur_scute",
+    "instances" : 1,
+    "seed" : 4597363872144593652,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 349,
+    "fossilID" : "turtle_scute",
+    "instances" : 1,
+    "seed" : 15998078695765839625,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 446,
+    "fossilID" : "ankylosaur_scute",
+    "instances" : 1,
+    "seed" : 8952049437083142942,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 489,
+    "fossilID" : "raptor_tooth",
+    "instances" : 1,
+    "seed" : 1906020186990118707,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 888,
+    "fossilID" : "trex_skull_frag",
+    "instances" : 1,
+    "seed" : 13306735002021430088,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 349,
+    "fossilID" : "turtle_scute",
+    "instances" : 1,
+    "seed" : 6260705751928422237,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 306,
+    "fossilID" : "petrified_wood",
+    "instances" : 1,
+    "seed" : 17661420566955277170,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 694,
+    "fossilID" : "hadrosaur_tooth_battery",
+    "instances" : 1,
+    "seed" : 10615391316866971527,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 565,
+    "fossilID" : "dino_egg_shell",
+    "instances" : 1,
+    "seed" : 3569362058184012700,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 953,
+    "fossilID" : "mammal_jaw",
+    "instances" : 1,
+    "seed" : 14970076881801064369,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 759,
+    "fossilID" : "trex_claw",
+    "instances" : 1,
+    "seed" : 7924047622585691078,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 1621,
+    "fossilID" : "ankylosaur_skull",
+    "instances" : 1,
+    "seed" : 878018372492666843,
+    "siteID" : "hell_creek"
+  },
+  {
+    "baseCeiling" : 371,
+    "fossilID" : "edmontosaurus_tooth",
     "instances" : 1,
     "seed" : 12278733187519783920,
     "siteID" : "hell_creek"
@@ -1400,351 +1400,351 @@
     "siteID" : "hell_creek"
   },
   {
-    "baseCeiling" : 554,
-    "fossilID" : "marrella",
+    "baseCeiling" : 428,
+    "fossilID" : "plesiosaur_tooth",
     "instances" : 1,
     "seed" : 2417876992,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 3184,
-    "fossilID" : "trike_skull",
-    "instances" : 1,
-    "seed" : 11400714821203106837,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 540,
-    "fossilID" : "hadrosaur_rib",
-    "instances" : 1,
-    "seed" : 4354685562520148010,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 512,
-    "fossilID" : "trike_tooth",
-    "instances" : 1,
-    "seed" : 15755400386137199679,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 343,
-    "fossilID" : "sponge_spicule",
-    "instances" : 1,
-    "seed" : 8709371127458435156,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 1046,
-    "fossilID" : "stingray",
-    "instances" : 1,
-    "seed" : 1663341877365673065,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 385,
-    "fossilID" : "nautilus",
-    "instances" : 1,
-    "seed" : 13064056692392790142,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 315,
-    "fossilID" : "hyolithes_cluster",
-    "instances" : 1,
-    "seed" : 6018027442303960211,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 1271,
-    "fossilID" : "ichthyo_tail",
-    "instances" : 1,
-    "seed" : 17418742257331077288,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 357,
-    "fossilID" : "palm_frond",
-    "instances" : 1,
-    "seed" : 10372713007238331581,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 413,
-    "fossilID" : "asteroceras",
-    "instances" : 1,
-    "seed" : 3326683748559567058,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 245,
-    "fossilID" : "peronopsis",
-    "instances" : 1,
-    "seed" : 14727398572176618727,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 343,
-    "fossilID" : "sponge_spicule",
-    "instances" : 1,
-    "seed" : 7681369313493659900,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 399,
-    "fossilID" : "petrified_wood",
-    "instances" : 1,
-    "seed" : 635340063405092113,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 259,
-    "fossilID" : "fish_scales",
-    "instances" : 1,
-    "seed" : 12036054878432209190,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 681,
-    "fossilID" : "diplomystus_large",
-    "instances" : 1,
-    "seed" : 4990025628339184955,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 568,
-    "fossilID" : "raptor_claw",
-    "instances" : 1,
-    "seed" : 16390740443370496336,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 512,
-    "fossilID" : "priscacara",
-    "instances" : 1,
-    "seed" : 9344711193277750629,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 779,
-    "fossilID" : "ichthyo_skull",
-    "instances" : 1,
-    "seed" : 2298681934594791802,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 2228,
-    "fossilID" : "trex_tail",
-    "instances" : 1,
-    "seed" : 13699396758216037775,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 540,
-    "fossilID" : "amphiplaga",
-    "instances" : 1,
-    "seed" : 6653367499533078948,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 188,
-    "fossilID" : "coprolite",
-    "instances" : 1,
-    "seed" : 18054082323149868473,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 174,
-    "fossilID" : "algae_mat",
-    "instances" : 1,
-    "seed" : 11008053064471628238,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 371,
-    "fossilID" : "hyolith",
-    "instances" : 2,
-    "seed" : 3962023814915474915,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 456,
-    "fossilID" : "agnostid",
-    "instances" : 2,
-    "seed" : 15362738629942591992,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 638,
-    "fossilID" : "raptor_tooth",
-    "instances" : 1,
-    "seed" : 8316709379854040589,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 385,
-    "fossilID" : "nautilus",
-    "instances" : 1,
-    "seed" : 1270680121171081762,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 638,
-    "fossilID" : "raptor_tooth",
-    "instances" : 1,
-    "seed" : 12671394944788133431,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 301,
-    "fossilID" : "dactylioceras",
-    "instances" : 1,
-    "seed" : 5625365686109368908,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 610,
-    "fossilID" : "ichthyo_jaw",
-    "instances" : 1,
-    "seed" : 17026080509726158433,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 512,
-    "fossilID" : "champsosaur_vertebra",
-    "instances" : 1,
-    "seed" : 9980051251043723894,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 681,
-    "fossilID" : "diplomystus_large",
-    "instances" : 1,
-    "seed" : 2934022000954893963,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 301,
-    "fossilID" : "maple_leaf",
-    "instances" : 1,
-    "seed" : 14334736815982011040,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 484,
-    "fossilID" : "olenoides",
-    "instances" : 1,
-    "seed" : 7288707565889003189,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 245,
-    "fossilID" : "peronopsis",
-    "instances" : 1,
-    "seed" : 242678307210500810,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 554,
-    "fossilID" : "plesiosaur_vertebra",
-    "instances" : 1,
-    "seed" : 11643393130827552479,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 174,
-    "fossilID" : "algae_mat",
-    "instances" : 1,
-    "seed" : 4597363872144593652,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 343,
-    "fossilID" : "sponge_spicule",
-    "instances" : 1,
-    "seed" : 15998078695765839625,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 203,
-    "fossilID" : "bivalve",
-    "instances" : 1,
-    "seed" : 8952049437083142942,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 357,
-    "fossilID" : "palm_frond",
-    "instances" : 1,
-    "seed" : 1906020186990118707,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 723,
-    "fossilID" : "mosasaur_tooth",
-    "instances" : 1,
-    "seed" : 13306735002021430088,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 301,
-    "fossilID" : "dactylioceras",
-    "instances" : 1,
-    "seed" : 6260705751928422237,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 610,
-    "fossilID" : "trex_rib",
-    "instances" : 1,
-    "seed" : 17661420566955277170,
     "siteID" : "night_dig"
   },
   {
     "baseCeiling" : 596,
     "fossilID" : "fossil_insect",
     "instances" : 1,
-    "seed" : 10615391316866971527,
+    "seed" : 11400714821203106837,
     "siteID" : "night_dig"
   },
   {
-    "baseCeiling" : 399,
-    "fossilID" : "petrified_wood",
+    "baseCeiling" : 540,
+    "fossilID" : "amphiplaga",
     "instances" : 1,
-    "seed" : 3569362058184012700,
+    "seed" : 4354685562520148010,
     "siteID" : "night_dig"
   },
   {
-    "baseCeiling" : 737,
-    "fossilID" : "phareodus",
-    "instances" : 1,
-    "seed" : 14970076881801064369,
-    "siteID" : "night_dig"
-  },
-  {
-    "baseCeiling" : 315,
-    "fossilID" : "brachiopod",
+    "baseCeiling" : 456,
+    "fossilID" : "agnostid",
     "instances" : 2,
-    "seed" : 7924047622585691078,
+    "seed" : 15755400386137199679,
     "siteID" : "night_dig"
   },
   {
-    "baseCeiling" : 301,
-    "fossilID" : "maple_leaf",
+    "baseCeiling" : 1046,
+    "fossilID" : "stingray",
     "instances" : 1,
-    "seed" : 878018372492666843,
+    "seed" : 8709371127458435156,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 413,
+    "fossilID" : "asteroceras",
+    "instances" : 1,
+    "seed" : 1663341877365673065,
     "siteID" : "night_dig"
   },
   {
     "baseCeiling" : 695,
     "fossilID" : "trex_vertebra",
     "instances" : 1,
+    "seed" : 13064056692392790142,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 470,
+    "fossilID" : "diplomystus",
+    "instances" : 1,
+    "seed" : 6018027442303960211,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 638,
+    "fossilID" : "plesiosaur_paddle",
+    "instances" : 1,
+    "seed" : 17418742257331077288,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 2228,
+    "fossilID" : "trex_tail",
+    "instances" : 1,
+    "seed" : 10372713007238331581,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 779,
+    "fossilID" : "ichthyo_skull",
+    "instances" : 1,
+    "seed" : 3326683748559567058,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 526,
+    "fossilID" : "ichthyo_paddle",
+    "instances" : 1,
+    "seed" : 14727398572176618727,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 484,
+    "fossilID" : "edmontosaurus_tooth",
+    "instances" : 1,
+    "seed" : 7681369313493659900,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 4028,
+    "fossilID" : "trex_skeleton",
+    "instances" : 1,
+    "seed" : 635340063405092113,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 245,
+    "fossilID" : "peronopsis",
+    "instances" : 1,
+    "seed" : 12036054878432209190,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 3606,
+    "fossilID" : "plesiosaur_skeleton",
+    "instances" : 1,
+    "seed" : 4990025628339184955,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 1412,
+    "fossilID" : "plesiosaur_ribcage",
+    "instances" : 1,
+    "seed" : 16390740443370496336,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 1243,
+    "fossilID" : "mammal_jaw",
+    "instances" : 1,
+    "seed" : 9344711193277750629,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 568,
+    "fossilID" : "raptor_claw",
+    "instances" : 1,
+    "seed" : 2298681934594791802,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 329,
+    "fossilID" : "eocrinoid",
+    "instances" : 1,
+    "seed" : 13699396758216037775,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 1271,
+    "fossilID" : "ichthyo_tail",
+    "instances" : 1,
+    "seed" : 6653367499533078948,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 371,
+    "fossilID" : "hyolith",
+    "instances" : 2,
+    "seed" : 18054082323149868473,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 399,
+    "fossilID" : "knightia",
+    "instances" : 1,
+    "seed" : 11008053064471628238,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 259,
+    "fossilID" : "elrathia",
+    "instances" : 1,
+    "seed" : 3962023814915474915,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 765,
+    "fossilID" : "anomalocaris_claw",
+    "instances" : 1,
+    "seed" : 15362738629942591992,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 385,
+    "fossilID" : "nautilus",
+    "instances" : 1,
+    "seed" : 8316709379854040589,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 2453,
+    "fossilID" : "bat_wing",
+    "instances" : 1,
+    "seed" : 1270680121171081762,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 1088,
+    "fossilID" : "pachycephalosaur_dome",
+    "instances" : 1,
+    "seed" : 12671394944788133431,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 188,
+    "fossilID" : "coprolite",
+    "instances" : 1,
+    "seed" : 5625365686109368908,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 217,
+    "fossilID" : "gryphaea",
+    "instances" : 1,
+    "seed" : 17026080509726158433,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 484,
+    "fossilID" : "olenoides",
+    "instances" : 1,
+    "seed" : 9980051251043723894,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 456,
+    "fossilID" : "pentacrinites",
+    "instances" : 1,
+    "seed" : 2934022000954893963,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 385,
+    "fossilID" : "nautilus",
+    "instances" : 1,
+    "seed" : 14334736815982011040,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 526,
+    "fossilID" : "eldonia",
+    "instances" : 1,
+    "seed" : 7288707565889003189,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 610,
+    "fossilID" : "trex_rib",
+    "instances" : 1,
+    "seed" : 242678307210500810,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 231,
+    "fossilID" : "gastropod_shell",
+    "instances" : 1,
+    "seed" : 11643393130827552479,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 217,
+    "fossilID" : "gryphaea",
+    "instances" : 1,
+    "seed" : 4597363872144593652,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 1440,
+    "fossilID" : "croc_skull",
+    "instances" : 1,
+    "seed" : 15998078695765839625,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 667,
+    "fossilID" : "ammonite_sphenodiscus",
+    "instances" : 1,
+    "seed" : 8952049437083142942,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 399,
+    "fossilID" : "petrified_wood",
+    "instances" : 1,
+    "seed" : 1906020186990118707,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 301,
+    "fossilID" : "dactylioceras",
+    "instances" : 1,
+    "seed" : 13306735002021430088,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 540,
+    "fossilID" : "amphiplaga",
+    "instances" : 1,
+    "seed" : 6260705751928422237,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 273,
+    "fossilID" : "modocia",
+    "instances" : 1,
+    "seed" : 17661420566955277170,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 934,
+    "fossilID" : "ankylosaur_spike",
+    "instances" : 1,
+    "seed" : 10615391316866971527,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 329,
+    "fossilID" : "eocrinoid",
+    "instances" : 1,
+    "seed" : 3569362058184012700,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 512,
+    "fossilID" : "champsosaur_vertebra",
+    "instances" : 1,
+    "seed" : 14970076881801064369,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 498,
+    "fossilID" : "croc_osteoderm",
+    "instances" : 1,
+    "seed" : 7924047622585691078,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 371,
+    "fossilID" : "hyolith",
+    "instances" : 2,
+    "seed" : 878018372492666843,
+    "siteID" : "night_dig"
+  },
+  {
+    "baseCeiling" : 737,
+    "fossilID" : "dino_egg_shell",
+    "instances" : 1,
     "seed" : 12278733187519783920,
     "siteID" : "night_dig"
   },
   {
-    "baseCeiling" : 315,
-    "fossilID" : "hyolithes_cluster",
+    "baseCeiling" : 428,
+    "fossilID" : "plesiosaur_tooth",
     "instances" : 1,
     "seed" : 5232703937430953989,
     "siteID" : "night_dig"

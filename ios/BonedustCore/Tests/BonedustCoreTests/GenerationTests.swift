@@ -151,8 +151,14 @@ final class GenerationTests: XCTestCase {
         for (id, weight) in site.fossilWeights {
             let expected = Double(weight) / Double(total) * 2_000
             let actual = Double(counts[id] ?? 0)
+            // Tolerance from the counting statistics rather than a flat percentage.
+            // Draws are Poisson, so the spread goes as sqrt(expected): a species expected
+            // 600 times lands within a few percent, while the deliberately rare ones --
+            // the articulated skeletons, at weight 2 of ~300 -- are expected about 13
+            // times, where a flat 35% is barely one sigma and fails on noise.
+            let tolerance = max(expected * 0.2, 4 * expected.squareRoot())
             XCTAssertEqual(
-                actual, expected, accuracy: expected * 0.35,
+                actual, expected, accuracy: tolerance,
                 "\(id) came up \(Int(actual)) times against an expected \(Int(expected))"
             )
         }

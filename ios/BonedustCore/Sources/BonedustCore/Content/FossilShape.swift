@@ -87,6 +87,9 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
         case ribcage         // spine with ribs down both sides
         case wing            // pterosaur arm and membrane
         case foot            // three-toed foot with claws
+        case vertebra        // one vertebra: centrum, arch, spine, processes
+        case toothRow        // a jaw fragment with teeth still in it
+        case skeleton        // part of an articulated animal
     }
 
     public var kind: Kind
@@ -116,6 +119,9 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
         case .ribcage: return Self.ribcage(params)
         case .wing: return Self.wing(params)
         case .foot: return Self.foot(params)
+        case .vertebra: return Self.vertebra(params)
+        case .toothRow: return Self.toothRow(params)
+        case .skeleton: return Self.skeleton(params)
         }
     }
 
@@ -322,6 +328,129 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
                 (c, p.thickness * 0.46), (claw, p.thickness * 0.16),
             ]))
         }
+        return out
+    }
+
+    /// One vertebra, large: centrum, neural arch, spine, and transverse processes.
+    ///
+    /// A single vertebra drawn as a disc is a disc. Drawn with its processes it is
+    /// unmistakable, and it is the one bone most people can name on sight.
+    ///
+    /// Grid y runs *down*, so negative y is toward the top of the slab.
+    private static func vertebra(_ p: ShapeParams) -> [ShapePrimitive] {
+        let body = max(0.1, p.thickness)
+        let reach = max(0.2, p.aspect)
+        var out: [ShapePrimitive] = [
+            // Centrum: the spool the rest hangs off, dished at both ends.
+            .ellipse(center: Vec2(0, 0.28), radii: Vec2(0.52, body * 1.5), rotation: 0),
+            // Neural arch above it, with the canal implied by the waist between them.
+            .ellipse(center: Vec2(0, -0.04), radii: Vec2(0.3, body * 0.9), rotation: 0),
+        ]
+        // Neural spine, tall and flat -- the part that makes it read as a vertebra and the
+        // part a hurried brush takes off first.
+        out.append(.stroke(vertices: [
+            (Vec2(0, -0.06), body * 0.85),
+            (Vec2(-0.04, -0.52 - reach * 0.4), body * 0.62),
+            (Vec2(-0.06, -0.96), body * 0.34),
+        ]))
+        // Transverse processes, one each side, swept back.
+        for side in [Float(-1), 1] {
+            out.append(.stroke(vertices: [
+                (Vec2(side * 0.16, -0.02), body * 0.6),
+                (Vec2(side * 0.72, 0.1), body * 0.44),
+                (Vec2(side * 1.0, 0.3), body * 0.24),
+            ]))
+        }
+        // Zygapophyses: the little paired knuckles that join one vertebra to the next.
+        for side in [Float(-1), 1] {
+            out.append(.ellipse(
+                center: Vec2(side * 0.3, -0.26), radii: Vec2(body * 0.5, body * 0.4),
+                rotation: 0
+            ))
+        }
+        return out
+    }
+
+    /// A chunk of jaw with the teeth still in it.
+    ///
+    /// A single tooth is a cone, and a cone drawn at 96x128 is a thorn. A jaw fragment is
+    /// read instantly, and it gives the player several fragile things in one slab rather
+    /// than one -- which is a better dig as well as a better silhouette.
+    private static func toothRow(_ p: ShapeParams) -> [ShapePrimitive] {
+        let bone = max(0.04, p.thickness)
+        let n = max(2, p.ribs)
+        // The jaw bone itself, slightly bowed.
+        var jaw: [(Vec2, Float)] = []
+        for i in 0...18 {
+            let u = Float(i) / 18
+            jaw.append((
+                Vec2(-1 + 2 * u, -0.3 + p.bend * (u - 0.5) * (u - 0.5) * 4),
+                bone * (1.7 - 0.3 * abs(u - 0.5) * 2)
+            ))
+        }
+        var out: [ShapePrimitive] = [.stroke(vertices: jaw)]
+        for i in 0..<n {
+            let u = (Float(i) + 0.5) / Float(n)
+            let x = -0.92 + 1.84 * u
+            let top = -0.3 + p.bend * (u - 0.5) * (u - 0.5) * 4 + bone * 1.4
+            // Crown down into the slab, with a visible gap to its neighbours. The gaps are
+            // what make it a row of teeth instead of a saw blade.
+            let length = p.aspect * (0.8 + 0.3 * sin(Float.pi * u))
+            out.append(.stroke(vertices: [
+                (Vec2(x, top), bone * 1.0),
+                (Vec2(x + 0.02, top + length * 0.6), bone * 0.72),
+                (Vec2(x + 0.04, top + length), bone * 0.16),
+            ]))
+        }
+        return out
+    }
+
+    /// Part of an articulated animal: spine, ribs, a limb, and a stub of tail.
+    ///
+    /// The best thing a slab can hold. Everything about it is thin, so it is also the
+    /// easiest to ruin -- which is the trade the whole game is about, made literal.
+    private static func skeleton(_ p: ShapeParams) -> [ShapePrimitive] {
+        let bone = max(0.03, p.thickness)
+        let n = max(4, p.ribs)
+        var out: [ShapePrimitive] = []
+        // Spine, arcing across the slab.
+        var spine: [(Vec2, Float)] = []
+        for i in 0...24 {
+            let u = Float(i) / 24
+            spine.append((Vec2(-1 + 2 * u, -0.3 - p.bend * sin(Float.pi * u)), bone * 1.3))
+        }
+        out.append(.stroke(vertices: spine))
+        // Ribs hanging off it, longest at the chest.
+        for i in 0..<n {
+            let u = (Float(i) + 0.5) / Float(n)
+            let x = -0.75 + 1.3 * u
+            let top = -0.3 - p.bend * sin(Float.pi * (0.125 + 0.65 * u))
+            let length = p.aspect * (0.6 + sin(Float.pi * u))
+            out.append(.stroke(vertices: [
+                (Vec2(x, top), bone * 0.8),
+                (Vec2(x + 0.06, top + length * 0.55), bone * 0.6),
+                (Vec2(x + 0.16, top + length), bone * 0.36),
+            ]))
+        }
+        // A limb, folded, off the shoulder.
+        let shoulder = Vec2(-0.66, -0.26)
+        let elbow = Vec2(-0.86, 0.26)
+        let wrist = Vec2(-0.5, 0.52)
+        out.append(.stroke(vertices: [(shoulder, bone * 1.2), (elbow, bone * 0.95)]))
+        out.append(.stroke(vertices: [(elbow, bone * 0.95), (wrist, bone * 0.7)]))
+        out.append(.ellipse(center: elbow, radii: Vec2(bone * 1.5, bone * 1.5), rotation: 0))
+        for toe in 0..<3 {
+            let spread = (Float(toe) - 1) * 0.22
+            out.append(.stroke(vertices: [
+                (wrist, bone * 0.55),
+                (wrist + Vec2(0.16 + spread * 0.3, 0.22 + spread), bone * 0.2),
+            ]))
+        }
+        // Skull at the far end, so there is no doubt what it was.
+        out.append(.ellipse(center: Vec2(0.92, -0.28), radii: Vec2(0.16, bone * 2.6), rotation: 0))
+        out.append(.stroke(vertices: [
+            (Vec2(1.0, -0.24), bone * 1.5), (Vec2(0.62, -0.18), bone * 0.9),
+        ]))
         return out
     }
 

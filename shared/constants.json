@@ -479,24 +479,24 @@
       "period" : "Jurassic",
       "setID" : "ichthyosaur",
       "shape" : {
-        "kind" : "discs",
+        "kind" : "vertebra",
         "params" : {
-          "aspect" : 0.34,
+          "aspect" : 0.45,
           "bend" : 0.22,
           "chain" : 0,
-          "count" : 6,
+          "count" : 7,
           "growth" : 0.085,
-          "jitter" : 0.22,
+          "jitter" : 0.1,
           "knobEnds" : 0,
-          "process" : 2.2,
+          "process" : 0,
           "ribs" : 9,
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.17,
+          "thickness" : 0.16,
           "turns" : 2.6
         },
-        "spanCells" : 80
+        "spanCells" : 72
       }
     },
     {
@@ -885,24 +885,24 @@
       "period" : "Late Cretaceous",
       "setID" : "trex",
       "shape" : {
-        "kind" : "taper",
+        "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.16,
+          "aspect" : 0.5,
+          "bend" : 0.1,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 9,
-          "root" : 2.4,
-          "taperFrom" : 0.2,
-          "taperTo" : 0.03,
-          "thickness" : 0.1,
+          "ribs" : 5,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.055,
           "turns" : 2.6
         },
-        "spanCells" : 54
+        "spanCells" : 78
       }
     },
     {
@@ -949,12 +949,12 @@
       "period" : "Late Cretaceous",
       "setID" : "trex",
       "shape" : {
-        "kind" : "tail",
+        "kind" : "vertebra",
         "params" : {
-          "aspect" : 0.44,
-          "bend" : 0.2,
+          "aspect" : 0.6,
+          "bend" : 0.22,
           "chain" : 0,
-          "count" : 5,
+          "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
@@ -963,10 +963,10 @@
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.11,
+          "thickness" : 0.2,
           "turns" : 2.6
         },
-        "spanCells" : 84
+        "spanCells" : 86
       }
     },
     {
@@ -1073,24 +1073,24 @@
       "note" : "Striated, slightly curved, and sharper than it has any right to be.",
       "period" : "Jurassic",
       "shape" : {
-        "kind" : "taper",
+        "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.22,
+          "aspect" : 0.46,
+          "bend" : 0.14,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 9,
-          "root" : 2.4,
-          "taperFrom" : 0.085,
-          "taperTo" : 0.012,
-          "thickness" : 0.1,
+          "ribs" : 5,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.045,
           "turns" : 2.6
         },
-        "spanCells" : 54
+        "spanCells" : 68
       }
     },
     {
@@ -1104,10 +1104,10 @@
       "note" : "A dinner plate with fins. Scales like chainmail.",
       "period" : "Jurassic",
       "shape" : {
-        "kind" : "fish",
+        "kind" : "skeleton",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.22,
+          "aspect" : 0.36,
+          "bend" : 0.13,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
@@ -1118,10 +1118,10 @@
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.1,
+          "thickness" : 0.04,
           "turns" : 2.6
         },
-        "spanCells" : 66
+        "spanCells" : 62
       }
     },
     {
@@ -1197,10 +1197,10 @@
       "note" : "Two shields and no shell between them. Rare and soft.",
       "period" : "Cambrian",
       "shape" : {
-        "kind" : "ribcage",
+        "kind" : "skeleton",
         "params" : {
-          "aspect" : 0.5,
-          "bend" : 1,
+          "aspect" : 0.3,
+          "bend" : 0.1,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
@@ -1211,10 +1211,10 @@
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.05,
+          "thickness" : 0.038,
           "turns" : 2.6
         },
-        "spanCells" : 48
+        "spanCells" : 44
       }
     },
     {
@@ -1352,24 +1352,24 @@
       "note" : "One of a thousand in a jaw built for grinding.",
       "period" : "Late Cretaceous",
       "shape" : {
-        "kind" : "taper",
+        "kind" : "toothRow",
         "params" : {
           "aspect" : 0.34,
-          "bend" : 0.08,
+          "bend" : 0.04,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 9,
-          "root" : 2.4,
-          "taperFrom" : 0.1,
-          "taperTo" : 0.03,
-          "thickness" : 0.1,
+          "ribs" : 8,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.045,
           "turns" : 2.6
         },
-        "spanCells" : 54
+        "spanCells" : 70
       }
     },
     {
@@ -1693,12 +1693,12 @@
       "note" : "Spool-shaped, deeply dished at both ends.",
       "period" : "Jurassic",
       "shape" : {
-        "kind" : "tail",
+        "kind" : "vertebra",
         "params" : {
-          "aspect" : 0.38,
+          "aspect" : 0.5,
           "bend" : 0.22,
           "chain" : 0,
-          "count" : 6,
+          "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
@@ -1707,10 +1707,10 @@
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.095,
+          "thickness" : 0.17,
           "turns" : 2.6
         },
-        "spanCells" : 86
+        "spanCells" : 76
       }
     },
     {
@@ -1787,10 +1787,10 @@
       "period" : "Jurassic",
       "setID" : "ichthyosaur",
       "shape" : {
-        "kind" : "fish",
+        "kind" : "skeleton",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.22,
+          "aspect" : 0.38,
+          "bend" : 0.14,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
@@ -1801,10 +1801,10 @@
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.1,
+          "thickness" : 0.045,
           "turns" : 2.6
         },
-        "spanCells" : 88
+        "spanCells" : 78
       }
     },
     {
@@ -2903,24 +2903,24 @@
       "note" : "Conical, striated, and shed by the hundred.",
       "period" : "Eocene",
       "shape" : {
-        "kind" : "taper",
+        "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.15,
+          "aspect" : 0.4,
+          "bend" : 0.06,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 9,
-          "root" : 2.4,
-          "taperFrom" : 0.1,
-          "taperTo" : 0.02,
-          "thickness" : 0.1,
+          "ribs" : 7,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.042,
           "turns" : 2.6
         },
-        "spanCells" : 54
+        "spanCells" : 72
       }
     },
     {
@@ -3027,24 +3027,24 @@
       "note" : "A shearing tooth from a battery of hundreds.",
       "period" : "Late Cretaceous",
       "shape" : {
-        "kind" : "taper",
+        "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.06,
+          "aspect" : 0.36,
+          "bend" : 0.05,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 9,
-          "root" : 2.4,
-          "taperFrom" : 0.09,
-          "taperTo" : 0.03,
-          "thickness" : 0.1,
+          "ribs" : 6,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.045,
           "turns" : 2.6
         },
-        "spanCells" : 54
+        "spanCells" : 64
       }
     },
     {
@@ -3058,24 +3058,24 @@
       "note" : "Teeth stacked like coins in a roll. Lose one and the row is wrong.",
       "period" : "Late Cretaceous",
       "shape" : {
-        "kind" : "discs",
+        "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.22,
-          "chain" : 1,
-          "count" : 12,
+          "aspect" : 0.3,
+          "bend" : 0.03,
+          "chain" : 0,
+          "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 9,
+          "ribs" : 10,
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.14,
+          "thickness" : 0.04,
           "turns" : 2.6
         },
-        "spanCells" : 84
+        "spanCells" : 80
       }
     },
     {
@@ -3151,24 +3151,24 @@
       "note" : "Serrated on the back edge. Check it with a thumbnail, gently.",
       "period" : "Late Cretaceous",
       "shape" : {
-        "kind" : "taper",
+        "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.22,
+          "aspect" : 0.4,
+          "bend" : 0.12,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 9,
-          "root" : 2.4,
-          "taperFrom" : 0.12,
-          "taperTo" : 0.03,
-          "thickness" : 0.1,
+          "ribs" : 6,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.04,
           "turns" : 2.6
         },
-        "spanCells" : 54
+        "spanCells" : 62
       }
     },
     {
@@ -3182,24 +3182,24 @@
       "note" : "From the inland sea that cut the continent in half.",
       "period" : "Late Cretaceous",
       "shape" : {
-        "kind" : "taper",
+        "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.34,
-          "bend" : 0.14,
+          "aspect" : 0.46,
+          "bend" : 0.08,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 9,
-          "root" : 2.4,
-          "taperFrom" : 0.11,
-          "taperTo" : 0.025,
-          "thickness" : 0.1,
+          "ribs" : 6,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.05,
           "turns" : 2.6
         },
-        "spanCells" : 54
+        "spanCells" : 76
       }
     },
     {
@@ -3957,24 +3957,24 @@
       "note" : "Hollow bones, and a wishbone you can see. Breathe on it wrong and it is gone.",
       "period" : "Eocene",
       "shape" : {
-        "kind" : "ribcage",
+        "kind" : "skeleton",
         "params" : {
-          "aspect" : 0.6,
-          "bend" : 0.22,
+          "aspect" : 0.34,
+          "bend" : 0.13,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
-          "ribs" : 7,
+          "ribs" : 8,
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.045,
+          "thickness" : 0.034,
           "turns" : 2.6
         },
-        "spanCells" : 92
+        "spanCells" : 66
       }
     },
     {
@@ -4019,10 +4019,10 @@
       "note" : "Swimming flaps down both sides. The best thing in the shale, and the softest.",
       "period" : "Cambrian",
       "shape" : {
-        "kind" : "ribcage",
+        "kind" : "skeleton",
         "params" : {
-          "aspect" : 0.5,
-          "bend" : 0.22,
+          "aspect" : 0.34,
+          "bend" : 0.12,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
@@ -4033,10 +4033,103 @@
           "root" : 0,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
+          "thickness" : 0.036,
+          "turns" : 2.6
+        },
+        "spanCells" : 68
+      }
+    },
+    {
+      "baseValue" : 1400,
+      "crackMultiplier" : 1.5,
+      "formation" : "Hell Creek",
+      "id" : "trex_skeleton",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Tyrannosaurus, articulated",
+      "note" : "Spine, ribs, an arm, and the head still attached. Nobody finds these.",
+      "period" : "Late Cretaceous",
+      "shape" : {
+        "kind" : "skeleton",
+        "params" : {
+          "aspect" : 0.4,
+          "bend" : 0.16,
+          "chain" : 0,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "knobEnds" : 0,
+          "process" : 0,
+          "ribs" : 10,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
           "thickness" : 0.05,
           "turns" : 2.6
         },
-        "spanCells" : 104
+        "spanCells" : 84
+      }
+    },
+    {
+      "baseValue" : 1150,
+      "crackMultiplier" : 1.6,
+      "formation" : "Hell Creek",
+      "id" : "raptor_skeleton",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Dromaeosaur, articulated",
+      "note" : "Curled where it died. Every bone of it thinner than your brush.",
+      "period" : "Late Cretaceous",
+      "shape" : {
+        "kind" : "skeleton",
+        "params" : {
+          "aspect" : 0.36,
+          "bend" : 0.18,
+          "chain" : 0,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "knobEnds" : 0,
+          "process" : 0,
+          "ribs" : 9,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.04,
+          "turns" : 2.6
+        },
+        "spanCells" : 74
+      }
+    },
+    {
+      "baseValue" : 1250,
+      "crackMultiplier" : 1.5,
+      "formation" : "Blue Lias",
+      "id" : "plesiosaur_skeleton",
+      "instancesMax" : 1,
+      "instancesMin" : 1,
+      "name" : "Plesiosaur, articulated",
+      "note" : "Mary Anning found one at twelve. You have until sundown.",
+      "period" : "Jurassic",
+      "shape" : {
+        "kind" : "skeleton",
+        "params" : {
+          "aspect" : 0.4,
+          "bend" : 0.15,
+          "chain" : 0,
+          "count" : 7,
+          "growth" : 0.085,
+          "jitter" : 0.1,
+          "knobEnds" : 0,
+          "process" : 0,
+          "ribs" : 11,
+          "root" : 0,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.045,
+          "turns" : 2.6
+        },
+        "spanCells" : 82
       }
     }
   ],
@@ -4107,15 +4200,16 @@
         "ichthyo_jaw" : 6,
         "ichthyo_paddle" : 7,
         "ichthyo_rib" : 8,
-        "ichthyo_skull" : 5,
-        "ichthyo_tail" : 3,
+        "ichthyo_skull" : 3,
+        "ichthyo_tail" : 5,
         "ichthyo_vertebrae" : 7,
         "microderoceras" : 10,
         "nautiloid_straight" : 9,
         "nautilus" : 10,
         "pentacrinites" : 8,
         "plesiosaur_paddle" : 6,
-        "plesiosaur_ribcage" : 3,
+        "plesiosaur_ribcage" : 5,
+        "plesiosaur_skeleton" : 2,
         "plesiosaur_skull" : 3,
         "plesiosaur_tooth" : 9,
         "plesiosaur_vertebra" : 6,
@@ -4374,17 +4468,19 @@
         "pterosaur_wing" : 3,
         "raptor_claw" : 12,
         "raptor_foot" : 3,
+        "raptor_skeleton" : 2,
         "raptor_tooth" : 11,
         "theropod_vertebra" : 7,
         "trex_claw" : 7,
         "trex_foot" : 3,
         "trex_rib" : 11,
+        "trex_skeleton" : 2,
         "trex_skull" : 3,
         "trex_skull_frag" : 6,
         "trex_tail" : 3,
         "trex_tooth" : 10,
         "trex_vertebra" : 10,
-        "trike_frill" : 6,
+        "trike_frill" : 3,
         "trike_horn" : 8,
         "trike_skull" : 3,
         "trike_tooth" : 12,
@@ -4536,6 +4632,7 @@
         "phareodus" : 1,
         "plesiosaur_paddle" : 1,
         "plesiosaur_ribcage" : 1,
+        "plesiosaur_skeleton" : 1,
         "plesiosaur_skull" : 1,
         "plesiosaur_tooth" : 1,
         "plesiosaur_vertebra" : 1,
@@ -4546,6 +4643,7 @@
         "ptychagnostus" : 1,
         "raptor_claw" : 1,
         "raptor_foot" : 1,
+        "raptor_skeleton" : 1,
         "raptor_tooth" : 1,
         "sponge_spicule" : 1,
         "stingray" : 1,
@@ -4554,6 +4652,7 @@
         "trex_claw" : 1,
         "trex_foot" : 1,
         "trex_rib" : 1,
+        "trex_skeleton" : 1,
         "trex_skull" : 1,
         "trex_skull_frag" : 1,
         "trex_tail" : 1,

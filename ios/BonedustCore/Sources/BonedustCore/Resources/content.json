@@ -45,13 +45,11 @@
       "setID": "ichthyosaur",
       "note": "Scattered down the slab like dropped coins.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 80,
+        "kind": "vertebra",
+        "spanCells": 72,
         "params": {
-          "count": 6,
-          "thickness": 0.17,
-          "jitter": 0.22,
-          "process": 2.2
+          "thickness": 0.16,
+          "aspect": 0.45
         }
       }
     },
@@ -280,13 +278,13 @@
       "setID": "trex",
       "note": "Small, dense, and the reason you came.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 54,
+        "kind": "toothRow",
+        "spanCells": 78,
         "params": {
-          "taperFrom": 0.2,
-          "taperTo": 0.03,
-          "bend": 0.16,
-          "root": 2.4
+          "ribs": 5,
+          "thickness": 0.055,
+          "aspect": 0.5,
+          "bend": 0.1
         }
       }
     },
@@ -318,13 +316,11 @@
       "setID": "trex",
       "note": "Three fused drums of bone.",
       "shape": {
-        "kind": "tail",
-        "spanCells": 84,
+        "kind": "vertebra",
+        "spanCells": 86,
         "params": {
-          "count": 5,
-          "bend": 0.2,
-          "thickness": 0.11,
-          "aspect": 0.44
+          "thickness": 0.2,
+          "aspect": 0.6
         }
       }
     },
@@ -388,13 +384,13 @@
       "crackMultiplier": 1.3,
       "note": "Striated, slightly curved, and sharper than it has any right to be.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 54,
+        "kind": "toothRow",
+        "spanCells": 68,
         "params": {
-          "taperFrom": 0.085,
-          "taperTo": 0.012,
-          "bend": 0.22,
-          "root": 2.4
+          "ribs": 5,
+          "thickness": 0.045,
+          "aspect": 0.46,
+          "bend": 0.14
         }
       }
     },
@@ -406,11 +402,13 @@
       "baseValue": 130,
       "note": "A dinner plate with fins. Scales like chainmail.",
       "shape": {
-        "kind": "fish",
-        "spanCells": 66,
+        "kind": "skeleton",
+        "spanCells": 62,
         "params": {
-          "depth": 0.62,
-          "tail": 0.26
+          "ribs": 9,
+          "thickness": 0.04,
+          "aspect": 0.36,
+          "bend": 0.13
         }
       }
     },
@@ -458,13 +456,13 @@
       "note": "Two shields and no shell between them. Rare and soft.",
       "crackMultiplier": 1.35,
       "shape": {
-        "kind": "ribcage",
-        "spanCells": 48,
+        "kind": "skeleton",
+        "spanCells": 44,
         "params": {
           "ribs": 6,
-          "thickness": 0.05,
-          "aspect": 0.5,
-          "bend": 1
+          "thickness": 0.038,
+          "aspect": 0.3,
+          "bend": 0.1
         }
       }
     },
@@ -546,13 +544,13 @@
       "baseValue": 140,
       "note": "One of a thousand in a jaw built for grinding.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 54,
+        "kind": "toothRow",
+        "spanCells": 70,
         "params": {
-          "taperFrom": 0.1,
-          "taperTo": 0.03,
-          "bend": 0.08,
-          "root": 2.4
+          "ribs": 8,
+          "thickness": 0.045,
+          "aspect": 0.34,
+          "bend": 0.04
         }
       }
     },
@@ -740,13 +738,11 @@
       "baseValue": 165,
       "note": "Spool-shaped, deeply dished at both ends.",
       "shape": {
-        "kind": "tail",
-        "spanCells": 86,
+        "kind": "vertebra",
+        "spanCells": 76,
         "params": {
-          "count": 6,
-          "bend": 0.22,
-          "thickness": 0.095,
-          "aspect": 0.38
+          "thickness": 0.17,
+          "aspect": 0.5
         }
       }
     },
@@ -795,11 +791,13 @@
       "baseValue": 245,
       "note": "The eye socket is the size of your palm. Mind the ring of bone around it.",
       "shape": {
-        "kind": "fish",
-        "spanCells": 88,
+        "kind": "skeleton",
+        "spanCells": 78,
         "params": {
-          "depth": 0.44,
-          "tail": 0.1
+          "ribs": 9,
+          "thickness": 0.045,
+          "aspect": 0.38,
+          "bend": 0.14
         }
       },
       "crackMultiplier": 1.3,
@@ -1441,13 +1439,13 @@
       "baseValue": 140,
       "note": "Conical, striated, and shed by the hundred.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 54,
+        "kind": "toothRow",
+        "spanCells": 72,
         "params": {
-          "taperFrom": 0.1,
-          "taperTo": 0.02,
-          "bend": 0.15,
-          "root": 2.4
+          "ribs": 7,
+          "thickness": 0.042,
+          "aspect": 0.4,
+          "bend": 0.06
         }
       },
       "crackMultiplier": 1.1
@@ -1514,13 +1512,13 @@
       "baseValue": 150,
       "note": "A shearing tooth from a battery of hundreds.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 54,
+        "kind": "toothRow",
+        "spanCells": 64,
         "params": {
-          "taperFrom": 0.09,
-          "taperTo": 0.03,
-          "bend": 0.06,
-          "root": 2.4
+          "ribs": 6,
+          "thickness": 0.045,
+          "aspect": 0.36,
+          "bend": 0.05
         }
       }
     },
@@ -1532,13 +1530,13 @@
       "baseValue": 290,
       "note": "Teeth stacked like coins in a roll. Lose one and the row is wrong.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 84,
+        "kind": "toothRow",
+        "spanCells": 80,
         "params": {
-          "count": 12,
-          "thickness": 0.14,
-          "jitter": 0.1,
-          "chain": 1.0
+          "ribs": 10,
+          "thickness": 0.04,
+          "aspect": 0.3,
+          "bend": 0.03
         }
       },
       "crackMultiplier": 1.2
@@ -1586,13 +1584,13 @@
       "baseValue": 195,
       "note": "Serrated on the back edge. Check it with a thumbnail, gently.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 54,
+        "kind": "toothRow",
+        "spanCells": 62,
         "params": {
-          "taperFrom": 0.12,
-          "taperTo": 0.03,
-          "bend": 0.22,
-          "root": 2.4
+          "ribs": 6,
+          "thickness": 0.04,
+          "aspect": 0.4,
+          "bend": 0.12
         }
       },
       "crackMultiplier": 1.25
@@ -1605,13 +1603,13 @@
       "baseValue": 225,
       "note": "From the inland sea that cut the continent in half.",
       "shape": {
-        "kind": "taper",
-        "spanCells": 54,
+        "kind": "toothRow",
+        "spanCells": 76,
         "params": {
-          "taperFrom": 0.11,
-          "taperTo": 0.025,
-          "bend": 0.14,
-          "root": 2.4
+          "ribs": 6,
+          "thickness": 0.05,
+          "aspect": 0.46,
+          "bend": 0.08
         }
       },
       "crackMultiplier": 1.1
@@ -2070,12 +2068,13 @@
       "baseValue": 780,
       "note": "Hollow bones, and a wishbone you can see. Breathe on it wrong and it is gone.",
       "shape": {
-        "kind": "ribcage",
-        "spanCells": 92,
+        "kind": "skeleton",
+        "spanCells": 66,
         "params": {
-          "ribs": 7,
-          "thickness": 0.045,
-          "aspect": 0.6
+          "ribs": 8,
+          "thickness": 0.034,
+          "aspect": 0.34,
+          "bend": 0.13
         }
       },
       "crackMultiplier": 1.7
@@ -2106,15 +2105,73 @@
       "baseValue": 690,
       "note": "Swimming flaps down both sides. The best thing in the shale, and the softest.",
       "shape": {
-        "kind": "ribcage",
-        "spanCells": 104,
+        "kind": "skeleton",
+        "spanCells": 68,
         "params": {
           "ribs": 11,
-          "thickness": 0.05,
-          "aspect": 0.5
+          "thickness": 0.036,
+          "aspect": 0.34,
+          "bend": 0.12
         }
       },
       "crackMultiplier": 1.6
+    },
+    {
+      "id": "trex_skeleton",
+      "name": "Tyrannosaurus, articulated",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 1400,
+      "crackMultiplier": 1.5,
+      "note": "Spine, ribs, an arm, and the head still attached. Nobody finds these.",
+      "shape": {
+        "kind": "skeleton",
+        "spanCells": 84,
+        "params": {
+          "ribs": 10,
+          "thickness": 0.05,
+          "aspect": 0.4,
+          "bend": 0.16
+        }
+      }
+    },
+    {
+      "id": "raptor_skeleton",
+      "name": "Dromaeosaur, articulated",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 1150,
+      "crackMultiplier": 1.6,
+      "note": "Curled where it died. Every bone of it thinner than your brush.",
+      "shape": {
+        "kind": "skeleton",
+        "spanCells": 74,
+        "params": {
+          "ribs": 9,
+          "thickness": 0.04,
+          "aspect": 0.36,
+          "bend": 0.18
+        }
+      }
+    },
+    {
+      "id": "plesiosaur_skeleton",
+      "name": "Plesiosaur, articulated",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 1250,
+      "crackMultiplier": 1.5,
+      "note": "Mary Anning found one at twelve. You have until sundown.",
+      "shape": {
+        "kind": "skeleton",
+        "spanCells": 82,
+        "params": {
+          "ribs": 11,
+          "thickness": 0.045,
+          "aspect": 0.4,
+          "bend": 0.15
+        }
+      }
     }
   ],
   "sites": [
@@ -2152,12 +2209,13 @@
         "plesiosaur_vertebra": 6,
         "ichthyo_jaw": 6,
         "plesiosaur_paddle": 6,
-        "ichthyo_skull": 5,
-        "ichthyo_tail": 3,
-        "plesiosaur_ribcage": 3,
+        "ichthyo_skull": 3,
+        "ichthyo_tail": 5,
+        "plesiosaur_ribcage": 5,
         "plesiosaur_skull": 3,
         "dimorphodon_skull": 3,
-        "pterodactylus": 3
+        "pterodactylus": 3,
+        "plesiosaur_skeleton": 2
       }
     },
     {
@@ -2341,7 +2399,7 @@
         "pachycephalosaur_dome": 7,
         "trex_skull_frag": 6,
         "mammal_jaw": 6,
-        "trike_frill": 6,
+        "trike_frill": 3,
         "croc_skull": 3,
         "raptor_foot": 3,
         "hadrosaur_ribcage": 3,
@@ -2351,7 +2409,9 @@
         "mosasaur_skull": 3,
         "pterosaur_wing": 3,
         "trex_skull": 3,
-        "trike_skull": 3
+        "trike_skull": 3,
+        "raptor_skeleton": 2,
+        "trex_skeleton": 2
       }
     },
     {
@@ -2484,7 +2544,10 @@
         "dimorphodon_skull": 1,
         "bird_skeleton": 1,
         "bat_wing": 1,
-        "anomalocaris_whole": 1
+        "anomalocaris_whole": 1,
+        "trex_skeleton": 1,
+        "raptor_skeleton": 1,
+        "plesiosaur_skeleton": 1
       }
     }
   ],
