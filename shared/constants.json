@@ -4951,7 +4951,8 @@
   ],
   "tuning" : {
     "baselineFragility" : 0.3,
-    "boneTellTint" : 0.2,
+    "boneTellStipple" : 0.6,
+    "boneTellTint" : 0,
     "cellNoise" : 0.07,
     "contactAssumedTipPoints" : 11,
     "contactCalibrationRate" : 0.25,

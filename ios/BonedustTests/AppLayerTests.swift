@@ -970,6 +970,14 @@ final class DigSceneBackdropTests: XCTestCase {
     }
 }
 
+extension SlabRenderer {
+    /// One pixel of the rendered buffer, for tests that want to see what `colour()` decided.
+    fileprivate func pixel(_ x: Int, _ y: Int) -> RGB8 {
+        let offset = (y * SlabGrid.width + x) * SlabRenderer.bytesPerPixel
+        return RGB8(pixels[offset], pixels[offset + 1], pixels[offset + 2])
+    }
+}
+
 /// Fracture leaves a record on the page: a diagonal hatch over every cracked cell. The
 /// transient red bloom is the alarm, this is the annotation that stays. Spec §5.
 final class FractureHatchTests: XCTestCase {
@@ -1021,11 +1029,6 @@ final class FractureHatchTests: XCTestCase {
         )
     }
 
-    private func pixel(_ renderer: SlabRenderer, _ x: Int, _ y: Int) -> RGB8 {
-        let offset = (y * SlabGrid.width + x) * SlabRenderer.bytesPerPixel
-        return RGB8(renderer.pixels[offset], renderer.pixels[offset + 1], renderer.pixels[offset + 2])
-    }
-
     /// The tests above cover the helpers. Nothing in them would notice if `colour()`
     /// stopped calling one, or called it on the wrong cells, so this renders a patch of
     /// bone through the real pipeline: left half cracked, right half intact.
@@ -1050,7 +1053,7 @@ final class FractureHatchTests: XCTestCase {
         var plainCells = 0
         for y in 22..<38 {
             for x in 22..<28 {
-                let drawn = pixel(renderer, x, y)
+                let drawn = renderer.pixel(x, y)
                 if SlabRenderer.isHatched(x: x, y: y) {
                     hatchedCells += 1
                     XCTAssertEqual(drawn, SlabRenderer.hatched(palette.crackedBone, x: x, y: y),
@@ -1063,11 +1066,393 @@ final class FractureHatchTests: XCTestCase {
                 }
             }
             for x in 32..<38 {
-                XCTAssertEqual(pixel(renderer, x, y), palette.bone,
+                XCTAssertEqual(renderer.pixel(x, y), palette.bone,
                                "intact bone at (\(x), \(y)) took the hatch")
             }
         }
         XCTAssertGreaterThan(hatchedCells, 0, "no sampled cell was on a stripe")
         XCTAssertGreaterThan(plainCells, 0, "every sampled cell was on a stripe")
+    }
+}
+
+/// Spec §7 and §7a. The slab was already four discrete palette colours per layer, and the
+/// renderer smeared them with continuous operations. The cel pass steps those operations
+/// and adds a real edge. One rule governs all of it: quantize the lighting, never the
+/// albedo. Every palette value comes through exact; only the shade multiplier steps.
+final class CelShadingTests: XCTestCase {
+
+    private func packed(_ colour: RGB8) -> UInt32 {
+        UInt32(colour.r) << 16 | UInt32(colour.g) << 8 | UInt32(colour.b)
+    }
+
+    private func distance(_ a: RGB8, _ b: RGB8) -> Int {
+        abs(Int(a.r) - Int(b.r)) + abs(Int(a.g) - Int(b.g)) + abs(Int(a.b) - Int(b.b))
+    }
+
+    private func fill(
+        _ grid: inout SlabGrid, x: Range<Int>, y: Range<Int>, with cell: SlabGrid.Cell
+    ) {
+        for row in y {
+            for column in x { grid[column, row] = cell }
+        }
+    }
+
+    private func exposedBone(extra: UInt8 = 0) -> SlabGrid.Cell {
+        SlabGrid.Cell(depth: 0, flags: SlabGrid.Flag.bone | extra, wear: 0, noise: 0)
+    }
+
+    // MARK: The helpers
+
+    /// The stipple is a 1-in-4 grid of isolated dots. Isolated matters: a 50%
+    /// checkerboard averages back into a flat tint at this cell size.
+    func testStippleIsAOneInFourGridOfIsolatedCells() {
+        XCTAssertTrue(SlabRenderer.isStippled(x: 0, y: 0))
+        XCTAssertFalse(SlabRenderer.isStippled(x: 1, y: 0))
+        XCTAssertFalse(SlabRenderer.isStippled(x: 0, y: 1))
+        XCTAssertTrue(SlabRenderer.isStippled(x: 2, y: 2))
+        // No two stippled cells are orthogonally adjacent.
+        var dots = 0
+        for y in 0..<8 {
+            for x in 0..<8 where SlabRenderer.isStippled(x: x, y: y) {
+                dots += 1
+                XCTAssertFalse(SlabRenderer.isStippled(x: x + 1, y: y))
+                XCTAssertFalse(SlabRenderer.isStippled(x: x, y: y + 1))
+            }
+        }
+        XCTAssertEqual(dots, 16, "one cell in four: 16 dots in an 8x8 patch")
+    }
+
+    /// The whole point of §7a: the tell must survive a posterize, because it is a
+    /// pattern and not a colour. A tint at 6 levels does not.
+    func testStippledTellSurvivesAPosterizeThatErasesTheTint() {
+        let sandstone = SlabPalette.standard.sandstone
+        let bone = SlabPalette.standard.bone
+
+        func posterize(_ c: RGB8, _ levels: Int) -> RGB8 {
+            let step = 255.0 / Double(levels - 1)
+            func q(_ v: UInt8) -> UInt8 {
+                UInt8(max(0, min(255, (Double(v) / step).rounded() * step)))
+            }
+            return RGB8(q(c.r), q(c.g), q(c.b))
+        }
+
+        let tinted = sandstone.lerp(to: bone, 0.20)
+        XCTAssertEqual(
+            posterize(tinted, 6), posterize(sandstone, 6),
+            "if these ever differ, the tint survives posterizing and §7a's premise is wrong"
+        )
+
+        let stippled = sandstone.lerp(to: bone, 0.60)
+        XCTAssertNotEqual(
+            posterize(stippled, 6), posterize(sandstone, 6),
+            "the stipple must stay visible under the same posterize"
+        )
+    }
+
+    /// Shade steps; albedo does not. This is the hue-shift guard.
+    func testCelShadeQuantizesToThreeStepsAndKeepsHue() {
+        let amount = SimTuning.standard.cellNoise
+        XCTAssertEqual(SlabRenderer.celShade(0.9, amount: amount), 1 - amount, accuracy: 0.0001)
+        XCTAssertEqual(SlabRenderer.celShade(0.0, amount: amount), 1.0, accuracy: 0.0001)
+        XCTAssertEqual(SlabRenderer.celShade(-0.9, amount: amount), 1 + amount, accuracy: 0.0001)
+
+        // Three steps, not a ramp: every noise value lands on one of exactly three.
+        let steps = Set(
+            stride(from: Float(-1), through: 1, by: 0.05).map {
+                SlabRenderer.celShade($0, amount: amount)
+            }
+        )
+        XCTAssertEqual(steps.count, 3)
+
+        // The amount is whatever the caller passes, not a value read from the shipped
+        // defaults. The debug overlay's slider reaches the renderer through this argument.
+        XCTAssertEqual(SlabRenderer.celShade(0.9, amount: 0.2), 0.8, accuracy: 0.0001)
+        XCTAssertEqual(SlabRenderer.celShade(0.9, amount: 0), 1, accuracy: 0.0001)
+
+        // A scaled colour keeps its channel ratios; a posterized one does not.
+        let topsoil = SlabPalette.standard.topsoil
+        let shaded = topsoil.scaled(SlabRenderer.celShade(0.9, amount: amount))
+        let ratioBefore = Double(topsoil.r) / Double(topsoil.g)
+        let ratioAfter = Double(shaded.r) / Double(shaded.g)
+        XCTAssertEqual(ratioBefore, ratioAfter, accuracy: 0.05, "cel shading shifted hue")
+    }
+
+    /// Moved here from Task 2, where it failed for the right reason: bone
+    /// legibility has never come from fill contrast. green_river's bone sits at
+    /// 1.14:1 against its own matrix — invisible — and the engine compensated with
+    /// a +/-14% lit/shadowed rim, because at 96x128 "there is no room for an
+    /// outline". The ink edge is that outline, and it must beat the rim it replaced
+    /// on every site, not just the forgiving ones.
+    ///
+    /// The edge colour comes from `SlabRenderer.inked`, the function `colour()` calls,
+    /// so a change to its strength is measured here rather than copied.
+    func testInkEdgeMakesBoneSeparateFromMatrixOnEverySite() {
+        for site in ContentCatalog.shared.sites {
+            let matrix = site.palette.matrix
+            let bone = site.palette.bone
+            let bare = bone.contrastRatio(against: matrix)
+            let edged = SlabRenderer.inked(bone).contrastRatio(against: matrix)
+            // The old relief: a lit top edge and a shadowed bottom edge. Whichever of
+            // the two was stronger is the one to beat.
+            let rim = max(
+                bone.scaled(1.12).contrastRatio(against: matrix),
+                bone.scaled(0.86).contrastRatio(against: matrix)
+            )
+
+            XCTAssertGreaterThanOrEqual(
+                edged, 3.0,
+                "site '\(site.id)': the ink edge does not separate bone from matrix (\(edged))"
+            )
+            XCTAssertGreaterThan(
+                edged, bare,
+                "site '\(site.id)': the ink edge is weaker than the bare fill it replaced"
+            )
+            XCTAssertGreaterThan(
+                edged, rim,
+                "site '\(site.id)': the ink edge (\(edged)) is weaker than the relief it replaced (\(rim))"
+            )
+        }
+    }
+
+    /// Thin specimens keep an interior. green_river's twist is "the fish are
+    /// paper", so a fossil two cells across must not be all outline.
+    func testInkEdgeSkipsRunsShorterThanThreeCells() {
+        XCTAssertFalse(SlabRenderer.inkEdge(runBehind: 1, neighbourDiffers: true))
+        XCTAssertFalse(SlabRenderer.inkEdge(runBehind: 2, neighbourDiffers: true))
+        XCTAssertTrue(SlabRenderer.inkEdge(runBehind: 3, neighbourDiffers: true))
+        XCTAssertFalse(SlabRenderer.inkEdge(runBehind: 9, neighbourDiffers: false))
+    }
+
+    // MARK: Through the renderer
+
+    /// A field of topsoil whose noise sweeps the whole -1...1 range. Three colours
+    /// come out, and they are the palette's own topsoil at three brightnesses: if a
+    /// channel were quantized instead, they would not be.
+    func testTheSlabRendersThreeShadesOfALayerAndNoOtherColour() {
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        for y in 0..<SlabGrid.height {
+            for x in 0..<SlabGrid.width {
+                let noise = Float(x) / Float(SlabGrid.width - 1) * 2 - 1
+                grid[x, y] = SlabGrid.Cell(depth: 3, flags: 0, wear: 0, noise: noise)
+            }
+        }
+        var renderer = SlabRenderer(palette: palette)
+        renderer.redrawEverything(grid)
+
+        let amount = SimTuning.standard.cellNoise
+        let expected = Set([
+            palette.topsoil.scaled(1 - amount), palette.topsoil, palette.topsoil.scaled(1 + amount),
+        ].map(packed))
+        var seen = Set<UInt32>()
+        for y in 0..<SlabGrid.height {
+            for x in 0..<SlabGrid.width { seen.insert(packed(renderer.pixel(x, y))) }
+        }
+        XCTAssertEqual(seen, expected)
+        XCTAssertEqual(seen.count, 3)
+    }
+
+    /// `colour()` once read `SimTuning.standard.cellNoise`, which would have made the debug
+    /// overlay's Cell noise slider do nothing. The renderer's own tuning is what counts.
+    func testTheShadeStepFollowsTheRenderersTuningNotTheShippedDefault() {
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        grid[10, 10] = SlabGrid.Cell(depth: 3, flags: 0, wear: 0, noise: 0.9)
+
+        var renderer = SlabRenderer(palette: palette)
+        renderer.tuning.cellNoise = 0.2
+        renderer.redrawEverything(grid)
+        XCTAssertEqual(renderer.pixel(10, 10), palette.topsoil.scaled(0.8))
+
+        renderer.tuning.cellNoise = 0
+        renderer.redrawEverything(grid)
+        XCTAssertEqual(renderer.pixel(10, 10), palette.topsoil)
+    }
+
+    /// Wear still shows before a cell breaks through, in steps instead of a gradient.
+    /// Sweeping wear across a row gives the unworn colour and exactly four steps toward
+    /// the layer below, never stepping back.
+    func testWearAdvancesInFourSteps() {
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        for x in 0..<SlabGrid.width {
+            grid[x, 10] = SlabGrid.Cell(
+                depth: 3, flags: 0, wear: Float(x) / Float(SlabGrid.width), noise: 0
+            )
+        }
+        var renderer = SlabRenderer(palette: palette)
+        renderer.redrawEverything(grid)
+
+        let row = (0..<SlabGrid.width).map { renderer.pixel($0, 10) }
+        XCTAssertEqual(Set(row.map(packed)).count, 5, "the unworn colour plus four wear steps")
+        XCTAssertEqual(row.first, palette.topsoil)
+        XCTAssertEqual(
+            row.last, palette.topsoil.lerp(to: palette.clay, SimTuning.standard.wearColorBlend)
+        )
+        for index in 1..<row.count {
+            XCTAssertGreaterThanOrEqual(
+                distance(row[index], palette.topsoil), distance(row[index - 1], palette.topsoil),
+                "wear stepped back toward the surface at column \(index)"
+            )
+        }
+    }
+
+    /// The tell, as a pattern. Sandstone over bone takes the stipple on its dot grid and
+    /// nowhere else, and both constants stay live so the debug overlay can A/B them:
+    /// either one at zero gives the pure case.
+    func testTheTellIsAStippleAndBothConstantsStayLive() {
+        XCTAssertEqual(SimTuning.standard.boneTellStipple, 0.60, "ships at stipple 0.60")
+        XCTAssertEqual(SimTuning.standard.boneTellTint, 0, "and with the tint off")
+
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        fill(&grid, x: 0..<SlabGrid.width, y: 0..<SlabGrid.height,
+             with: SlabGrid.Cell(depth: 1, flags: 0, wear: 0, noise: 0))
+        fill(&grid, x: 20..<40, y: 20..<40,
+             with: SlabGrid.Cell(depth: 1, flags: SlabGrid.Flag.bone, wear: 0, noise: 0))
+
+        var renderer = SlabRenderer(palette: palette)
+        renderer.redrawEverything(grid)
+        let dot = palette.sandstone.lerp(to: palette.bone, SimTuning.standard.boneTellStipple)
+        for y in 18..<42 {
+            for x in 18..<42 {
+                let inside = (20..<40).contains(x) && (20..<40).contains(y)
+                let expected = inside && SlabRenderer.isStippled(x: x, y: y) ? dot : palette.sandstone
+                XCTAssertEqual(renderer.pixel(x, y), expected, "cell (\(x), \(y))")
+            }
+        }
+
+        // Today's behaviour, from the sliders alone: no dots, a flat tint over the bone.
+        renderer.tuning.boneTellStipple = 0
+        renderer.tuning.boneTellTint = 0.20
+        renderer.redrawEverything(grid)
+        let tint = palette.sandstone.lerp(to: palette.bone, 0.20)
+        for y in 20..<40 {
+            for x in 20..<40 {
+                XCTAssertEqual(renderer.pixel(x, y), tint, "tint only, cell (\(x), \(y))")
+            }
+        }
+    }
+
+    /// Right and bottom only, so a thin specimen keeps its interior and the relief that
+    /// used to light the top edge is gone: the left column and top row are plain bone.
+    func testInkEdgeLandsOnTheRightAndBottomOfExposedBoneOnly() {
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        fill(&grid, x: 20..<30, y: 20..<30, with: exposedBone())
+        var renderer = SlabRenderer(palette: palette)
+        renderer.redrawEverything(grid)
+
+        let edge = SlabRenderer.inked(palette.bone)
+        XCTAssertGreaterThan(distance(edge, palette.bone), 100, "the edge must be visibly different")
+        for y in 20..<30 {
+            for x in 20..<30 {
+                let expected = (x == 29 || y == 29) ? edge : palette.bone
+                XCTAssertEqual(renderer.pixel(x, y), expected, "cell (\(x), \(y))")
+            }
+        }
+    }
+
+    /// A strip two cells tall has no bottom edge, because its run is under three, but it
+    /// is long enough to cap its right end. The fish are paper; they must not be outline.
+    func testAPaperThinSpecimenKeepsItsInterior() {
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        fill(&grid, x: 20..<32, y: 50..<52, with: exposedBone())
+        var renderer = SlabRenderer(palette: palette)
+        renderer.redrawEverything(grid)
+
+        for y in 50..<52 {
+            for x in 20..<31 {
+                XCTAssertEqual(renderer.pixel(x, y), palette.bone, "interior cell (\(x), \(y)) was inked")
+            }
+            XCTAssertEqual(renderer.pixel(31, y), SlabRenderer.inked(palette.bone), "end cap (31, \(y))")
+        }
+    }
+
+    /// Gems are 2x2 clusters, so every cell is under the three-cell run and none takes an
+    /// edge. Pinned so the next person to enlarge a gem sees what the threshold does.
+    func testAGemTwoCellsAcrossKeepsEveryCellOfItsColour() {
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        fill(&grid, x: 60..<62, y: 60..<62,
+             with: SlabGrid.Cell(depth: 0, flags: SlabGrid.Flag.gem, wear: 0, noise: 0))
+        var renderer = SlabRenderer(palette: palette)
+        renderer.redrawEverything(grid)
+        for y in 60..<62 {
+            for x in 60..<62 { XCTAssertEqual(renderer.pixel(x, y), palette.gem, "gem cell (\(x), \(y))") }
+        }
+    }
+
+    /// Fracture hatching and the ink edge are separate marks that can land on one cell.
+    /// A cracked cell on the edge and on a stripe carries both, so it is darker than
+    /// either alone. Deleting the relief must not take the hatch with it.
+    func testACrackedCellOnTheEdgeCarriesTheHatchAndTheInk() {
+        let palette = SlabPalette.standard
+        var grid = SlabGrid()
+        fill(&grid, x: 20..<30, y: 20..<30, with: exposedBone(extra: SlabGrid.Flag.cracked))
+        var renderer = SlabRenderer(palette: palette)
+        renderer.redrawEverything(grid)
+
+        let inked = SlabRenderer.inked(palette.crackedBone)
+        var checked = 0
+        for y in 22..<28 {
+            let drawn = renderer.pixel(29, y)
+            if SlabRenderer.isHatched(x: 29, y: y) {
+                checked += 1
+                XCTAssertLessThan(drawn.relativeLuminance, inked.relativeLuminance, "no hatch at (29, \(y))")
+                XCTAssertLessThan(
+                    drawn.relativeLuminance,
+                    SlabRenderer.hatched(palette.crackedBone, x: 29, y: y).relativeLuminance,
+                    "no ink at (29, \(y))"
+                )
+            } else {
+                XCTAssertEqual(drawn, inked, "an edge cell between stripes at (29, \(y))")
+            }
+        }
+        XCTAssertGreaterThan(checked, 0, "no sampled cell was on a stripe")
+    }
+
+    /// The ink edge asks how long the run behind a cell is, which reads two cells back.
+    /// So exposing one cell can change the cell two ahead of it, one further than the
+    /// dirty rect used to be inflated, and the third cell of a run is exactly what turns
+    /// its end cap to ink. A stale pixel here is a seam left behind by digging.
+    func testAnIncrementalRedrawCatchesAnEdgeTwoCellsFromTheChange() {
+        let palette = SlabPalette.standard
+        for vertical in [false, true] {
+            let name = vertical ? "vertical" : "horizontal"
+            func at(_ along: Int) -> (x: Int, y: Int) {
+                vertical ? (60, 20 + along) : (20 + along, 50)
+            }
+            // Buried bone, then two exposed cells, then plain slab.
+            var before = SlabGrid()
+            before[at(0).x, at(0).y] = SlabGrid.Cell(depth: 1, flags: SlabGrid.Flag.bone, wear: 0, noise: 0)
+            before[at(1).x, at(1).y] = exposedBone()
+            before[at(2).x, at(2).y] = exposedBone()
+            var after = before
+            after[at(0).x, at(0).y].depth = 0
+
+            var incremental = SlabRenderer(palette: palette)
+            incremental.redrawEverything(before)
+            var full = SlabRenderer(palette: palette)
+            full.redrawEverything(after)
+            let changed = at(2)
+            XCTAssertNotEqual(
+                incremental.pixel(changed.x, changed.y), full.pixel(changed.x, changed.y),
+                "\(name): the change does not reach two cells away, so this proves nothing"
+            )
+
+            let origin = at(0)
+            incremental.redraw(
+                after, region: DirtyRegion(minX: origin.x, minY: origin.y, maxX: origin.x, maxY: origin.y)
+            )
+            var stale: [String] = []
+            for y in 0..<SlabGrid.height {
+                for x in 0..<SlabGrid.width where incremental.pixel(x, y) != full.pixel(x, y) {
+                    stale.append("(\(x), \(y))")
+                }
+            }
+            XCTAssertEqual(stale, [], "\(name): cells left stale by an incremental redraw")
+        }
     }
 }
