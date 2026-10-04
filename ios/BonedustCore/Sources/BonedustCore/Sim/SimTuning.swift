@@ -49,6 +49,20 @@ public struct SimTuning: Sendable, Codable, Equatable {
     // MARK: Cracking
 
     public var crackRate: Float = 0.0011
+    /// How fragile exposed bone is even when brushed perfectly carefully.
+    ///
+    /// Added to whatever the brush is over the safe speed by, so cracking is possible at
+    /// any speed while going fast still makes it far likelier.
+    ///
+    /// Zero for six milestones, which quietly killed half the shop. Cracking keyed only on
+    /// `speed - safeSpeed`, so a player who obeyed the speed meter never cracked anything,
+    /// so every anti-crack tool and charm defended against something that was not
+    /// happening -- the fine brush bought `crackMultiplier: 0.35` with 57% of the brush's
+    /// radius and earned a seventh as much, and the air blower's 2.6 never bit at all.
+    ///
+    /// It also makes 100% intact an achievement rather than the default, which is what the
+    /// grade and "Not a mark on it" were both written as though it already was.
+    public var baselineFragility: Float = 0.30
     public var crackWalkMin: Int = 3
     public var crackWalkMax: Int = 8
 

@@ -76,13 +76,25 @@ final class CrackingTests: XCTestCase {
         return Double(total) / Double(trials)
     }
 
-    func testNoCracksBelowTheSafeSpeed() {
-        // The brush is safe up to 1.4 cells/frame. At 0.4 the EMA never gets near it.
-        var sim = TestSlab.simulation(TestSlab.boneBlock(exposed: true))
-        let result = scrubOverBone(&sim, tool: .brush, cellsPerFrame: 0.4, samples: 1_500)
-        XCTAssertEqual(result.cracks, 0)
-        XCTAssertEqual(sim.crackedBone, 0)
-        XCTAssertEqual(sim.intact, 1)
+    /// Bone is fragile at any speed, and far more so above the safe one.
+    ///
+    /// This used to assert that brushing below the safe speed cracked *nothing*, which was
+    /// true and was the reason half the shop was worthless: every anti-crack tool and charm
+    /// defended against something that could not happen to a careful player. Going slowly
+    /// is now a large reduction rather than an exemption.
+    func testCrackingIsFarRarerBelowTheSafeSpeed() {
+        // The brush is safe up to 1.4 cells/frame.
+        var careful = TestSlab.simulation(TestSlab.boneBlock(exposed: true))
+        _ = scrubOverBone(&careful, tool: .brush, cellsPerFrame: 0.4, samples: 1_500)
+
+        var hurried = TestSlab.simulation(TestSlab.boneBlock(exposed: true))
+        _ = scrubOverBone(&hurried, tool: .brush, cellsPerFrame: 4, samples: 1_500)
+
+        XCTAssertGreaterThan(careful.intact, 0.8, "careful work should still be good work")
+        XCTAssertLessThan(
+            careful.crackedBone, hurried.crackedBone / 3,
+            "going slowly should be worth far more than it costs in daylight"
+        )
     }
 
     func testCracksAppearAboveTheSafeSpeed() {
@@ -221,10 +233,12 @@ final class CrackingTests: XCTestCase {
 
     func testACellOnlyCracksOnce() {
         var sim = TestSlab.simulation(TestSlab.boneBlock(exposed: true))
-        var totalMarked = 0
         var x: Float = 32
         var direction: Float = 1
-        sim.beginStroke(at: Vec2(x, 64), tool: .airBlower)
+        // The opening stroke counts too. It could not crack anything while cracking needed
+        // over-speed -- the EMA starts at zero -- so summing only the moves used to agree
+        // with the grid by accident.
+        var totalMarked = sim.beginStroke(at: Vec2(x, 64), tool: .airBlower).cellsCracked
         for _ in 0..<2_000 {
             x += direction * 16
             if x > 62 { x = 62; direction = -1 }

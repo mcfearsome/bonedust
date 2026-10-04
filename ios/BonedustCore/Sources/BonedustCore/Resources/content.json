@@ -405,7 +405,7 @@
         "reputation": 180
       },
       "modifiers": {
-        "crackMultiplier": 1.35,
+        "crackMultiplier": 2.0,
         "payoutMultiplier": 1.6
       },
       "palette": {

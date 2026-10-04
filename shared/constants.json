@@ -927,14 +927,14 @@
   ],
   "installmentGrowth" : 1.22,
   "installments" : [
-    450,
-    550,
-    1150,
-    1825,
-    2900,
-    3150,
-    3700,
-    4000
+    425,
+    500,
+    950,
+    1700,
+    2550,
+    2800,
+    3200,
+    3500
   ],
   "schema" : 1,
   "sets" : [
@@ -1112,7 +1112,7 @@
       },
       "id" : "green_river",
       "modifiers" : {
-        "crackMultiplier" : 1.35,
+        "crackMultiplier" : 2,
         "daylightDelta" : 0,
         "extraInstances" : 0,
         "extraRockNodules" : 0,
@@ -1495,6 +1495,7 @@
     }
   ],
   "tuning" : {
+    "baselineFragility" : 0.3,
     "boneTellTint" : 0.2,
     "cellNoise" : 0.07,
     "crackRate" : 0.0011,

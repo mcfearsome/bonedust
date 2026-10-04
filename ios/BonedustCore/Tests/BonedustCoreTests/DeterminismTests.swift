@@ -111,6 +111,8 @@ final class DeterminismTests: XCTestCase {
         // restore has to re-apply them. Forgetting this changes the physics silently.
         withState.crackMultiplier = live.crackMultiplier
         withoutState.crackMultiplier = live.crackMultiplier
+        withState.siteCrackMultiplier = live.siteCrackMultiplier
+        withoutState.siteCrackMultiplier = live.siteCrackMultiplier
         var reference = live
         Trace.replay(continuation, on: &reference, tool: .airBlower)
         Trace.replay(continuation, on: &withState, tool: .airBlower)

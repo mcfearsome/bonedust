@@ -638,3 +638,51 @@ who already owns everything.
 defect stays visible and flips to a hard failure the moment it is fixed. Not fixed here,
 because the fix is a design decision — either cracking has to be possible at safe speed, or
 the shop has to sell coverage rather than safety.
+
+## Bone is fragile at any speed
+
+Cracking keyed only on `speed - safeSpeed`, so a player who obeyed the speed meter never
+cracked anything, so every anti-crack tool and charm defended against something that could
+not happen. Measured, on identical slabs with each tool at its own safe speed, the whole
+column read `cracked: 0`.
+
+`baselineFragility` adds a constant pressure on exposed bone, so going slowly is a large
+reduction rather than an exemption. The shop now differentiates:
+
+| tool | intact | exposure |
+|---|---|---|
+| Brush | 0.966 | 0.939 |
+| Air blower | 0.788 | 0.993 |
+| Brush, switching to the fine brush once bone shows | **0.996** | 0.939 |
+
+The air blower's `crackMultiplier: 2.6` finally bites, so it trades reach for damage as its
+numbers always claimed. The fine brush still loses a whole-slab sweep and always will —
+radius 2.4 against 4.2 is 57% of the ground covered — but it is a *finishing* tool, and
+switching to it once bone shows is now worth three points of intactness. Before this there
+was no moment in a dig when it was better at anything.
+
+### Two wrong mechanisms before the right one
+
+**Scaling the baseline by the full crack multiplier inverted Green River**, whose entire
+twist is fragility: it came out 3.8 points *more* intact than Charmouth. Its knightia and
+leaves are one cell wide, and `propagateCrack` walks across adjacent bone, so a crack cannot
+travel far inside a thin rib. Contact-driven cracking therefore damages chunky fossils more,
+and the fossil term in the multiplier is written for exactly those thin shapes. The baseline
+is now scaled by the tool and the *site*, leaving the fossil term on the over-speed path
+where it was written to work.
+
+**That fix was dead code for an hour.** `EconomySimulator.playSlab` builds its simulation
+from a grid and sets the multipliers by hand rather than going through the `seed:site:`
+initialiser that derives them, so `siteCrackMultiplier` stayed at its default of 1 in the
+only path the economy tests exercise — the measured numbers were identical to sixteen
+decimal places, which is what gave it away. Two construction paths and only one updated is
+the same shape of bug as the texture orientation, and worth watching for.
+
+Green River's multiplier then went 1.35 → 2.0, because a twist has to bite through the
+baseline to still mean anything. Its payout multiplier of 1.6 already priced the risk.
+
+Installments re-fitted to [425, 500, 950, 1700, 2550, …]: 73%, 60%, 43%, 36%, 32% against
+targets of 70, 60, 48, 38, 30 — the closest fit the ramp has had.
+
+The hot loop lost its early-out, since pressure is never zero now: 4.3 us/frame mean and
+83.5 us worst, which is 0.5% of a 60 Hz frame.

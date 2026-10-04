@@ -130,6 +130,11 @@ public enum EconomySimulator {
 
         var sim = SlabSimulation(grid: generated.grid, layout: generated.layout, tuning: tuning)
         sim.crackMultiplier = modifiers.crackMultiplier
+        // The site's share alone, which scales the baseline fragility. Easy to miss: this
+        // path builds the simulation from a grid and sets the multipliers by hand rather
+        // than going through the `seed:site:` initialiser that derives them, so a new one
+        // added there is silently left at its default here.
+        sim.siteCrackMultiplier = site.modifiers.crackMultiplier
         sim.safeSpeedMultiplier = modifiers.safeSpeedMultiplier
         sim.rockHardnessMultiplier = modifiers.rockHardnessMultiplier
 

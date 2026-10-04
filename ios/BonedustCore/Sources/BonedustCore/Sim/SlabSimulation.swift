@@ -27,6 +27,16 @@ public struct SlabSimulation: Sendable {
 
     /// Multiplies the tool's crack multiplier. Site twist x fossil fragility x charms.
     public var crackMultiplier: Float = 1
+    /// The site's share of that, alone.
+    ///
+    /// Kept separately because the baseline fragility has to be scaled by the site but
+    /// *not* by the fossil. A fossil's own multiplier is written for thin, breakable
+    /// shapes -- a knightia's ribs, a leaf's veins -- and `propagateCrack` walks across
+    /// adjacent bone, so a crack cannot travel far inside a one-cell-wide feature.
+    /// Contact-driven cracking therefore damages chunky fossils *more*, and folding the
+    /// fossil term into the baseline made Green River, whose entire twist is fragility,
+    /// come out 3.8 points more intact than Charmouth.
+    public var siteCrackMultiplier: Float = 1
     /// Multiplies every tool's safe speed. "Steady hands" sets this to 1.25.
     public var safeSpeedMultiplier: Float = 1
     /// Multiplies rock hardness. The dental pick sets this to 0.33.
@@ -89,6 +99,7 @@ public struct SlabSimulation: Sendable {
             seed: seed, site: site, catalog: catalog, tuning: tuning
         )
         self.init(grid: generated.grid, layout: generated.layout, tuning: tuning)
+        self.siteCrackMultiplier = site.modifiers.crackMultiplier
         self.crackMultiplier = site.modifiers.crackMultiplier
             * (catalog.fossil(generated.layout.fossilID)?.crackMultiplier ?? 1)
     }
@@ -266,7 +277,21 @@ public struct SlabSimulation: Sendable {
         let strength = tool.strength
         let crackRate = tuning.crackRate
         let crackScale = tool.crackMultiplier * crackMultiplier
-        let overSpeed = speed - safeSpeed(for: tool)
+        // Two separate pressures on exposed bone, scaled differently on purpose.
+        //
+        // The baseline -- bone is a little fragile however carefully it is brushed -- is
+        // scaled by the *tool* only. The over-speed term keeps the site and fossil twist as
+        // well, which is where it has always lived.
+        //
+        // Folding the site twist into the baseline too looked obvious and inverted Green
+        // River: its knightia and leaves are one cell wide, and `propagateCrack` walks
+        // across adjacent bone, so a crack cannot travel far in a thin rib. Contact-driven
+        // cracking therefore damages *chunky* fossils more, and the site whose whole twist
+        // is fragility came out the safest. Keeping the twist on the speed term leaves it
+        // measuring what it was written to measure.
+        let overSpeed = max(0, speed - safeSpeed(for: tool))
+        let baselinePressure = tuning.baselineFragility
+            * tool.crackMultiplier * siteCrackMultiplier
         let walkMin = tuning.crackWalkMin
         let walkMax = tuning.crackWalkMax
         let boneFlag = SlabGrid.Flag.bone
@@ -343,12 +368,15 @@ public struct SlabSimulation: Sendable {
                     // Cracking is evaluated after removal, so the very stroke that
                     // uncovers bone can also break it. That is the whole tension of
                     // the air blower: it reveals and ruins in one pass.
-                    guard overSpeed > 0 else { continue }
+                    // Flag checks first: two loads and a branch, and they reject the
+                    // overwhelming majority of cells. `pressure` is never zero now, so it
+                    // can no longer serve as the early-out it used to be.
                     let flags = cells[i].flags
                     guard cells[i].depth == 0,
                           flags & boneFlag != 0,
                           flags & crackedFlag == 0 else { continue }
-                    let probability = overSpeed * crackRate * crackScale * falloff * seg
+                    let probability = (baselinePressure + overSpeed * crackScale)
+                        * crackRate * falloff * seg
                     guard probability > 0, rng.nextUnit() < probability else { continue }
 
                     let length = rng.nextInt(walkMin, through: walkMax)
