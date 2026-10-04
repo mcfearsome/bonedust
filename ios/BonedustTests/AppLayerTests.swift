@@ -1819,6 +1819,14 @@ final class DigViewThemeWiringTests: XCTestCase {
         return try body(window)
     }
 
+    private func firstSKView(in view: UIView) -> SKView? {
+        if let skView = view as? SKView { return skView }
+        for subview in view.subviews {
+            if let found = firstSKView(in: subview) { return found }
+        }
+        return nil
+    }
+
     /// Runs the loop until `done` or three seconds.
     private func spin(until done: () -> Bool) -> Bool {
         let deadline = Date().addingTimeInterval(3)
@@ -1852,6 +1860,37 @@ final class DigViewThemeWiringTests: XCTestCase {
         XCTAssertTrue(theme.ink == Ink.night, "the theme must start on night for this to prove anything")
         let switched = try dig(site: "charmouth", theme: theme) { theme.ink == Ink.day }
         XCTAssertTrue(switched, "a day-site dig left the theme on night")
+    }
+
+    /// Why a seemingly trivial assertion exists. On screen the scene was 1x1 and SpriteKit
+    /// stretched it to fill the view: `scaleMode = .resizeFill` was set in `didMove`, which is
+    /// too late, so the scene never took the view's size. Every length in scene units was then
+    /// wrong by the view's width. Task 6's 12pt slab inset became `max(0, 1 - 12)`, a slab with
+    /// no area, and the game's central picture vanished while a hundred tests passed. Every
+    /// offscreen test builds its scene at the view's real size (`DigScene(size:)`), so none of
+    /// them could see a scene that was not. This one hosts the real `DigView` and compares the
+    /// scene with the `SKView` it was presented in. The slab check is the symptom a player sees.
+    func testTheSceneIsAsBigAsTheViewItIsPresentedInAndTheSlabHasArea() throws {
+        try withDig(site: "charmouth", theme: Theme()) { window in
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.6))
+            let skView = try XCTUnwrap(firstSKView(in: window), "the dig screen has no SKView")
+            let scene = try XCTUnwrap(skView.scene as? DigScene, "the SKView is not showing a DigScene")
+            XCTAssertGreaterThan(
+                skView.bounds.width, 100, "the SKView has no real size, so nothing below proves anything"
+            )
+            XCTAssertEqual(
+                scene.size.width, skView.bounds.width, accuracy: 0.5,
+                "the scene is \(scene.size), not the \(skView.bounds.size) view it is shown in"
+            )
+            XCTAssertEqual(scene.size.height, skView.bounds.height, accuracy: 0.5)
+
+            let slab = try XCTUnwrap(scene.slabNode).size
+            XCTAssertEqual(
+                slab.width, skView.bounds.width - 2 * Measure.mountMargin, accuracy: 0.5,
+                "the slab is \(slab): the scene less the mount's margin on every side"
+            )
+            XCTAssertEqual(slab.height, skView.bounds.height - 2 * Measure.mountMargin, accuracy: 0.5)
+        }
     }
 
     /// The slab is width-limited at 3:4, so the dig screen's content is shorter than the
