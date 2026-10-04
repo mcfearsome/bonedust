@@ -35,13 +35,9 @@ struct DigView: View {
         onBagged: @escaping (DigEngine) -> Void = { _ in }
     ) {
         _engine = State(initialValue: engine)
-        // Resize with the view from the moment it is presented. Set later, in `didMove`, it is
-        // too late: the scene keeps its initial 1x1 and SpriteKit stretches it to the view, so
-        // every length in scene units (the slab's inset, the bloom, the dust) is wrong by the
-        // view's width. A 12pt inset on a 1pt scene is a slab with no area.
-        let scene = DigScene()
-        scene.scaleMode = .resizeFill
-        _scene = State(initialValue: scene)
+        // No size and no scale mode here: `DigScene` makes itself `.resizeFill` in every
+        // initialiser, so it takes its size from this view whoever builds it.
+        _scene = State(initialValue: DigScene())
         self.day = day
         self.totalDays = totalDays
         self.cash = cash

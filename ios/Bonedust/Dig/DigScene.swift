@@ -58,14 +58,34 @@ final class DigScene: SKScene {
     private var hasReportedCrack = false
     private var pendingFullRedraw = true
 
+    // MARK: Construction
+
+    // `scaleMode` is this class's own invariant, so every initialiser sets it. It has to be set
+    // before the scene is presented. Set later, in `didMove`, it does nothing: the scene's size
+    // is fixed by then and SpriteKit stretches the scene to the view instead, so every length in
+    // scene units is wrong by the view's width, and `slabSize` is `max(0, 1 - 12)`, a slab with
+    // no area that `gridPoint(for:)` will not map a touch onto. A caller that had to remember to
+    // set it would hand that bug back the first time someone else built a scene.
+
+    override init() {
+        super.init()
+        scaleMode = .resizeFill
+    }
+
+    override init(size: CGSize) {
+        super.init(size: size)
+        scaleMode = .resizeFill
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        scaleMode = .resizeFill
+    }
+
     // MARK: Setup
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
-        // Too late to matter on its own: `DigView` sets `.resizeFill` when it creates the scene,
-        // because set here the scene keeps its initial 1x1 and is stretched to the view. Kept so
-        // a scene built anywhere else still ends up in the same mode.
-        scaleMode = .resizeFill
         backgroundColor = SKColor(appliedInk.page)
         view.isMultipleTouchEnabled = false
         configureRenderer()

@@ -648,12 +648,17 @@ final class DigSceneBackdropTests: XCTestCase {
     private let sceneSize = CGSize(width: 361, height: 481)
 
     /// `SKScene.view` is weak, so the view has to outlive the test body.
+    ///
+    /// Built the way `DigView` builds it: `DigScene()` with no size, so the only thing that can
+    /// give the scene one is the view it is presented in. `DigScene(size:)` handed every test a
+    /// scene of exactly the size it wanted, which no player ever gets, and that is how a scene
+    /// stuck at 1x1 passed a hundred tests.
     private func present(
         size: CGSize? = nil, engine: DigEngine? = nil, theme: Theme? = nil
     ) -> (scene: DigScene, view: SKView) {
         let size = size ?? sceneSize
         let view = SKView(frame: CGRect(origin: .zero, size: size))
-        let scene = DigScene(size: size)
+        let scene = DigScene()
         scene.engine = engine
         scene.theme = theme
         view.presentScene(scene)
@@ -722,6 +727,41 @@ final class DigSceneBackdropTests: XCTestCase {
 
     private func distance(_ a: [Int], _ b: [Int]) -> Int {
         zip(a, b).map { abs($0 - $1) }.reduce(0, +)
+    }
+
+    // MARK: Construction
+
+    /// `scaleMode` is the scene's own invariant. Set in `didMove` it does nothing, because the
+    /// scene's size is fixed by then and the view stretches it instead; the slab is inset by
+    /// `mountMargin`, so a stretched 1x1 scene gives a slab of `max(0, 1 - 12)`, no area and no
+    /// touches. It was once set by one caller, `DigView`, so a second `DigScene()` anywhere
+    /// would have got the bug back.
+    func testEveryWayOfBuildingASceneMakesItResizeFill() {
+        XCTAssertEqual(DigScene().scaleMode, .resizeFill, "DigScene()")
+        XCTAssertEqual(
+            DigScene(size: CGSize(width: 10, height: 10)).scaleMode, .resizeFill, "DigScene(size:)"
+        )
+    }
+
+    /// What that buys, for a scene built with the wrong size on purpose: presented in a view it
+    /// takes the view's size, and the slab has area.
+    func testASceneTakesTheSizeOfItsViewWhateverItWasBuiltWith() throws {
+        let viewSize = CGSize(width: 300, height: 400)
+        let builders: [(String, () -> DigScene)] = [
+            ("DigScene()", { DigScene() }),
+            ("DigScene(size: 1x1)", { DigScene(size: CGSize(width: 1, height: 1)) }),
+        ]
+        for (how, build) in builders {
+            let view = SKView(frame: CGRect(origin: .zero, size: viewSize))
+            let scene = build()
+            view.presentScene(scene)
+            XCTAssertEqual(scene.size, viewSize, "\(how): the scene is not the size of its view")
+            let slab = try XCTUnwrap(scene.slabNode, "\(how): no slab").size
+            XCTAssertEqual(
+                slab.width, viewSize.width - 2 * Measure.mountMargin, accuracy: 0.5, "\(how): slab \(slab)"
+            )
+            XCTAssertEqual(slab.height, viewSize.height - 2 * Measure.mountMargin, accuracy: 0.5)
+        }
     }
 
     // MARK: Layers
