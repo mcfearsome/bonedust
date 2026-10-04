@@ -72,6 +72,9 @@ final class DigScene: SKScene {
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
+        // Too late to matter on its own: `DigView` sets `.resizeFill` when it creates the scene,
+        // because set here the scene keeps its initial 1x1 and is stretched to the view. Kept so
+        // a scene built anywhere else still ends up in the same mode.
         scaleMode = .resizeFill
         backgroundColor = SKColor(appliedInk.page)
         view.isMultipleTouchEnabled = false
