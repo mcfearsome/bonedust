@@ -172,6 +172,40 @@ public struct SlabRenderer {
         return layer
     }
 
+    /// Copies the buffer out with its rows reversed, for a GPU texture.
+    ///
+    /// Everything in Bonedust treats y as running *down*: grid row 0 is the top of the
+    /// slab, `SlabGenerator` lays fossils out that way, `gridPoint` maps a touch near the
+    /// top of the screen to row 0, and the edge shading lights bone from above. GPU
+    /// textures inherited the opposite convention from OpenGL, and `SKMutableTexture` is no
+    /// exception — `TextureOrientationTests` measures it rather than trusting anyone's
+    /// memory of it.
+    ///
+    /// Reconciling the two here, in the one function that hands bytes to a framework, is
+    /// what keeps that convention out of the simulation, the generator, the touch mapping
+    /// and every test. The alternative — `node.yScale = -1` — is one character shorter and
+    /// makes the scene graph lie about which way up it is, so every child node added later
+    /// has to know.
+    ///
+    /// Costs 128 memcpys of 384 bytes instead of one of 48 KB, which does not register
+    /// against a 16 ms budget.
+    public func copyRowsBottomUp(into destination: UnsafeMutableRawPointer, length: Int) {
+        let rowBytes = SlabRenderer.width * SlabRenderer.bytesPerPixel
+        let rows = min(SlabRenderer.height, length / rowBytes)
+        guard rows > 0 else { return }
+        let out = destination.assumingMemoryBound(to: UInt8.self)
+        pixels.withUnsafeBufferPointer { source in
+            guard let base = source.baseAddress else { return }
+            for y in 0..<rows {
+                memcpy(
+                    out + y * rowBytes,
+                    base + (SlabRenderer.height - 1 - y) * rowBytes,
+                    rowBytes
+                )
+            }
+        }
+    }
+
     /// Dust colour for the layer currently being removed.
     public func dustColour(forLayer depth: UInt8) -> RGB8 {
         palette.layerColor(depth: depth).scaled(lightLevel)

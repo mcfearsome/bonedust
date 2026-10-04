@@ -8,7 +8,7 @@ SIM ?= platform=iOS Simulator,name=iPhone 17
 CORE := ios/BonedustCore
 
 .PHONY: all project test test-core test-app bench simulate constants golden content app \
-	server-test server-golden server-load server-setup render team-id clean
+	server-test server-golden server-load server-setup render team-id device clean
 
 all: test
 
@@ -74,6 +74,29 @@ render:
 	done
 	rm -f $(RENDER_OUT)/*.ppm
 	@echo "wrote $$(ls $(RENDER_OUT)/*.png | wc -l | tr -d ' ') frames to $(RENDER_OUT)"
+
+# Builds, installs and launches on the first physically attached iPhone.
+#
+# The device is looked up rather than hardcoded, because a UDID in a build file is a
+# thing that goes stale silently on a machine that sees more than one phone.
+#
+# -allowProvisioningUpdates is what registers a new bundle id and a new device with the
+# team. Without it, a bundle id that App Store Connect has never seen fails to sign with
+# a message about a missing profile, which reads like a certificate problem and is not.
+DEVICE_BUILD ?= build/device
+device: project
+	@udid=$$(xcrun devicectl list devices 2>/dev/null \
+		| awk '$$NF == "physical" { for (i = 1; i <= NF; i++) if ($$i ~ /^[0-9A-F]{8}-[0-9A-F]{16}$$/) print $$i }' \
+		| head -1); \
+	if [ -z "$$udid" ]; then echo "no physical device attached"; exit 1; fi; \
+	echo "device $$udid"; \
+	xcodebuild build -project ios/Bonedust.xcodeproj -scheme Bonedust \
+		-destination "id=$$udid" -derivedDataPath $(DEVICE_BUILD) \
+		-allowProvisioningUpdates | tail -3; \
+	app=$(DEVICE_BUILD)/Build/Products/Debug-iphoneos/Bonedust.app; \
+	xcrun devicectl device install app --device "$$udid" "$$app" | tail -2; \
+	xcrun devicectl device process launch --device "$$udid" \
+		$$(plutil -extract CFBundleIdentifier raw "$$app/Info.plist") | tail -1
 
 content:
 	cd $(CORE) && swift run bonedust-tool content-check

@@ -431,3 +431,35 @@ The rename also found a real bug. `server/.env.example` still carried
 that found them filtered by file extension and `.env.example` has none. A fail-closed check
 is only as good as the config it compares against, and an example env file is where someone
 copies production values from.
+
+## The slab was upside down for six milestones
+
+`SKMutableTexture` reads the first row of pixel data as the **bottom** of the texture — the
+OpenGL convention GPU textures have carried for decades. `SlabRenderer` writes row 0 as grid
+y 0, which is the top of the slab. Uploading in order drew the slab mirrored.
+
+Every piece was individually correct and consistent with the others. `gridPoint` maps a touch
+near the top of the view to grid row 0; the simulation brushes row 0; SpriteKit draws row 0 at
+the bottom. The *composition* was wrong, so strokes landed at the vertically reflected spot
+and dragging down dug upward.
+
+Fixed in `SlabRenderer.copyRowsBottomUp`, not with `node.yScale = -1`. One character longer
+and it keeps the convention in the single function that hands bytes to a framework, instead of
+making the scene graph lie about which way up it is — the dust emitter is a child of that node,
+and so is anything added later.
+
+**Why nothing caught it.** `make render` exists precisely so the output can be looked at, and
+it was blind to this by construction: it writes PPM top row first, so it shows the orientation
+the renderer intends rather than the one SpriteKit produces. Then a procedurally generated
+fossil is plausible either way up, bone lit from below reads as odd rather than wrong, and the
+slab's layer structure is nearly symmetric. It needed a finger.
+
+`TextureOrientationTests` is the pair of tests that would have caught it. One *measures* the
+framework's row order rather than trusting anyone's memory of it, and says so if Apple ever
+changes it. The other brushes a band along grid row 6 and asserts the top of the texture
+changed and the bottom did not — against the whole real pipeline, because every individual
+piece already passed.
+
+The lesson worth keeping: a headless renderer verifies the renderer, not the composition with
+the framework that displays it. Any convention a framework imposes needs a test that measures
+the framework.

@@ -115,13 +115,16 @@ final class DigScene: SKScene {
         // The whole 48 KB goes up each time anything changed. Copying it costs a few
         // microseconds and means we never have to assume SKMutableTexture preserved
         // our previous contents between calls.
-        let pixels = renderer.pixels
+        //
+        // Rows go up reversed, because SpriteKit reads the first row as the bottom of the
+        // texture. Uploading them in order drew the slab mirrored, which put every brush
+        // stroke at the vertically reflected spot and made dragging down dig upwards --
+        // invisible in the renderer's own PNGs, because those are written top row first and
+        // a procedural fossil looks plausible either way up.
+        let renderer = self.renderer
         texture.modifyPixelData { pointer, length in
             guard let pointer else { return }
-            pixels.withUnsafeBytes { source in
-                guard let base = source.baseAddress else { return }
-                memcpy(pointer, base, min(length, source.count))
-            }
+            renderer.copyRowsBottomUp(into: pointer, length: length)
         }
     }
 
