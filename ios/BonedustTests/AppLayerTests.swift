@@ -274,9 +274,19 @@ final class DesignTokenTests: XCTestCase {
     /// renders. This reads the text colours back out of each palette and holds them to
     /// AA on the surfaces they are drawn on. `Ink.night.muted` was s4, 4.49:1 on the
     /// night page, until review caught it.
+    ///
+    /// The three accents are text too, and they are drawn on `raised` as well as on the page:
+    /// the result card's total is `stamp` on it and the cash figure in the pill is `safe`.
+    /// `EarthRampTests` measures the accents against the page only, and this table once
+    /// stopped at `ink` and `muted`, so nothing held that pair. `stampNight` on night's `raised`
+    /// (s7) is 4.72:1, the thinnest margin in the app.
     func testTextColoursClearAAOnTheirOwnSurfaces() {
         for (palette, ink) in [("day", Ink.day), ("night", Ink.night)] {
-            for (textName, text) in [("ink", ink.ink), ("muted", ink.muted)] {
+            let texts = [
+                ("ink", ink.ink), ("muted", ink.muted),
+                ("stamp", ink.stamp), ("gem", ink.gem), ("safe", ink.safe),
+            ]
+            for (textName, text) in texts {
                 for (surfaceName, surface) in [("page", ink.page), ("raised", ink.raised)] {
                     let ratio = rgb8(of: text).contrastRatio(against: rgb8(of: surface))
                     XCTAssertGreaterThanOrEqual(
