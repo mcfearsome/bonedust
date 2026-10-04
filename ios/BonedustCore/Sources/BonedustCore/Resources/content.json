@@ -940,5 +940,68 @@
       "scale": 0.1,
       "reputationRequired": 1500
     }
+  ],
+  "personalMilestones": [
+    {
+      "id": "first_thousand",
+      "amount": 1000,
+      "name": "First thousand",
+      "beat": "He writes it down without looking up.",
+      "unlocks": [],
+      "cosmetics": [
+        "stamp:first_thousand"
+      ]
+    },
+    {
+      "id": "five_k",
+      "amount": 5000,
+      "name": "Known at the gate",
+      "beat": "The foreman starts using your name.",
+      "unlocks": [],
+      "cosmetics": [
+        "label:brass_plate"
+      ]
+    },
+    {
+      "id": "twenty_five_k",
+      "amount": 25000,
+      "name": "Worth the daylight",
+      "beat": "Somebody holds the lamp a little longer for you.",
+      "unlocks": [
+        "perk:personal_daylight_3"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "hundred_k",
+      "amount": 100000,
+      "name": "Trusted with the good stock",
+      "beat": "The vault inventory lands on your side of the desk.",
+      "unlocks": [
+        "charmpool:vault"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "half_million",
+      "amount": 500000,
+      "name": "Half a million of his money",
+      "beat": "He has stopped pretending this is about the money.",
+      "unlocks": [],
+      "cosmetics": [
+        "frame:brass"
+      ]
+    },
+    {
+      "id": "two_million",
+      "amount": 2000000,
+      "name": "Named in the Book",
+      "beat": "Your name, in his hand, on the first page.",
+      "unlocks": [],
+      "cosmetics": [
+        "stamp:named_in_the_book",
+        "frame:prestige"
+      ]
+    }
   ]
 }

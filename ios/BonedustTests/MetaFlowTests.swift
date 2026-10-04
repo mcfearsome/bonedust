@@ -16,7 +16,7 @@ final class MetaFlowTests: XCTestCase {
     }
 
     /// Finishes the slab on screen, having exposed enough to identify the specimen.
-    private func digAndBag(_ coordinator: RunCoordinator) {
+    private func digAndBag(_ coordinator: RunCoordinator) async {
         guard let engine = coordinator.digEngine else { return XCTFail("no dig") }
         engine.brushBegan(at: Vec2(48, 64))
         // Sweep the whole slab so the fossil is identified and the record is real.
@@ -31,29 +31,29 @@ final class MetaFlowTests: XCTestCase {
         coordinator.slabFinished(engine)
     }
 
-    private func playWholeRun(_ coordinator: RunCoordinator) {
+    private func playWholeRun(_ coordinator: RunCoordinator) async {
         for _ in 1...5 {
-            digAndBag(coordinator)
-            coordinator.continueFromResults()
-            if coordinator.screen == .supplyTent { coordinator.leaveShop() }
+            await digAndBag(coordinator)
+            await coordinator.continueFromResults()
+            if coordinator.screen == .supplyTent { await coordinator.leaveShop() }
         }
     }
 
-    func testAFinishedRunFillsTheCollection() {
+    func testAFinishedRunFillsTheCollection() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         XCTAssertEqual(coordinator.meta.collection.discoveredCount, 0)
-        playWholeRun(coordinator)
+        await playWholeRun(coordinator)
         XCTAssertEqual(coordinator.screen, .runEnd)
         XCTAssertGreaterThan(coordinator.meta.collection.discoveredCount, 0,
                              "five dug slabs catalogued nothing")
         XCTAssertTrue(coordinator.meta.collection.records.values.allSatisfy { $0.timesFound > 0 })
     }
 
-    func testTheCollectionPersistsAcrossCoordinators() {
+    func testTheCollectionPersistsAcrossCoordinators() async {
         let (coordinator, store, settings) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
-        playWholeRun(coordinator)
+        await coordinator.startRun(siteID: "charmouth")
+        await playWholeRun(coordinator)
         let found = coordinator.meta.collection.discoveredCount
         XCTAssertGreaterThan(found, 0)
 
@@ -61,12 +61,12 @@ final class MetaFlowTests: XCTestCase {
         XCTAssertEqual(relaunched.meta.collection.discoveredCount, found)
     }
 
-    func testResultsPreviewIncludesTheSlabJustBagged() {
+    func testResultsPreviewIncludesTheSlabJustBagged() async {
         // The specimen is not catalogued until the run settles, but the pips on the
         // results card have to show what the player just earned.
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
-        digAndBag(coordinator)
+        await coordinator.startRun(siteID: "charmouth")
+        await digAndBag(coordinator)
         guard let record = coordinator.lastRecord else { return XCTFail() }
         XCTAssertEqual(coordinator.meta.collection.discoveredCount, 0, "not yet absorbed")
         if record.identified {
@@ -74,28 +74,28 @@ final class MetaFlowTests: XCTestCase {
         }
     }
 
-    func testSetPerksReachTheDig() {
+    func testSetPerksReachTheDig() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         let before = coordinator.digEngine?.totalDaylight ?? 0
 
         // Complete the ichthyosaur set, whose perk is five more seconds everywhere.
         guard let set = ContentCatalog.shared.setsByID["ichthyosaur"] else { return XCTFail() }
         coordinator.debugCompleteSet(set.id)
-        coordinator.debugSettleRun(succeed: true)
+        await coordinator.debugSettleRun(succeed: true)
         coordinator.acknowledgeRunEnd()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         XCTAssertEqual(coordinator.digEngine?.totalDaylight ?? 0, before + 5, accuracy: 0.01)
     }
 
-    func testASiteSpecificSetPerkDoesNothingAtTheWrongSite() {
+    func testASiteSpecificSetPerkDoesNothingAtTheWrongSite() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         let before = coordinator.digEngine?.modifiers.payoutMultiplier ?? 0
         coordinator.debugCompleteSet("trex")   // Hell Creek only
-        coordinator.debugSettleRun(succeed: true)
+        await coordinator.debugSettleRun(succeed: true)
         coordinator.acknowledgeRunEnd()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         XCTAssertEqual(coordinator.digEngine?.modifiers.payoutMultiplier ?? 0, before,
                        accuracy: 0.0001)
     }
@@ -134,12 +134,12 @@ final class MetaFlowTests: XCTestCase {
                        "crew milestones are M5, not Reputation")
     }
 
-    func testRewardsAreReportedWhenARunSettles() {
+    func testRewardsAreReportedWhenARunSettles() async {
         let (coordinator, _, _) = makeCoordinator()
         var observed: MetaProgress.Rewards?
         coordinator.onRunAbsorbed = { _, rewards in observed = rewards }
-        coordinator.startRun(siteID: "charmouth")
-        playWholeRun(coordinator)
+        await coordinator.startRun(siteID: "charmouth")
+        await playWholeRun(coordinator)
         XCTAssertNotNil(observed, "the Game Center hook never fired")
         XCTAssertEqual(observed, coordinator.lastRewards)
     }

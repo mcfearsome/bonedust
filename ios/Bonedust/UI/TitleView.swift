@@ -151,7 +151,7 @@ struct TitleView: View {
     private var actions: some View {
         VStack(spacing: 10) {
             if coordinator.canContinue {
-                primary("Continue run") { coordinator.continueRun() }
+                primary("Continue run") { Task { await coordinator.continueRun() } }
                 secondary("New run") { coordinator.beginNewRun() }
             } else {
                 primary("New run") { coordinator.beginNewRun() }

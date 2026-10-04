@@ -10,6 +10,9 @@ public struct ContentCatalog: Sendable, Codable {
     public var charms: [Charm]
     public var achievements: [Achievement]
     public var trails: [BrushTrail]
+    /// Awarded from the player's own lifetime total, so they ship with the app and
+    /// work with no network. Outfit and crew ladders come over the wire instead.
+    public var personalMilestones: [ContributionMilestone]
 
     /// Built once in `init`, because the dig loop looks fossils up by id on every
     /// slab and a linear scan over nineteen entries inside generation is waste.
@@ -21,6 +24,7 @@ public struct ContentCatalog: Sendable, Codable {
 
     private enum CodingKeys: String, CodingKey {
         case version, fossils, sites, sets, tools, charms, achievements, trails
+        case personalMilestones
     }
 
     public init(
@@ -31,7 +35,8 @@ public struct ContentCatalog: Sendable, Codable {
         tools: [Tool] = [],
         charms: [Charm] = [],
         achievements: [Achievement] = [],
-        trails: [BrushTrail] = []
+        trails: [BrushTrail] = [],
+        personalMilestones: [ContributionMilestone] = []
     ) {
         self.version = version
         self.fossils = fossils
@@ -41,6 +46,7 @@ public struct ContentCatalog: Sendable, Codable {
         self.charms = charms
         self.achievements = achievements
         self.trails = trails
+        self.personalMilestones = personalMilestones.sorted { $0.amount < $1.amount }
         self.fossilsByID = Dictionary(uniqueKeysWithValues: fossils.map { ($0.id, $0) })
         self.sitesByID = Dictionary(uniqueKeysWithValues: sites.map { ($0.id, $0) })
         self.setsByID = Dictionary(uniqueKeysWithValues: sets.map { ($0.id, $0) })
@@ -58,7 +64,10 @@ public struct ContentCatalog: Sendable, Codable {
             tools: try c.decodeIfPresent([Tool].self, forKey: .tools) ?? [],
             charms: try c.decodeIfPresent([Charm].self, forKey: .charms) ?? [],
             achievements: try c.decodeIfPresent([Achievement].self, forKey: .achievements) ?? [],
-            trails: try c.decodeIfPresent([BrushTrail].self, forKey: .trails) ?? []
+            trails: try c.decodeIfPresent([BrushTrail].self, forKey: .trails) ?? [],
+            personalMilestones: try c.decodeIfPresent(
+                [ContributionMilestone].self, forKey: .personalMilestones
+            ) ?? []
         )
     }
 
@@ -187,6 +196,16 @@ public struct ContentCatalog: Sendable, Codable {
             problems.append("duplicate achievement id")
         }
         if Set(trails.map(\.id)).count != trails.count { problems.append("duplicate trail id") }
+        if Set(personalMilestones.map(\.id)).count != personalMilestones.count {
+            problems.append("duplicate personal milestone id")
+        }
+        for milestone in personalMilestones where milestone.amount <= 0 {
+            problems.append("personal milestone \(milestone.id) has a non-positive amount")
+        }
+        for milestone in personalMilestones
+        where milestone.unlocks.isEmpty && milestone.cosmetics.isEmpty {
+            problems.append("personal milestone \(milestone.id) rewards nothing")
+        }
         if !trails.isEmpty, !trails.contains(where: { $0.reputationRequired == 0 }) {
             problems.append("no brush trail is available at zero Reputation")
         }

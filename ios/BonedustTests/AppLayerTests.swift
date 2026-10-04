@@ -68,9 +68,15 @@ final class DigEngineTests: XCTestCase {
 
     func testPublishedReadoutsTrackTheSimulation() {
         let subject = engine()
+        // Sweeps the whole slab several times. A single pass removes roughly one layer at
+        // the brush centre, so the original one-line version never reached bone and
+        // asserted on an untouched slab.
         subject.brushBegan(at: Vec2(20, 30))
-        for x in stride(from: Float(20), through: 76, by: 1.5) {
-            subject.brushMoved(to: Vec2(x, 64), deltaMillis: 16.67)
+        for pass in 0..<30 {
+            let y = Float(6 + (pass * 4) % 116)
+            for x in stride(from: Float(6), through: 90, by: 1.5) {
+                subject.brushMoved(to: Vec2(x, y), deltaMillis: 16.67)
+            }
         }
         subject.brushEnded()
         subject.publish()
@@ -93,8 +99,11 @@ final class DigEngineTests: XCTestCase {
         rush.rushThreshold = 20
         let subject = DigEngine(seed: 9, site: site, extraModifiers: rush)
         subject.brushBegan(at: Vec2(48, 64))
-        for x in stride(from: Float(10), through: 86, by: 1.5) {
-            subject.brushMoved(to: Vec2(x, 64), deltaMillis: 16.67)
+        for pass in 0..<30 {
+            let y = Float(6 + (pass * 4) % 116)
+            for x in stride(from: Float(6), through: 90, by: 1.5) {
+                subject.brushMoved(to: Vec2(x, y), deltaMillis: 16.67)
+            }
         }
         subject.publish()
         let estimate = subject.estimatedValue

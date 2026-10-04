@@ -86,7 +86,7 @@ Xcode supports — see **Toolchain** in `DECISIONS.md` if `xcodebuild` reports
   headlessly and is both the App Store screenshot pipeline and the only way to look at the
   game without a device.
 
-179 core tests pass. App-layer tests compile but cannot be *run* here — see
+204 core tests pass. App-layer tests compile but cannot be *run* here — see
 **Toolchain** in `DECISIONS.md`.
 
 ## The one rule

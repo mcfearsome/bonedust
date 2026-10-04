@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  App Attest (§6). "development" is correct for builds signed with a development
+	  profile; release builds flip this to "production".
+
+	  The distinction is not cosmetic: Apple stamps a development attestation with the
+	  aaguid "appattestdevelop" and a production one with "appattest" plus null padding,
+	  and the server refuses the development value when it is itself running in
+	  production. See AppAttest.verify_aaguid! -- that check is what stops someone with a
+	  dev-provisioned build attesting a key against the live ledger, which is a far lower
+	  bar than shipping through App Review.
+	-->
+	<key>com.apple.developer.devicecheck.appattest-environment</key>
+	<string>development</string>
+</dict>
+</plist>

@@ -15,11 +15,48 @@ enum InstallIdentity {
     private static let service = "dev.mcfearsome.bonedust"
     private static let account = "install-id"
 
-    /// The install id, created on first call.
-    static func current() -> String {
-        if let existing = read() { return existing }
+    /// Where the current id actually came from. Exposed for diagnosis, because the
+    /// failure this guards against is silent by nature.
+    enum Source: String {
+        case keychain
+        case defaultsFallback
+        case fresh
+    }
+
+    private(set) static var lastSource: Source = .fresh
+    private(set) static var lastKeychainStatus: OSStatus = errSecSuccess
+
+    /// A mirror of the id in UserDefaults.
+    ///
+    /// The Keychain is still primary, because it survives a reinstall and UserDefaults
+    /// does not. But the first simulator run of `InstallIdentityTests` returned a
+    /// different UUID on every call: the Keychain is unavailable to an unsigned test host,
+    /// every error was discarded, and the fallback was to mint a new identity. On a device
+    /// that is rarer but not impossible — and when it happens the player silently loses
+    /// their entire lifetime contribution to the crew debt and their place on every board,
+    /// with nothing anywhere saying so.
+    ///
+    /// A new id is now minted only when *both* stores are empty.
+    private static let fallbackKey = "bonedust.install-id"
+
+    static func current(defaults: UserDefaults = .standard) -> String {
+        if let existing = read() {
+            lastSource = .keychain
+            // Mirror it, so a later Keychain failure cannot lose an id we already had.
+            defaults.set(existing, forKey: fallbackKey)
+            return existing
+        }
+
+        if let mirrored = defaults.string(forKey: fallbackKey), UUID(uuidString: mirrored) != nil {
+            lastSource = .defaultsFallback
+            // Try to put it back where it belongs; harmless if this fails again.
+            _ = write(mirrored)
+            return mirrored
+        }
+
         let fresh = UUID().uuidString
-        write(fresh)
+        lastSource = write(fresh) ? .keychain : .defaultsFallback
+        defaults.set(fresh, forKey: fallbackKey)
         return fresh
     }
 
@@ -29,7 +66,9 @@ enum InstallIdentity {
         query[kSecMatchLimit as String] = kSecMatchLimitOne
 
         var item: CFTypeRef?
-        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        lastKeychainStatus = status
+        guard status == errSecSuccess,
               let data = item as? Data,
               let value = String(data: data, encoding: .utf8),
               UUID(uuidString: value) != nil
@@ -46,7 +85,9 @@ enum InstallIdentity {
         // never reaches the crew.
         attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         SecItemDelete(baseQuery() as CFDictionary)
-        return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
+        let status = SecItemAdd(attributes as CFDictionary, nil)
+        lastKeychainStatus = status
+        return status == errSecSuccess
     }
 
     private static func baseQuery() -> [String: Any] {
@@ -57,8 +98,9 @@ enum InstallIdentity {
         ]
     }
 
-    /// Only for tests: forgets the id so a fresh one is generated.
-    static func reset() {
+    /// Only for tests: forgets the id in both stores.
+    static func reset(defaults: UserDefaults = .standard) {
         SecItemDelete(baseQuery() as CFDictionary)
+        defaults.removeObject(forKey: fallbackKey)
     }
 }

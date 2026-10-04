@@ -229,3 +229,53 @@ Durable, keyed by slab id, and safe to retry:
   clear.
 - **Seeds travel as strings.** A seed past 2^53 does not survive a JSON number, and a server
   scoring a different seed would reject an honest payment. Tested with 9007199254740993.
+
+## Three ladders, three homes
+
+| ladder | counts | lives in | why there |
+|---|---|---|---|
+| **Crew** | every player, against $2.4B | server, `milestones` table | one number nobody's client can know |
+| **Outfit** | your group's pooled total | server, `outfit_milestones` | only the server can add up several diggers |
+| **Personal** | your own lifetime total | the app, `content.json` | awarded offline from a number the client already has |
+
+That split is the design, not an accident. A cosmetic you earned by digging should not
+wait on a network call, and a total spanning other people cannot be computed without one.
+
+## Outfits
+
+A handful of diggers — twelve at most — who pool what they pay. The pooled total counts
+**in addition** to the crew debt, never instead of it: a dollar dug pays the Collector
+once and shows up in the outfit's total as well.
+
+**"Outfit", not "crew".** Crew already means every player alive against one debt, and it
+is spelled that way through the schema, the endpoints, the docs and the fiction. An outfit
+is what a survey party was called, which leaves the existing word alone.
+
+**Names are generated, not typed.** Free text would be a content-moderation surface with
+no moderation behind it, on a service that stores no accounts and has no way to contact
+anyone. Generated names also cannot be squatted or impersonated, and cannot carry a slur
+onto a leaderboard every player sees. The cost is real — an outfit cannot be called what
+its members want — and it is the reason this is worth revisiting properly with a reject
+list and a report path, rather than left as it is.
+
+**Joining is a six-character code**, drawn from an alphabet with no O, 0, I, 1, S or 5,
+because codes get read aloud and copied off screens.
+
+**Leaving does not claw anything back.** What a member has already paid stays with the
+outfit. Otherwise one person walking out could take a milestone away from everyone else —
+and the crew debt itself can never go backwards either.
+
+**Outfit totals move in the same transaction as the payment and the crew ledger**, with
+the same `UPDATE … SET paid_total = paid_total + $1` shape, for the same reason: two
+members paying at once must both count.
+
+## Keeping the rewards small
+
+Every rung on all three ladders is mostly cosmetic, and the two gameplay perks are a few
+seconds of daylight and two percent of payout.
+
+That restraint comes from M3. A reward that makes money easier compounds: more income pays
+the debt faster, which reaches the next rung sooner, which grants more income. The
+difficulty curve `make simulate` measures would quietly flatten under its own rewards.
+`testPerksAreSmallEnoughNotToRebalanceTheGame` asserts the whole personal ladder together
+stays under +10% payout and +10 seconds, and changes nothing about cracking.

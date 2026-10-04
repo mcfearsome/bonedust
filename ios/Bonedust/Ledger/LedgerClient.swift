@@ -174,7 +174,11 @@ actor LedgerClient {
     /// Asks for a seed. Returns nil when offline, and the caller digs a local slab.
     func issueSlab(site: String) async -> IssuedSlab? {
         do {
+            // Three seconds, not the default ten: this request is the only thing between
+            // tapping "New run" and seeing a slab. Waiting longer than that for a seed is
+            // worse for the player than digging an offline slab at half credit.
             var request = URLRequest(url: baseURL.appending(path: "v1/slabs"))
+            request.timeoutInterval = 3
             request.httpMethod = "POST"
             let body = try JSONEncoder().encode(["site": site])
             try await sign(&request, body: body)
@@ -190,6 +194,55 @@ actor LedgerClient {
         } catch {
             return nil
         }
+    }
+
+    // MARK: Outfits
+
+    /// Founds one. The name is generated server-side; see Outfit in the Rails app for why.
+    func foundOutfit() async throws -> OutfitSnapshot {
+        var request = URLRequest(url: baseURL.appending(path: "v1/outfits"))
+        request.httpMethod = "POST"
+        try await sign(&request, body: Data("{}".utf8))
+        let (data, _) = try await perform(request)
+        return try decode(OutfitSnapshot.self, from: data)
+    }
+
+    func joinOutfit(code: String) async throws -> OutfitSnapshot {
+        var request = URLRequest(url: baseURL.appending(path: "v1/outfits/join"))
+        request.httpMethod = "POST"
+        let body = try JSONEncoder().encode(["join_code": code])
+        try await sign(&request, body: body)
+        let (data, _) = try await perform(request)
+        return try decode(OutfitSnapshot.self, from: data)
+    }
+
+    /// Nil when this digger is not in one.
+    func outfit() async throws -> OutfitSnapshot? {
+        var request = URLRequest(url: baseURL.appending(path: "v1/outfits/me"))
+        decorate(&request)
+        let (data, _) = try await perform(request)
+        // The server answers {"outfit": null} rather than 404, so an absent outfit is an
+        // ordinary state rather than an error the caller has to catch.
+        if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           object.count == 1, object["outfit"] is NSNull {
+            return nil
+        }
+        return try decode(OutfitSnapshot.self, from: data)
+    }
+
+    func leaveOutfit() async throws {
+        var request = URLRequest(url: baseURL.appending(path: "v1/outfits/me"))
+        request.httpMethod = "DELETE"
+        try await sign(&request, body: Data())
+        _ = try await perform(request)
+    }
+
+    func outfitBoard() async throws -> [OutfitBoardEntry] {
+        var request = URLRequest(url: baseURL.appending(path: "v1/outfits/leaderboard"))
+        decorate(&request)
+        let (data, _) = try await perform(request)
+        struct Payload: Decodable { let entries: [OutfitBoardEntry] }
+        return try decode(Payload.self, from: data).entries
     }
 
     /// Sends one payment. Throws so the queue knows to keep it.

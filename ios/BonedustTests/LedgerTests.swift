@@ -108,10 +108,29 @@ final class PaymentQueueTests: XCTestCase {
 final class InstallIdentityTests: XCTestCase {
 
     func testTheInstallIDIsStableAndAUUID() {
-        let first = InstallIdentity.current()
+        // The Keychain is unavailable to an unsigned test host, which is exactly the
+        // condition that used to mint a new identity on every call. Stability has to hold
+        // whichever store ends up backing it.
+        let defaults = UserDefaults(suiteName: "bonedust.install.\(UUID().uuidString)")!
+        InstallIdentity.reset(defaults: defaults)
+
+        let first = InstallIdentity.current(defaults: defaults)
         XCTAssertNotNil(UUID(uuidString: first))
-        XCTAssertEqual(InstallIdentity.current(), first,
-                       "a changing install id would reset the player's lifetime share")
+        XCTAssertEqual(InstallIdentity.current(defaults: defaults), first,
+                       "a changing install id resets the player's lifetime share")
+        XCTAssertEqual(InstallIdentity.current(defaults: defaults), first)
+    }
+
+    func testTheSourceOfTheIDIsKnowable() {
+        // The failure this guards against is silent by nature, so which store answered has
+        // to be inspectable rather than inferred.
+        let defaults = UserDefaults(suiteName: "bonedust.install.\(UUID().uuidString)")!
+        InstallIdentity.reset(defaults: defaults)
+        _ = InstallIdentity.current(defaults: defaults)
+        XCTAssertTrue(
+            [.keychain, .defaultsFallback].contains(InstallIdentity.lastSource),
+            "an id came from nowhere identifiable"
+        )
     }
 }
 

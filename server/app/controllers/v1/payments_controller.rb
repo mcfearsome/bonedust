@@ -89,8 +89,13 @@ module V1
           season_key: Season.key
         )
         # §6: the atomic increment happens in the same transaction as the insert, so the
-        # debt and the payments table can never disagree.
-        CrewLedger.credit!(credited) if credited.positive?
+        # debt and the payments table can never disagree. The outfit's total moves in the
+        # same breath and the same way, for the same reason: two members paying at once
+        # must both count.
+        if credited.positive?
+          CrewLedger.credit!(credited)
+          Outfit.credit!(digger.outfit_id, credited) if digger.outfit_id
+        end
         update_rollup(payment)
       end
       payment

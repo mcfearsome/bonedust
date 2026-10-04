@@ -71,6 +71,34 @@ public enum RunPhase: Sendable, Codable, Equatable {
     }
 }
 
+/// An outfit: a handful of diggers who pool what they pay.
+///
+/// "Crew" already means every player alive against one debt, so the smaller group needed
+/// its own word. An outfit is what a survey party was called, and it leaves "crew"
+/// unambiguous everywhere it already appears.
+public struct OutfitMembership: Sendable, Codable, Equatable {
+    public var id: String
+    public var name: String
+    public var paidTotal: Int
+    public var memberCount: Int
+    /// Reward identifiers for every outfit rung reached, as the server reported them.
+    public var reachedUnlocks: [String]
+    /// Shown so a member can bring someone in. Nil once they have left.
+    public var joinCode: String?
+
+    public init(
+        id: String, name: String, paidTotal: Int = 0, memberCount: Int = 1,
+        reachedUnlocks: [String] = [], joinCode: String? = nil
+    ) {
+        self.id = id
+        self.name = name
+        self.paidTotal = paidTotal
+        self.memberCount = memberCount
+        self.reachedUnlocks = reachedUnlocks
+        self.joinCode = joinCode
+    }
+}
+
 /// A slab the server issued, remembered so its payment can be matched to it.
 public struct IssuedSlabRef: Sendable, Codable, Equatable {
     public var slabID: String
@@ -392,6 +420,11 @@ public struct MetaProgress: Sendable, Codable, Equatable {
     public var hasFlawlessSlab: Bool
     /// Chosen cosmetic brush trail, unlocked by Reputation.
     public var brushTrailID: String?
+    /// Personal contribution rungs already reported, so one is announced once.
+    public var claimedPersonalMilestoneIDs: [String]
+    /// The outfit this digger belongs to, as the server last described it. Cached so the
+    /// outfit's perks survive going offline, exactly as the crew's do.
+    public var outfit: OutfitMembership?
     /// The kit the next run starts with.
     ///
     /// §4 says the Collector takes your tools as interest *when you fail*, which means
@@ -417,6 +450,8 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         self.highestTierCleared = 0
         self.hasFlawlessSlab = false
         self.brushTrailID = nil
+        self.claimedPersonalMilestoneIDs = []
+        self.outfit = nil
         self.carriedToolIDs = [BrushTool.brush.id]
         self.carriedCharmIDs = []
     }
@@ -431,13 +466,15 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         public var completedSets: [String] = []
         /// Achievements newly qualified for.
         public var newAchievements: [String] = []
+        /// Personal contribution rungs passed by this run.
+        public var personalMilestones: [ContributionMilestone] = []
 
         public init() {}
 
         public var totalReputation: Int { reputationFromCash + reputationFromSets }
         public var isEmpty: Bool {
-            totalReputation == 0 && newSpecies.isEmpty
-                && completedSets.isEmpty && newAchievements.isEmpty
+            totalReputation == 0 && newSpecies.isEmpty && completedSets.isEmpty
+                && newAchievements.isEmpty && personalMilestones.isEmpty
         }
     }
 
@@ -451,7 +488,17 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         _ run: RunState, catalog: ContentCatalog = .shared
     ) -> Rewards {
         var rewards = Rewards()
+        // Measured before and after, so a rung passed mid-run is caught exactly once even
+        // if the app dies between the slab and the results screen.
+        let contributionBefore = lifetimeContribution
         lifetimeContribution += run.crewContribution
+        let claimed = Set(claimedPersonalMilestoneIDs)
+        rewards.personalMilestones = ContributionPerks.newlyReached(
+            catalog.personalMilestones,
+            previous: contributionBefore,
+            current: lifetimeContribution
+        ).filter { !claimed.contains($0.id) }
+        claimedPersonalMilestoneIDs.append(contentsOf: rewards.personalMilestones.map(\.id))
         bestSlabPayout = max(bestSlabPayout, run.slabs.map(\.payout.total).max() ?? 0)
 
         // The Collection records what came out of the ground, whether or not the week
@@ -506,6 +553,28 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         return rewards
     }
 
+    /// Everything the player's own lifetime contribution has earned.
+    public func personalUnlocks(catalog: ContentCatalog = .shared) -> [String] {
+        catalog.personalMilestones
+            .filter { $0.reached(by: lifetimeContribution) }
+            .flatMap { $0.unlocks + $0.cosmetics }
+    }
+
+    /// Modifiers from personal rungs and from the outfit, composed the usual way.
+    public func contributionPerks(catalog: ContentCatalog = .shared) -> ModifierSet {
+        ModifierSet.combining([
+            ContributionPerks.modifiers(for: personalUnlocks(catalog: catalog)),
+            ContributionPerks.modifiers(for: outfit?.reachedUnlocks ?? []),
+        ])
+    }
+
+    /// Item pools opened by contribution, personal or shared.
+    public func contributionPools(catalog: ContentCatalog = .shared) -> Set<ItemPool> {
+        ContributionPerks.pools(
+            for: personalUnlocks(catalog: catalog) + (outfit?.reachedUnlocks ?? [])
+        )
+    }
+
     /// Permanent modifiers from completed skeleton sets, for a given site.
     public func setPerks(
         forSite siteID: String, catalog: ContentCatalog = .shared
@@ -517,8 +586,11 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         )
     }
 
-    /// Which item pools Reputation has opened. The vault is a crew milestone (M5).
-    public func unlockedPools() -> Set<ItemPool> { [.shop] }
+    /// Which item pools are open. The vault opens either by personal contribution or by
+    /// an outfit reaching its own rung.
+    public func unlockedPools(catalog: ContentCatalog = .shared) -> Set<ItemPool> {
+        contributionPools(catalog: catalog)
+    }
 
     public var nextInstallment: Int { Installments.amount(tier: nextTier) }
 }

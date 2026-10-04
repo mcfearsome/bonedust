@@ -30,3 +30,18 @@ end
 Milestone.where.not(key: definition.fetch("milestones").map { |m| m.fetch("id") }).delete_all
 
 puts "ledger seeded: $#{ledger.total_debt} debt, #{Milestone.count} milestones"
+
+definition.fetch("outfitMilestones", []).each do |row|
+  OutfitMilestone.find_or_initialize_by(key: row.fetch("id")).update!(
+    amount: row.fetch("amount"),
+    name: row.fetch("name"),
+    beat: row["beat"],
+    unlocks: row.fetch("unlocks", []),
+    cosmetics: row.fetch("cosmetics", [])
+  )
+end
+OutfitMilestone.where.not(
+  key: definition.fetch("outfitMilestones", []).map { |m| m.fetch("id") }
+).delete_all
+
+puts "outfit ladder seeded: #{OutfitMilestone.count} milestones"

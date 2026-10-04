@@ -11,7 +11,9 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    DEVELOPMENT_TEAM: ""
+    # Read from the signing certificates' OU, which is the authoritative Team ID
+    # (the parenthetical in a development cert's common name is the user id).
+    DEVELOPMENT_TEAM: VHH2P6SR8R
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     SWIFT_STRICT_CONCURRENCY: minimal
@@ -36,6 +38,7 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        CODE_SIGN_ENTITLEMENTS: Bonedust/Bonedust.entitlements
     info:
       path: Bonedust/Info.plist
       properties:
@@ -59,7 +62,9 @@ targets:
         BonedustLedgerBaseURL: "https://api.bonedust.app"
         # App Attest identifies the app as teamID.bundleID. Filled in once the team is
         # known; until then the server skips the relying-party check.
-        BonedustAppAttestAppID: ""
+        # teamID.bundleID. The server hashes this to check the relying party, and
+        # refuses to boot in production without the matching APP_ATTEST_APP_ID set.
+        BonedustAppAttestAppID: "VHH2P6SR8R.dev.mcfearsome.bonedust"
       debug:
         BonedustLedgerBaseURL: "https://api.bonedust.app"
 

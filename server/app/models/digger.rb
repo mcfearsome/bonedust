@@ -4,6 +4,9 @@
 class Digger < ApplicationRecord
   has_many :payments, dependent: :restrict_with_exception
   has_many :slab_issues, dependent: :destroy
+  # Optional: most diggers are not in an outfit, and leaving sets this back to nil rather
+  # than deleting anything.
+  belongs_to :outfit, optional: true
 
   validates :install_id, presence: true, uniqueness: true
 

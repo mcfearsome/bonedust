@@ -71,7 +71,7 @@ struct RootView: View {
         case .siteSelect:
             SiteSelectView(
                 coordinator: coordinator,
-                onPick: { coordinator.startRun(siteID: $0) },
+                onPick: { site in Task { await coordinator.startRun(siteID: site) } },
                 onCancel: { coordinator.showTitle() }
             )
 
@@ -104,7 +104,7 @@ struct RootView: View {
                     // The slab has been banked but the run is not over, so the Collection
                     // has not absorbed it yet. Show the pips as they will stand.
                     collection: coordinator.collectionIncludingCurrentRun,
-                    onContinue: { coordinator.continueFromResults() }
+                    onContinue: { Task { await coordinator.continueFromResults() } }
                 )
             } else {
                 recovery
@@ -121,7 +121,7 @@ struct RootView: View {
                     onSellTool: { coordinator.sellTool($0) },
                     onSellCharm: { coordinator.sellCharm($0) },
                     onRestock: { coordinator.restock() },
-                    onLeave: { coordinator.leaveShop() }
+                    onLeave: { Task { await coordinator.leaveShop() } }
                 )
             } else {
                 recovery
@@ -131,7 +131,15 @@ struct RootView: View {
             CollectionView(meta: coordinator.meta) { coordinator.showTitle() }
 
         case .crewLedger:
-            CrewLedgerView(store: coordinator.ledger) { coordinator.showTitle() }
+            CrewLedgerView(
+                store: coordinator.ledger,
+                meta: coordinator.meta,
+                onOutfit: { coordinator.showOutfit() },
+                onClose: { coordinator.showTitle() }
+            )
+
+        case .outfit:
+            OutfitView(store: coordinator.ledger) { coordinator.showCrewLedger() }
 
         case .runEnd:
             if let run = coordinator.run {

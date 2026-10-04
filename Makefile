@@ -4,7 +4,7 @@
 # source of truth, so a target or build-setting change is a reviewable one-line
 # diff instead of a 400-line pbxproj conflict.
 
-SIM ?= platform=iOS Simulator,name=iPhone 16
+SIM ?= platform=iOS Simulator,name=iPhone 17
 CORE := ios/BonedustCore
 
 .PHONY: all project test test-core test-app bench simulate constants golden content app \

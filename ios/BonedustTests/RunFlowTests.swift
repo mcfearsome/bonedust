@@ -15,20 +15,37 @@ final class RunCoordinatorTests: XCTestCase {
     }
 
     /// Advances past the results card, and out of the supply tent if one appears.
-    private func leaveResults(_ coordinator: RunCoordinator) {
-        coordinator.continueFromResults()
-        if coordinator.screen == .supplyTent { coordinator.leaveShop() }
+    private func leaveResults(_ coordinator: RunCoordinator) async {
+        await coordinator.continueFromResults()
+        if coordinator.screen == .supplyTent { await coordinator.leaveShop() }
+    }
+
+    /// Sweeps until bone is actually showing, rather than for a fixed number of passes.
+    ///
+    /// Clearing a slab takes roughly 5,300 cells of brush travel, and every hand-picked
+    /// pass count in these tests has been wrong at least once — the last one delivered
+    /// about 2,000 and silently asserted on an untouched slab. Stopping on the condition
+    /// the test actually cares about means a change to `removalRate` cannot quietly turn
+    /// these back into assertions about nothing.
+    @discardableResult
+    private func digUntilBoneShows(_ engine: DigEngine, passLimit: Int = 200) -> Bool {
+        engine.brushBegan(at: Vec2(6, 6))
+        var pass = 0
+        while pass < passLimit, engine.exposedBoneCells == 0 {
+            let y = Float(6 + (pass * 5) % 116)
+            for x in stride(from: Float(6), through: 90, by: 1.5) {
+                engine.brushMoved(to: Vec2(x, y), deltaMillis: 16.67)
+            }
+            pass += 1
+        }
+        engine.brushEnded()
+        return engine.exposedBoneCells > 0
     }
 
     /// Finishes whatever slab is on screen by running the daylight out.
-    private func burnThroughSlab(_ coordinator: RunCoordinator) {
+    private func burnThroughSlab(_ coordinator: RunCoordinator) async {
         guard let engine = coordinator.digEngine else { return XCTFail("no dig on screen") }
-        engine.brushBegan(at: Vec2(48, 64))
-        // A few real strokes so the slab is not completely untouched.
-        for x in stride(from: Float(10), through: 86, by: 2) {
-            engine.brushMoved(to: Vec2(x, 64), deltaMillis: 16.67)
-        }
-        engine.brushEnded()
+        XCTAssertTrue(digUntilBoneShows(engine), "the sweep never reached bone")
         engine.tick(delta: Double(engine.totalDaylight) + 1)
         XCTAssertTrue(engine.isFinished)
         coordinator.slabFinished(engine)
@@ -46,48 +63,48 @@ final class RunCoordinatorTests: XCTestCase {
         XCTAssertEqual(coordinator.unlockedSites.map(\.id), ["charmouth"])
     }
 
-    func testStartingARunOpensADig() {
+    func testStartingARunOpensADig() async {
         let (coordinator, store, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         XCTAssertEqual(coordinator.screen, .dig)
         XCTAssertNotNil(coordinator.digEngine)
         XCTAssertEqual(coordinator.run?.currentDay, 1)
         XCTAssertNotNil(store.loadRun(), "the run was not written to the save slot")
     }
 
-    func testAWholeRunReachesTheEndScreen() {
+    func testAWholeRunReachesTheEndScreen() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         for day in 1...5 {
             XCTAssertEqual(coordinator.screen, .dig, "day \(day)")
             XCTAssertEqual(coordinator.run?.currentDay, day)
-            burnThroughSlab(coordinator)
+            await burnThroughSlab(coordinator)
             XCTAssertEqual(coordinator.screen, .slabResults, "day \(day)")
-            leaveResults(coordinator)
+            await leaveResults(coordinator)
         }
         XCTAssertEqual(coordinator.screen, .runEnd)
         XCTAssertEqual(coordinator.run?.slabs.count, 5)
         XCTAssertTrue(coordinator.run?.isOver ?? false)
     }
 
-    func testEachDayDrawsADifferentSlab() {
+    func testEachDayDrawsADifferentSlab() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         var seeds: [UInt64] = []
         for _ in 1...5 {
             seeds.append(coordinator.digEngine?.layout.seed ?? 0)
-            burnThroughSlab(coordinator)
-            leaveResults(coordinator)
+            await burnThroughSlab(coordinator)
+            await leaveResults(coordinator)
         }
         XCTAssertEqual(Set(seeds).count, 5, "two days dug the same slab")
     }
 
-    func testFinishingARunUpdatesMetaAndClearsTheSaveSlot() {
+    func testFinishingARunUpdatesMetaAndClearsTheSaveSlot() async {
         let (coordinator, store, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         for _ in 1...5 {
-            burnThroughSlab(coordinator)
-            leaveResults(coordinator)
+            await burnThroughSlab(coordinator)
+            await leaveResults(coordinator)
         }
         XCTAssertGreaterThan(coordinator.meta.lifetimeContribution, 0)
         XCTAssertNil(store.loadRun(), "a settled run must not be resumable")
@@ -96,16 +113,12 @@ final class RunCoordinatorTests: XCTestCase {
         XCTAssertFalse(coordinator.canContinue)
     }
 
-    func testAutosaveAndResumeRestoreTheSameSlabMidDig() {
+    func testAutosaveAndResumeRestoreTheSameSlabMidDig() async {
         let (coordinator, store, settings) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         guard let engine = coordinator.digEngine else { return XCTFail() }
 
-        engine.brushBegan(at: Vec2(20, 40))
-        for x in stride(from: Float(20), through: 80, by: 1.5) {
-            engine.brushMoved(to: Vec2(x, 56), deltaMillis: 16.67)
-        }
-        engine.brushEnded()
+        XCTAssertTrue(digUntilBoneShows(engine), "the sweep never reached bone")
         engine.tick(delta: 12)
         let exposedBefore = engine.exposedBoneCells
         let seedBefore = engine.layout.seed
@@ -118,7 +131,7 @@ final class RunCoordinatorTests: XCTestCase {
         // A fresh coordinator over the same store is what a relaunch looks like.
         let resumed = RunCoordinator(settings: settings, store: store)
         XCTAssertTrue(resumed.canContinue)
-        resumed.continueRun()
+        await resumed.continueRun()
         XCTAssertEqual(resumed.screen, .dig)
         guard let restored = resumed.digEngine else { return XCTFail("no dig after resume") }
         XCTAssertEqual(restored.layout.seed, seedBefore)
@@ -127,16 +140,16 @@ final class RunCoordinatorTests: XCTestCase {
         XCTAssertNil(resumed.resumeProblem)
     }
 
-    func testAResumedSlabStartsPausedAndResumesOnTouch() {
+    func testAResumedSlabStartsPausedAndResumesOnTouch() async {
         // §5: "restores the slab with daylight paused."
         let (coordinator, store, settings) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         coordinator.digEngine?.brushBegan(at: Vec2(40, 40))
         coordinator.digEngine?.brushEnded()
         coordinator.autosave()
 
         let resumed = RunCoordinator(settings: settings, store: store)
-        resumed.continueRun()
+        await resumed.continueRun()
         guard let engine = resumed.digEngine else { return XCTFail() }
         XCTAssertEqual(engine.phase, .waiting)
         let before = engine.daylightRemaining
@@ -147,9 +160,9 @@ final class RunCoordinatorTests: XCTestCase {
         XCTAssertLessThan(engine.daylightRemaining, before)
     }
 
-    func testACorruptSnapshotFallsBackToAFreshSlabWithAnExplanation() {
+    func testACorruptSnapshotFallsBackToAFreshSlabWithAnExplanation() async {
         let (coordinator, store, settings) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         coordinator.digEngine?.brushBegan(at: Vec2(40, 40))
         coordinator.autosave()
 
@@ -161,57 +174,57 @@ final class RunCoordinatorTests: XCTestCase {
         store.save(slab: snapshot)
 
         let resumed = RunCoordinator(settings: settings, store: store)
-        resumed.continueRun()
+        await resumed.continueRun()
         XCTAssertEqual(resumed.screen, .dig, "a refused snapshot must not strand the player")
         XCTAssertNotNil(resumed.digEngine)
         XCTAssertNotNil(resumed.resumeProblem)
         XCTAssertNil(store.loadSlab(), "the bad snapshot should have been discarded")
     }
 
-    func testAbandoningARunCountsAsAFailure() {
+    func testAbandoningARunCountsAsAFailure() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
-        burnThroughSlab(coordinator)
-        leaveResults(coordinator)
+        await coordinator.startRun(siteID: "charmouth")
+        await burnThroughSlab(coordinator)
+        await leaveResults(coordinator)
         coordinator.abandonRun()
         XCTAssertEqual(coordinator.screen, .runEnd)
         XCTAssertEqual(coordinator.meta.runsFailed, 1)
         XCTAssertEqual(coordinator.meta.nextTier, 1)
     }
 
-    func testTheTentOpensBetweenSlabs() {
+    func testTheTentOpensBetweenSlabs() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
-        burnThroughSlab(coordinator)
-        coordinator.continueFromResults()
+        await coordinator.startRun(siteID: "charmouth")
+        await burnThroughSlab(coordinator)
+        await coordinator.continueFromResults()
         XCTAssertEqual(coordinator.screen, .supplyTent)
         XCTAssertFalse(coordinator.run?.shop.isEmpty ?? true, "the tent had nothing in it")
         XCTAssertNil(coordinator.digEngine, "the finished slab should be let go of")
-        coordinator.leaveShop()
+        await coordinator.leaveShop()
         XCTAssertEqual(coordinator.screen, .dig)
         XCTAssertEqual(coordinator.run?.currentDay, 2)
     }
 
-    func testThereIsNoTentAfterTheLastSlab() {
+    func testThereIsNoTentAfterTheLastSlab() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         for day in 1...5 {
-            burnThroughSlab(coordinator)
-            coordinator.continueFromResults()
+            await burnThroughSlab(coordinator)
+            await coordinator.continueFromResults()
             if day < 5 {
                 XCTAssertEqual(coordinator.screen, .supplyTent, "day \(day)")
-                coordinator.leaveShop()
+                await coordinator.leaveShop()
             }
         }
         XCTAssertEqual(coordinator.screen, .runEnd)
     }
 
-    func testBuyingInTheTentPersistsImmediately() {
+    func testBuyingInTheTentPersistsImmediately() async {
         // A crash between buying and digging must not hand the cash back.
         let (coordinator, store, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
-        burnThroughSlab(coordinator)
-        coordinator.continueFromResults()
+        await coordinator.startRun(siteID: "charmouth")
+        await burnThroughSlab(coordinator)
+        await coordinator.continueFromResults()
         guard var run = coordinator.run, let offered = run.shop.charmIDs.first,
               let charm = ContentCatalog.shared.charm(offered)
         else { return XCTFail("nothing offered") }
@@ -230,42 +243,42 @@ final class RunCoordinatorTests: XCTestCase {
         }
     }
 
-    func testAPurchasedToolReachesTheNextSlabsTray() {
+    func testAPurchasedToolReachesTheNextSlabsTray() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         XCTAssertEqual(coordinator.digEngine?.availableBrushes.count, 1)
-        burnThroughSlab(coordinator)
-        coordinator.continueFromResults()
+        await burnThroughSlab(coordinator)
+        await coordinator.continueFromResults()
 
         // Force a known affordable brush into the kit rather than depending on the roll.
         coordinator.debugGrantTool("fine_brush")
-        coordinator.leaveShop()
+        await coordinator.leaveShop()
         let brushes = coordinator.digEngine?.availableBrushes.map(\.id) ?? []
         XCTAssertTrue(brushes.contains("fine_brush"), "got \(brushes)")
         XCTAssertEqual(brushes.count, 2)
     }
 
-    func testPassiveToolsChangeTheSlabRatherThanTheTray() {
+    func testPassiveToolsChangeTheSlabRatherThanTheTray() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         let before = coordinator.digEngine?.totalDaylight ?? 0
-        burnThroughSlab(coordinator)
-        coordinator.continueFromResults()
+        await burnThroughSlab(coordinator)
+        await coordinator.continueFromResults()
         coordinator.debugGrantTool("headlamp")
-        coordinator.leaveShop()
+        await coordinator.leaveShop()
         guard let engine = coordinator.digEngine else { return XCTFail() }
         XCTAssertEqual(engine.availableBrushes.count, 1, "a headlamp is not a brush")
         XCTAssertEqual(engine.passiveTools.map(\.id), ["headlamp"])
         XCTAssertEqual(engine.totalDaylight, before + 10, accuracy: 0.01)
     }
 
-    func testXRayGogglesRevealThenExpire() {
+    func testXRayGogglesRevealThenExpire() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
-        burnThroughSlab(coordinator)
-        coordinator.continueFromResults()
+        await coordinator.startRun(siteID: "charmouth")
+        await burnThroughSlab(coordinator)
+        await coordinator.continueFromResults()
         coordinator.debugGrantTool("xray_goggles")
-        coordinator.leaveShop()
+        await coordinator.leaveShop()
         guard let engine = coordinator.digEngine else { return XCTFail() }
         XCTAssertTrue(engine.isRevealing)
         // The reveal only burns while digging, so looking before the first touch is free.
@@ -276,27 +289,27 @@ final class RunCoordinatorTests: XCTestCase {
         XCTAssertFalse(engine.isRevealing)
     }
 
-    func testAKitSurvivesASuccessfulRunAndIsSeizedAfterAFailure() {
+    func testAKitSurvivesASuccessfulRunAndIsSeizedAfterAFailure() async {
         let (coordinator, _, _) = makeCoordinator()
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         coordinator.debugGrantTool("fine_brush")
         // Force a win, then check the tool carries.
-        coordinator.debugSettleRun(succeed: true)
+        await coordinator.debugSettleRun(succeed: true)
         XCTAssertTrue(coordinator.meta.carriedToolIDs.contains("fine_brush"))
         coordinator.acknowledgeRunEnd()
 
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         XCTAssertTrue(coordinator.run?.toolIDs.contains("fine_brush") ?? false,
                       "a successful run should keep its kit")
-        coordinator.debugSettleRun(succeed: false)
+        await coordinator.debugSettleRun(succeed: false)
         XCTAssertEqual(coordinator.meta.carriedToolIDs, [BrushTool.brush.id],
                        "the Collector takes your tools as interest")
     }
 
-    func testGentleModeReachesTheDig() {
+    func testGentleModeReachesTheDig() async {
         let (coordinator, _, settings) = makeCoordinator()
         settings.gentleMode = true
-        coordinator.startRun(siteID: "charmouth")
+        await coordinator.startRun(siteID: "charmouth")
         guard let engine = coordinator.digEngine else { return XCTFail() }
         // 0.5 from gentle mode, times the site and fossil multipliers.
         XCTAssertLessThan(engine.modifiers.crackMultiplier, 1)

@@ -18,6 +18,12 @@ module LedgerSeed
         unlocks: row.fetch("unlocks", []), cosmetics: row.fetch("cosmetics", [])
       )
     end
+    definition.fetch("outfitMilestones", []).each do |row|
+      OutfitMilestone.find_or_initialize_by(key: row.fetch("id")).update!(
+        amount: row.fetch("amount"), name: row.fetch("name"), beat: row["beat"],
+        unlocks: row.fetch("unlocks", []), cosmetics: row.fetch("cosmetics", [])
+      )
+    end
   end
 
   # Empties every table between examples.
@@ -26,8 +32,8 @@ module LedgerSeed
   # its own transaction and issues a raw UPDATE; wrapping each example in an outer
   # transaction would hide exactly the behaviour this service exists to get right.
   def self.reset!
-    tables = %w[payments slab_issues attest_challenges diggers milestones crew_ledgers
-                rate_counters]
+    tables = %w[payments slab_issues attest_challenges outfits diggers milestones
+                outfit_milestones crew_ledgers rate_counters]
     ActiveRecord::Base.connection.execute(
       "TRUNCATE #{tables.join(', ')} RESTART IDENTITY CASCADE"
     )

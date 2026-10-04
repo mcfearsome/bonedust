@@ -7,86 +7,245 @@
     "This file is data, not code, on purpose: if the population turns out smaller",
     "or larger than planned, the ladder is re-tuned with a migration and a content",
     "update, not an App Store review cycle. Only `unlocks` entries need matching",
-    "client support, and every one of them is permanent and retroactive — a player",
+    "client support, and every one of them is permanent and retroactive \u2014 a player",
     "who installs after a milestone passed still gets it."
   ],
-
   "totalDebt": 2400000000,
   "newGamePlusDebt": 6000000000,
   "offlineCreditFraction": 0.5,
-
   "milestones": [
-    { "id": "first_page", "amount": 1000000, "name": "First Ledger Page",
+    {
+      "id": "first_page",
+      "amount": 1000000,
+      "name": "First Ledger Page",
       "beat": "The Collector initials the first page. He does not look up.",
-      "unlocks": ["site:hell_creek"],
-      "cosmetics": ["stamp:crew_badge"] },
-
-    { "id": "vault", "amount": 5000000, "name": "The Vault Cracks",
+      "unlocks": [
+        "site:hell_creek"
+      ],
+      "cosmetics": [
+        "stamp:crew_badge"
+      ]
+    },
+    {
+      "id": "vault",
+      "amount": 5000000,
+      "name": "The Vault Cracks",
       "beat": "Someone leaves the vault inventory on the desk. Nobody admits it.",
-      "unlocks": ["charmpool:vault"],
-      "cosmetics": [] },
-
-    { "id": "lights_out", "amount": 20000000, "name": "Lights Out",
+      "unlocks": [
+        "charmpool:vault"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "lights_out",
+      "amount": 20000000,
+      "name": "Lights Out",
       "beat": "Permits for after dark. Unsigned, but permits.",
-      "unlocks": ["site:night_dig"],
-      "cosmetics": [] },
-
-    { "id": "union_rates", "amount": 50000000, "name": "Union Rates",
+      "unlocks": [
+        "site:night_dig"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "union_rates",
+      "amount": 50000000,
+      "name": "Union Rates",
       "beat": "Proper kit starts appearing in the supply tent. Nobody ordered it.",
-      "unlocks": ["tool:dental_pick", "tool:sieve"],
-      "cosmetics": [] },
-
-    { "id": "field_notes", "amount": 100000000, "name": "Field Notes",
+      "unlocks": [
+        "tool:dental_pick",
+        "tool:sieve"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "field_notes",
+      "amount": 100000000,
+      "name": "Field Notes",
       "beat": "The Collector's own annotations, in the margins of your collection.",
-      "unlocks": ["collection:annotations"],
-      "cosmetics": ["drawer:oak"] },
-
-    { "id": "bone_dust", "amount": 250000000, "name": "Bone Dust Trail",
+      "unlocks": [
+        "collection:annotations"
+      ],
+      "cosmetics": [
+        "drawer:oak"
+      ]
+    },
+    {
+      "id": "bone_dust",
+      "amount": 250000000,
+      "name": "Bone Dust Trail",
       "beat": "Your brush leaves a mark the crew recognises.",
       "unlocks": [],
-      "cosmetics": ["trail:bonedust", "trail:ochre", "trail:verdigris"] },
-
-    { "id": "deep_quarry", "amount": 500000000, "name": "The Deep Quarry",
+      "cosmetics": [
+        "trail:bonedust",
+        "trail:ochre",
+        "trail:verdigris"
+      ]
+    },
+    {
+      "id": "deep_quarry",
+      "amount": 500000000,
+      "name": "The Deep Quarry",
       "beat": "A lagoon that has not been opened in a hundred and fifty million years.",
-      "unlocks": ["site:solnhofen"],
-      "cosmetics": [] },
-
-    { "id": "salvage_rights", "amount": 800000000, "name": "Salvage Rights",
+      "unlocks": [
+        "site:solnhofen"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "salvage_rights",
+      "amount": 800000000,
+      "name": "Salvage Rights",
       "beat": "The crew wins an argument. Every run now starts with fifty dollars in it.",
-      "unlocks": ["perk:crew_stake_50"],
-      "cosmetics": [] },
-
-    { "id": "collector_blinks", "amount": 1200000000, "name": "The Collector Blinks",
+      "unlocks": [
+        "perk:crew_stake_50"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "collector_blinks",
+      "amount": 1200000000,
+      "name": "The Collector Blinks",
       "beat": "The interest rate moves. Downward. For the first time.",
-      "unlocks": ["perk:installment_growth_1_28"],
-      "cosmetics": [] },
-
-    { "id": "provenance", "amount": 1600000000, "name": "Provenance",
+      "unlocks": [
+        "perk:installment_growth_1_28"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "provenance",
+      "amount": 1600000000,
+      "name": "Provenance",
       "beat": "Your specimens leave with a crew seal on the label. They are worth more for it.",
-      "unlocks": ["perk:seal_payout_1_05"],
-      "cosmetics": ["label:crew_seal"] },
-
-    { "id": "last_invoice", "amount": 2000000000, "name": "Last Invoice",
+      "unlocks": [
+        "perk:seal_payout_1_05"
+      ],
+      "cosmetics": [
+        "label:crew_seal"
+      ]
+    },
+    {
+      "id": "last_invoice",
+      "amount": 2000000000,
+      "name": "Last Invoice",
       "beat": "He opens his own quarry to you. It is not generosity.",
-      "unlocks": ["site:collectors_quarry"],
-      "cosmetics": [] },
-
-    { "id": "paid_in_full", "amount": 2400000000, "name": "Paid In Full",
+      "unlocks": [
+        "site:collectors_quarry"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "paid_in_full",
+      "amount": 2400000000,
+      "name": "Paid In Full",
       "beat": "The ledger closes. Then his heir opens a new one.",
-      "unlocks": ["ending:paid_in_full", "mode:new_game_plus"],
-      "cosmetics": ["frame:prestige", "stamp:founder"] }
+      "unlocks": [
+        "ending:paid_in_full",
+        "mode:new_game_plus"
+      ],
+      "cosmetics": [
+        "frame:prestige",
+        "stamp:founder"
+      ]
+    }
   ],
-
   "leaderboards": [
-    { "id": "contribution", "name": "Paid to the debt", "unit": "dollars",
-      "window": "all_time", "source": "diggers.paid_total" },
-    { "id": "season", "name": "This season", "unit": "dollars",
-      "window": "season", "source": "diggers.paid_season" },
-    { "id": "best_slab", "name": "Best single slab", "unit": "dollars",
-      "window": "all_time", "source": "diggers.best_slab_amount" },
-    { "id": "streak", "name": "Longest run streak", "unit": "runs",
-      "window": "all_time", "source": "diggers.best_streak" },
-    { "id": "intact", "name": "Flawless slabs", "unit": "count",
-      "window": "all_time", "source": "diggers.flawless_slabs" }
+    {
+      "id": "contribution",
+      "name": "Paid to the debt",
+      "unit": "dollars",
+      "window": "all_time",
+      "source": "diggers.paid_total"
+    },
+    {
+      "id": "season",
+      "name": "This season",
+      "unit": "dollars",
+      "window": "season",
+      "source": "diggers.paid_season"
+    },
+    {
+      "id": "best_slab",
+      "name": "Best single slab",
+      "unit": "dollars",
+      "window": "all_time",
+      "source": "diggers.best_slab_amount"
+    },
+    {
+      "id": "streak",
+      "name": "Longest run streak",
+      "unit": "runs",
+      "window": "all_time",
+      "source": "diggers.best_streak"
+    },
+    {
+      "id": "intact",
+      "name": "Flawless slabs",
+      "unit": "count",
+      "window": "all_time",
+      "source": "diggers.flawless_slabs"
+    }
+  ],
+  "_outfitComment": [
+    "An outfit is a handful of diggers who pool what they pay. 'Crew' already means",
+    "every player alive against one debt, so a smaller group needed its own word --",
+    "'outfit' is what a survey party was called and leaves 'crew' unambiguous.",
+    "",
+    "Outfit perks are kept small on purpose. They should make being in one feel good",
+    "without making solo play feel punished, because a player with no friends who dig",
+    "is still most of the audience."
+  ],
+  "outfitMilestones": [
+    {
+      "id": "outfit_staked",
+      "amount": 50000,
+      "name": "Claim staked",
+      "beat": "Somebody hammers a post in with your outfit's name on it.",
+      "unlocks": [],
+      "cosmetics": [
+        "stamp:outfit_badge"
+      ]
+    },
+    {
+      "id": "outfit_known",
+      "amount": 250000,
+      "name": "A known outfit",
+      "beat": "Other diggers start asking who you dig with.",
+      "unlocks": [
+        "perk:outfit_payout_1_02"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "outfit_supplied",
+      "amount": 1000000,
+      "name": "Properly supplied",
+      "beat": "Crates arrive that nobody ordered.",
+      "unlocks": [
+        "charmpool:outfit"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "outfit_lamps",
+      "amount": 5000000,
+      "name": "Lamps for everyone",
+      "beat": "Nobody in your outfit digs in the dark again.",
+      "unlocks": [
+        "perk:outfit_daylight_5"
+      ],
+      "cosmetics": []
+    },
+    {
+      "id": "outfit_honour",
+      "amount": 25000000,
+      "name": "On the honour roll",
+      "beat": "Your outfit's name goes on the ledger itself.",
+      "unlocks": [
+        "ledger:honour_roll"
+      ],
+      "cosmetics": [
+        "frame:outfit_gold"
+      ]
+    }
   ]
 }

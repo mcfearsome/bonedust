@@ -21,6 +21,7 @@ final class RunCoordinator {
         case runEnd
         case collection
         case crewLedger
+        case outfit
     }
 
     private(set) var screen: Screen = .title
@@ -111,6 +112,26 @@ final class RunCoordinator {
         screen = .crewLedger
     }
 
+    func showOutfit() {
+        screen = .outfit
+    }
+
+    /// Everything contribution has earned: the player's own lifetime rungs and the
+    /// outfit's shared ones, folded through the same ModifierSet as charms and site twists.
+    private var contributionModifiers: ModifierSet {
+        ContributionPerks.modifiers(
+            for: meta.personalUnlocks(catalog: catalog) + ledger.outfitUnlocks
+        )
+    }
+
+    /// Item pools opened by contribution. The vault opens either by paying enough yourself
+    /// or by your outfit doing it between you.
+    private var contributionPools: Set<ItemPool> {
+        ContributionPerks.pools(
+            for: meta.personalUnlocks(catalog: catalog) + ledger.outfitUnlocks
+        )
+    }
+
     // MARK: Cosmetics
 
     /// Trails the player has earned (§5). Always at least one.
@@ -138,7 +159,7 @@ final class RunCoordinator {
         screen = .siteSelect
     }
 
-    func startRun(siteID: String) {
+    func startRun(siteID: String) async {
         var fresh = RunState(
             seed: UInt64.random(in: 1...(UInt64.max >> 2)),
             siteID: siteID,
@@ -153,11 +174,11 @@ final class RunCoordinator {
         run = fresh
         store.save(run: fresh)
         store.save(slab: nil)
-        Task { await prepareDig(day: 1) }
+        await prepareDig(day: 1)
     }
 
     /// Resumes from the autosave slot, including a part-dug slab.
-    func continueRun() {
+    func continueRun() async {
         guard let run else { return }
         switch run.phase {
         case .digging(let day):
@@ -179,10 +200,15 @@ final class RunCoordinator {
 
     /// Asks the ledger for this day's seed before opening the dig, then opens it either way.
     ///
-    /// The request is awaited rather than fired alongside, because the seed decides which
-    /// slab gets generated and a slab that changed underneath the player a second after
-    /// appearing would be worse than an offline one. The client timeout is short for
-    /// exactly this reason.
+    /// Awaited rather than fired alongside, because the seed decides which slab gets
+    /// generated and one that changed underneath the player a second after appearing would
+    /// be worse than an offline one.
+    ///
+    /// This is why `startRun`, `leaveShop` and `continueFromResults` are `async`. They used
+    /// to wrap this in `Task { }` and return immediately, which left `digEngine` nil — so
+    /// the dig screen rendered its "that dig got away from us" recovery view until the
+    /// request finished, every single time a run started. Hiding the wait inside a
+    /// synchronous method made it invisible to the type system and to every test.
     private func prepareDig(day: Int) async {
         guard var current = run, current.issuedSlabs[day] == nil else {
             openDig(day: day, restoring: false)
@@ -211,6 +237,7 @@ final class RunCoordinator {
         let extra = ModifierSet.combining([
             settings.gentleModeModifiers,
             meta.setPerks(forSite: siteID, catalog: catalog),
+            contributionModifiers,
         ])
         let loadout = run.loadout(catalog: catalog)
 
@@ -282,7 +309,7 @@ final class RunCoordinator {
     }
 
     /// Leaves the results card: into the tent, or settle up.
-    func continueFromResults() {
+    func continueFromResults() async {
         guard var current = run else { return }
         current.advance()
         run = current
@@ -308,7 +335,7 @@ final class RunCoordinator {
 
         store.save(run: current)
         if case .digging(let day) = current.phase {
-            Task { await prepareDig(day: day) }
+            await prepareDig(day: day)
         }
     }
 
@@ -325,7 +352,7 @@ final class RunCoordinator {
 
     /// Which item pools are open. The vault is a crew milestone, and the ledger client
     /// arrives at M5, so for now only the shop pool is available.
-    private var unlockedPools: Set<ItemPool> { meta.unlockedPools() }
+    private var unlockedPools: Set<ItemPool> { contributionPools }
 
     func buyTool(_ id: String) { mutateRun { try? $0.buyTool(id, catalog: catalog) } }
     func buyCharm(_ id: String) { mutateRun { try? $0.buyCharm(id, catalog: catalog) } }
@@ -338,12 +365,12 @@ final class RunCoordinator {
         }
     }
 
-    func leaveShop() {
+    func leaveShop() async {
         guard var current = run, case .supplyTent(let day) = current.phase else { return }
         current.leaveShop()
         run = current
         store.save(run: current)
-        Task { await prepareDig(day: day + 1) }
+        await prepareDig(day: day + 1)
     }
 
     /// Applies a change to the run and persists it. Purchases are saved immediately
@@ -429,11 +456,11 @@ extension RunCoordinator {
     }
 
     /// Ends the run as a success or a failure, without playing it.
-    func debugSettleRun(succeed: Bool) {
+    func debugSettleRun(succeed: Bool) async {
         guard var current = run else { return }
         current.cash = succeed ? current.installment + 100 : 0
         current.phase = .results(day: current.totalDays)
         run = current
-        continueFromResults()
+        await continueFromResults()
     }
 }

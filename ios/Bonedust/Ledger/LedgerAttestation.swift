@@ -27,6 +27,16 @@ actor LedgerAttestation {
 
     var isSupported: Bool { service.isSupported }
 
+    /// `teamID.bundleID`, which is what the server hashes to verify the relying party.
+    ///
+    /// Read from Info.plist rather than hard-coded so it cannot drift from the value in
+    /// `ios/project.yml` that the entitlement and the server configuration are both
+    /// derived from.
+    static var appAttestAppID: String? {
+        let value = Bundle.main.object(forInfoDictionaryKey: "BonedustAppAttestAppID") as? String
+        return value?.isEmpty == false ? value : nil
+    }
+
     /// Signs a request body against a server nonce. Nil when attestation is unavailable.
     func assertion(for body: Data, nonce: String) async -> String? {
         guard service.isSupported, let keyID = await ensureKey() else { return nil }

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BonedustAppAttestAppID</key>
-	<string></string>
+	<string>VHH2P6SR8R.dev.mcfearsome.bonedust</string>
 	<key>BonedustLedgerBaseURL</key>
 	<string>https://api.bonedust.app</string>
 	<key>CFBundleDevelopmentRegion</key>

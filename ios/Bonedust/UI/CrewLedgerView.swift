@@ -6,6 +6,8 @@ import SwiftUI
 struct CrewLedgerView: View {
 
     let store: CrewLedgerStore
+    let meta: MetaProgress
+    let onOutfit: () -> Void
     let onClose: () -> Void
 
     var body: some View {
@@ -16,6 +18,8 @@ struct CrewLedgerView: View {
                     debtCard(snapshot)
                     season(snapshot)
                     yourShare
+                    personalLadder
+                    outfitCard
                     milestoneTrack(snapshot)
                     feed(snapshot)
                 } else {
@@ -146,6 +150,97 @@ struct CrewLedgerView: View {
             .background(Ink.raised.opacity(0.55))
             .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
         }
+    }
+
+    /// What this player's own contribution has earned.
+    ///
+    /// Awarded from the local lifetime total rather than the server's, so it keeps working
+    /// with no connection — the same reason these rungs ship in the app's content while the
+    /// crew's and the outfit's arrive over the wire.
+    private var personalLadder: some View {
+        let ladder = ContentCatalog.shared.personalMilestones
+        let paid = meta.lifetimeContribution
+        let next = ladder.first { !$0.reached(by: paid) }
+        return VStack(alignment: .leading, spacing: 7) {
+            HStack(alignment: .firstTextBaseline) {
+                FieldLabel(text: "What you have paid")
+                Spacer()
+                Text(CrewLedgerView.money(paid))
+                    .font(Typography.number(.subheadline, weight: .semibold))
+                    .foregroundStyle(Ink.ivory)
+                    .monospacedDigit()
+            }
+            ForEach(ladder) { milestone in
+                HStack(alignment: .top, spacing: 10) {
+                    Circle()
+                        .fill(milestone.reached(by: paid) ? Ink.accent : Color.clear)
+                        .frame(width: 8, height: 8)
+                        .overlay(Circle().stroke(
+                            milestone.reached(by: paid) ? Ink.accent : Ink.hairline, lineWidth: 1
+                        ))
+                        .padding(.top, 5)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(milestone.name)
+                                .font(Typography.ui(.caption, weight: .semibold))
+                                .foregroundStyle(milestone.reached(by: paid) ? Ink.ivory : Ink.muted)
+                            Spacer()
+                            Text(CrewLedgerView.money(milestone.amount))
+                                .font(Typography.number(.caption2))
+                                .foregroundStyle(Ink.muted)
+                                .monospacedDigit()
+                        }
+                        if milestone.reached(by: paid), let beat = milestone.beat {
+                            Text(beat)
+                                .font(Typography.ui(.caption2))
+                                .foregroundStyle(Ink.muted)
+                                .italic()
+                                .fixedSize(horizontal: false, vertical: true)
+                        } else if milestone.id == next?.id {
+                            Text("\(CrewLedgerView.money(milestone.amount - paid)) to go.")
+                                .font(Typography.ui(.caption2))
+                                .foregroundStyle(Ink.accent)
+                        }
+                    }
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityValue(milestone.reached(by: paid) ? "Reached" : "Not yet")
+            }
+        }
+        .padding(13)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Ink.raised.opacity(0.55))
+        .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
+    }
+
+    /// The way in to outfits. Deliberately a card rather than a tab: most players will dig
+    /// alone, and the screen should not imply they are missing something required.
+    private var outfitCard: some View {
+        Button(action: onOutfit) {
+            VStack(alignment: .leading, spacing: 5) {
+                FieldLabel(text: "Your outfit")
+                Text(store.outfitMembership?.name ?? "Dig with people you know")
+                    .font(Typography.ui(.headline, weight: .semibold))
+                    .foregroundStyle(Ink.ivory)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(store.outfitMembership.map {
+                    "\(CrewLedgerView.money($0.paidTotal)) pooled between \($0.memberCount)."
+                } ?? "Found one, or join with a code. What you pool counts for the crew too.")
+                    .font(Typography.ui(.caption2))
+                    .foregroundStyle(Ink.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(13)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Ink.raised)
+            .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: Measure.cardRadius)
+                    .stroke(Ink.hairline, lineWidth: Measure.hairline)
+            )
+        }
+        .accessibilityLabel("Your outfit")
     }
 
     private func milestoneTrack(_ snapshot: LedgerSnapshot) -> some View {
@@ -297,7 +392,11 @@ struct CrewLedgerView: View {
         case "perk": return "Crew perk"
         case "mode": return "New game plus"
         case "ending": return "The ending"
-        default: return parts[1].replacingOccurrences(of: "_", with: " ").capitalized
+        default:
+            // Sentence case, to match the branches above ("Rare charms", "New game plus").
+            // `.capitalized` gives "Future Thing", which reads like a product name.
+            let words = parts[1].replacingOccurrences(of: "_", with: " ")
+            return words.prefix(1).uppercased() + words.dropFirst()
         }
     }
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_03_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_04_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -48,11 +48,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_000001) do
     t.datetime "last_payment_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "outfit_id"
     t.index ["attest_key_id"], name: "index_diggers_on_attest_key_id", unique: true
     t.index ["best_slab_amount"], name: "index_diggers_on_best_slab_amount", order: :desc
     t.index ["best_streak"], name: "index_diggers_on_best_streak", order: :desc
     t.index ["flawless_slabs"], name: "index_diggers_on_flawless_slabs", order: :desc
     t.index ["install_id"], name: "index_diggers_on_install_id", unique: true
+    t.index ["outfit_id", "paid_total"], name: "index_diggers_on_outfit_id_and_paid_total"
+    t.index ["outfit_id"], name: "index_diggers_on_outfit_id"
     t.index ["paid_season"], name: "index_diggers_on_paid_season", order: :desc
     t.index ["paid_total"], name: "index_diggers_on_paid_total", order: :desc
   end
@@ -68,6 +71,32 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_000001) do
     t.datetime "updated_at", null: false
     t.index ["amount"], name: "index_milestones_on_amount"
     t.index ["key"], name: "index_milestones_on_key", unique: true
+  end
+
+  create_table "outfit_milestones", force: :cascade do |t|
+    t.string "key", null: false
+    t.bigint "amount", null: false
+    t.string "name", null: false
+    t.text "beat"
+    t.jsonb "unlocks", default: [], null: false
+    t.jsonb "cosmetics", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["amount"], name: "index_outfit_milestones_on_amount"
+    t.index ["key"], name: "index_outfit_milestones_on_key", unique: true
+  end
+
+  create_table "outfits", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "join_code", null: false
+    t.bigint "paid_total", default: 0, null: false
+    t.bigint "founder_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["founder_id"], name: "index_outfits_on_founder_id"
+    t.index ["join_code"], name: "index_outfits_on_join_code", unique: true
+    t.index ["name"], name: "index_outfits_on_name", unique: true
+    t.index ["paid_total"], name: "index_outfits_on_paid_total", order: :desc
   end
 
   create_table "payments", force: :cascade do |t|
@@ -113,6 +142,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_03_000001) do
     t.index ["slab_id"], name: "index_slab_issues_on_slab_id", unique: true
   end
 
+  add_foreign_key "diggers", "outfits"
+  add_foreign_key "outfits", "diggers", column: "founder_id"
   add_foreign_key "payments", "diggers"
   add_foreign_key "slab_issues", "diggers"
 end

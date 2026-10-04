@@ -21,6 +21,15 @@ final class CrewLedgerStore {
     /// so a player who goes offline keeps Hell Creek.
     private(set) var reachedUnlocks: Set<String> = []
 
+    /// The outfit, as last described by the server.
+    private(set) var outfit: OutfitSnapshot?
+    private(set) var outfitBoard: [OutfitBoardEntry] = []
+    /// Cached separately and kept on disk, so an outfit's perks survive going offline the
+    /// same way the crew's milestone unlocks do.
+    private(set) var outfitMembership: OutfitMembership?
+    /// Last outfit action that failed, for the screen to explain rather than swallow.
+    private(set) var outfitProblem: String?
+
     let queue: PaymentQueue
     private let client: LedgerClient
     private let defaults: UserDefaults
@@ -30,6 +39,7 @@ final class CrewLedgerStore {
     private static let snapshotKey = "ledger.snapshot"
     private static let unlocksKey = "ledger.unlocks"
     private static let etagKey = "ledger.etag"
+    private static let outfitKey = "ledger.outfit"
 
     init(
         client: LedgerClient = LedgerClient(),
@@ -51,6 +61,10 @@ final class CrewLedgerStore {
         }
         reachedUnlocks = Set(defaults.stringArray(forKey: Self.unlocksKey) ?? [])
         etag = defaults.string(forKey: Self.etagKey)
+        if let data = defaults.data(forKey: Self.outfitKey),
+           let decoded = try? JSONDecoder().decode(OutfitMembership.self, from: data) {
+            outfitMembership = decoded
+        }
     }
 
     private func persist() {
@@ -59,6 +73,11 @@ final class CrewLedgerStore {
         }
         defaults.set(Array(reachedUnlocks), forKey: Self.unlocksKey)
         defaults.set(etag, forKey: Self.etagKey)
+        if let outfitMembership, let data = try? JSONEncoder().encode(outfitMembership) {
+            defaults.set(data, forKey: Self.outfitKey)
+        } else {
+            defaults.removeObject(forKey: Self.outfitKey)
+        }
     }
 
     // MARK: Polling
@@ -136,6 +155,90 @@ final class CrewLedgerStore {
     func issueSlab(site: String) async -> IssuedSlab? {
         await client.issueSlab(site: site)
     }
+
+    // MARK: Outfits
+
+    func refreshOutfit() async {
+        guard let snapshot = try? await client.outfit() else { return }
+        apply(snapshot)
+    }
+
+    func refreshOutfitBoard() async {
+        outfitBoard = (try? await client.outfitBoard()) ?? outfitBoard
+    }
+
+    @discardableResult
+    func foundOutfit() async -> Bool {
+        outfitProblem = nil
+        do {
+            apply(try await client.foundOutfit())
+            return true
+        } catch {
+            outfitProblem = Self.describe(error)
+            return false
+        }
+    }
+
+    @discardableResult
+    func joinOutfit(code: String) async -> Bool {
+        outfitProblem = nil
+        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard trimmed.count >= 4 else {
+            outfitProblem = "That code is too short."
+            return false
+        }
+        do {
+            apply(try await client.joinOutfit(code: trimmed))
+            return true
+        } catch {
+            outfitProblem = Self.describe(error)
+            return false
+        }
+    }
+
+    func leaveOutfit() async {
+        outfitProblem = nil
+        do {
+            try await client.leaveOutfit()
+            outfit = nil
+            outfitMembership = nil
+            persist()
+        } catch {
+            outfitProblem = Self.describe(error)
+        }
+    }
+
+    private func apply(_ snapshot: OutfitSnapshot?) {
+        outfit = snapshot
+        outfitMembership = snapshot?.membership
+        persist()
+    }
+
+    /// Server refusals in words a player can act on.
+    private static func describe(_ error: Error) -> String {
+        guard let failure = error as? LedgerClient.Failure else {
+            return "That did not work. Try again in a moment."
+        }
+        switch failure {
+        case .offline:
+            return "No connection. Outfits need one."
+        case .rejected(let code) where code == "already_in_an_outfit":
+            return "You are already in an outfit. Leave it first."
+        case .rejected(let code) where code == "outfit_full":
+            return "That outfit is full."
+        case .rejected(let code) where code == "unknown_code":
+            return "No outfit has that code."
+        case .rejected:
+            return "That was refused."
+        case .server(let status) where status == 404:
+            return "No outfit has that code."
+        case .server, .malformed:
+            return "That did not work. Try again in a moment."
+        }
+    }
+
+    /// Everything the outfit has earned, for the dig to fold in.
+    var outfitUnlocks: [String] { outfitMembership?.reachedUnlocks ?? [] }
 
     // MARK: Unlocks
 
