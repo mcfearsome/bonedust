@@ -287,6 +287,24 @@ final class DesignTokenTests: XCTestCase {
         }
     }
 
+    /// The mount's whole job is to stop the slab vanishing into the page, and nothing measured
+    /// that pair. The night mount was `s8` on `nightPage`: 1.15:1, so a night dig had no band at
+    /// all, only a 1pt hairline at 2.4:1, and the page, the mount and uncleared topsoil sat
+    /// within 1.15:1 of each other. The matrix-against-mount tests stayed green throughout, and
+    /// choosing `s8` had improved that pair (3.12 to 3.56), which is how it shipped.
+    ///
+    /// 3:1, the bar the matrix pair holds, in both palettes: the mount is dark on cream by day
+    /// and cream on the night page by night, so one palette's pass says nothing of the other.
+    func testTheMountSeparatesFromThePageInBothPalettes() {
+        for (palette, ink) in [("day", Ink.day), ("night", Ink.night)] {
+            let ratio = rgb8(of: ink.mount).contrastRatio(against: rgb8(of: ink.page))
+            XCTAssertGreaterThanOrEqual(
+                ratio, 3.0,
+                "\(palette): the mount is \(String(format: "%.2f", ratio)):1 against the page, so the slab's card has no edge"
+            )
+        }
+    }
+
     /// Review Focus 4. Dynamic Type must reach the custom faces. SwiftUI's `Font` is
     /// opaque, so the only way to see how `display` built one is to compare it with a
     /// Font built the right way. `Font.custom(_:fixedSize:)` is the regression this
@@ -491,15 +509,16 @@ final class ThemeTests: XCTestCase {
     /// against the mount at full daylight — but night_dig renders at
     /// `lightLevel` 0.55, and `SlabRenderer` scales every cell by it, so the
     /// colour Task 2 measured for that site never reaches a screen. On screen
-    /// the matrix is (123, 112, 91) against the night mount, s8, which is 3.56:1.
-    /// That clears 3:1 by about half a point, the kind of margin that regresses
-    /// silently when someone nudges `nightFloor` or `switchPoint`.
+    /// the matrix is (123, 112, 91) against the night mount, s1, which is 3.85:1.
+    /// That clears 3:1 by under a point, the kind of margin that regresses
+    /// silently when someone nudges `nightFloor` or `switchPoint`. (The night
+    /// mount was s8 until its pair with the page was measured: 3.56:1 here, and
+    /// 1.15:1 against the page. See `testTheMountSeparatesFromThePageInBothPalettes`.)
     ///
     /// The mount is read from the palette `Theme` actually selects. It is s6 on
-    /// the day palette and s8 on the night one, never a blend, so a model that
-    /// lerped between them would overstate the contrast of any dim site on the
-    /// day side of the switch (the default matrix at lightLevel 0.70 is 4.23 as
-    /// a blend and 3.28 as shipped).
+    /// the day palette and s1 on the night one, never a blend, so a model that
+    /// lerped between them would misreport any dim site on the day side of the
+    /// switch (the default matrix at lightLevel 0.70 is 3.28 as shipped).
     ///
     /// Iterates the catalog, like Task 2's test: no night_dig literal, so a
     /// second dim site added later is covered.
