@@ -267,7 +267,8 @@ struct DigView: View {
             Readout(label: "Exposed", value: "\(engine.exposurePercent)%")
             // This used to be three colours, ink, accent and danger. The last two are
             // one `stamp` now, so what separates "some damage" from "badly broken" is
-            // motion: below 60 the number pulses. Red in motion, spec §5.
+            // motion: below 60 the number pulses. Red in motion, spec §5. With Reduce
+            // Motion on it does not pulse, and the number is what is left to say it.
             Readout(
                 label: "Intact",
                 value: "\(engine.intactPercent)%",

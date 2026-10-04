@@ -6,12 +6,24 @@ import SwiftUI
 /// second red has to be carried by something other than hue. This is the carrier: the
 /// view's opacity pulses between `floor` and 1, taking `halfCycle` each way.
 ///
-/// It is a fade, not a scale or a slide, so it stays inside what Reduce Motion permits
-/// (the fracture bloom makes the same substitution) and it keeps running when that
-/// setting is on: it is the one cue here that does not depend on telling red from
-/// green. At one cycle a second it is well under the three-flashes-a-second limit.
+/// It is a fade, not a scale or a slide, but it starts by itself and runs for the rest of
+/// the dig, and that is what Reduce Motion is for. WCAG 2.2.2 (Pause, Stop, Hide, Level A)
+/// asks for a way to stop blinking that lasts past five seconds, and that setting is the
+/// way, so the pulse stops when either source of it is on: the system setting or the
+/// in-app toggle, the same two that quiet the bloom, the dust and the hint. (The
+/// three-flashes limit in 2.3.1 is a different rule; at one cycle a second this was always
+/// far under it.)
+///
+/// Stopping it loses nothing. Both users of the pulse have a word or a number beside it:
+/// the speed bar says "TOO FAST" and its fill has crossed the notch, and the Intact
+/// readout is the number itself. Stopped, the view is exactly itself at full strength.
 struct AlarmPulse: ViewModifier {
     let isActive: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    /// Optional on purpose: a view built without the app's settings, in a preview or a
+    /// test, has no in-app toggle rather than a crash for the missing environment object.
+    @Environment(GameSettings.self) private var settings: GameSettings?
 
     /// Opacity at the dim end of the pulse.
     static let floor = 0.65
@@ -28,9 +40,19 @@ struct AlarmPulse: ViewModifier {
         return floor + (1 - floor) * wave
     }
 
+    /// Whether the pulse runs. Pure, so both sources can be driven from a test: the system
+    /// setting is read-only in an environment and cannot be set from one.
+    static func pulses(isActive: Bool, systemReduceMotion: Bool, appReducedMotion: Bool) -> Bool {
+        isActive && !systemReduceMotion && !appReducedMotion
+    }
+
     @ViewBuilder
     func body(content: Content) -> some View {
-        if isActive {
+        if Self.pulses(
+            isActive: isActive,
+            systemReduceMotion: systemReduceMotion,
+            appReducedMotion: settings?.reducedMotion ?? false
+        ) {
             TimelineView(.animation) { timeline in
                 content.opacity(Self.opacity(at: timeline.date.timeIntervalSinceReferenceDate))
             }
@@ -55,7 +77,8 @@ extension View {
 /// fill visibly crosses, the state is also spelled out in words, and when it is dangerous the
 /// bar pulses. A player who cannot distinguish the green from the red can still see the fill
 /// pass the notch, see it beat, and read "TOO FAST" — which, with the crack haptic, is four
-/// independent channels carrying the same information.
+/// independent channels carrying the same information, and three when Reduce Motion has
+/// stopped the beat.
 ///
 /// **It only says TOO FAST when the brush is actually over exposed bone**, because that is
 /// the only place speed can break anything — `SlabSimulation` guards cracking on

@@ -1721,30 +1721,103 @@ final class AlarmPulseTests: XCTestCase {
         XCTAssertLessThanOrEqual(spread(under), 1, "the bar pulses while the brush is inside the safe speed")
     }
 
+    /// The total ink on the page in one render of a readout: it rises and falls with the opacity.
+    private func inkMass(_ pixels: RenderedPixels) -> Int {
+        let page = rgb255(Ink.day.page)
+        var total = 0
+        for y in 0..<pixels.height {
+            for x in 0..<pixels.width { total += distance(pixels.rgb(x, y), page) }
+        }
+        return total
+    }
+
+    /// How far the Intact readout's total ink swings over a bit more than one cycle, as a
+    /// fraction of its peak. `settings` is the player's own preferences, if the view is given any.
+    private func readoutSwing(alarmed: Bool, settings: GameSettings? = nil) throws -> Double {
+        var masses: [Int] = []
+        for _ in 0..<14 {
+            let view = Readout(label: "Intact", value: "52%", tint: Ink.day.stamp, isAlarmed: alarmed)
+                .background(Ink.day.page)
+                .environment(settings)
+            masses.append(inkMass(try renderPixels(view, width: 120)))
+            RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.09))
+        }
+        let high = Double(masses.max() ?? 0), low = Double(masses.min() ?? 0)
+        return high == 0 ? 0 : (high - low) / high
+    }
+
     /// The Intact readout pulses when told it is alarmed and not otherwise. Measured over the
     /// whole number: the total ink on the page rises and falls with the opacity.
     func testAReadoutPulsesOnlyWhenAlarmed() throws {
-        func inkMass(_ pixels: RenderedPixels) -> Int {
-            let page = rgb255(Ink.day.page)
-            var total = 0
-            for y in 0..<pixels.height {
-                for x in 0..<pixels.width { total += distance(pixels.rgb(x, y), page) }
-            }
-            return total
+        XCTAssertGreaterThan(try readoutSwing(alarmed: true), 0.04, "the alarmed readout does not pulse")
+        XCTAssertLessThan(try readoutSwing(alarmed: false), 0.005, "a readout that is not alarmed is moving")
+    }
+
+    // MARK: Reduce Motion
+
+    private func settings(reducedMotion: Bool) -> GameSettings {
+        let settings = GameSettings(
+            defaults: UserDefaults(suiteName: "bonedust.tests.\(UUID().uuidString)")!
+        )
+        settings.reducedMotion = reducedMotion
+        return settings
+    }
+
+    /// A pulse that starts by itself and runs for the rest of the dig is blinking content, and
+    /// WCAG 2.2.2 (Pause, Stop, Hide, Level A) wants a way to stop anything like that which runs
+    /// past five seconds. Reduce Motion is that way. It is not the three-flashes limit of 2.3.1,
+    /// which a fade at one cycle a second was always under, and which the old comment here
+    /// answered instead. Intact below 60 started the pulse and nothing stopped it until the dig
+    /// ended, however the player had set their device.
+    ///
+    /// This is the player's own toggle, which reaches the pulse through `GameSettings`. The
+    /// system setting is read-only in a test, so it is covered where the two are combined, in
+    /// `testEitherReduceMotionSourceStopsThePulse`. The bar must also hold at full strength, not
+    /// at whatever point of the fade it was stopped on: nothing about the state changed, only
+    /// its motion.
+    func testTheInAppReduceMotionToggleHoldsTheSpeedMeterBarStill() throws {
+        let beating = try samples(
+            of: SpeedMeter(speed: 6, safeSpeed: 1, overBone: true).environment(settings(reducedMotion: false)),
+            width: 300, at: barPoint()
+        )
+        XCTAssertGreaterThan(
+            spread(beating), 10, "with the toggle off the bar does not pulse, so the check below proves nothing"
+        )
+
+        let held = try samples(
+            of: SpeedMeter(speed: 6, safeSpeed: 1, overBone: true).environment(settings(reducedMotion: true)),
+            width: 300, at: barPoint()
+        )
+        XCTAssertLessThanOrEqual(spread(held), 1, "the over-limit bar pulses with Reduce Motion on")
+        XCTAssertLessThanOrEqual(
+            distance(held[0], rgb255(Ink.day.stamp)), 6,
+            "held still the bar should be the stamp red at full strength, but it is \(held[0])"
+        )
+    }
+
+    func testTheInAppReduceMotionToggleHoldsAnAlarmedReadoutStill() throws {
+        XCTAssertGreaterThan(
+            try readoutSwing(alarmed: true, settings: settings(reducedMotion: false)), 0.04,
+            "with the toggle off the alarmed readout does not pulse, so the check below proves nothing"
+        )
+        XCTAssertLessThan(
+            try readoutSwing(alarmed: true, settings: settings(reducedMotion: true)), 0.005,
+            "an alarmed readout pulses with Reduce Motion on"
+        )
+    }
+
+    /// The two sources are combined in one place, and this drives it with each. Either one
+    /// stops the pulse, as either quiets the bloom, the dust and the hint; neither being on
+    /// leaves it running; and a pulse nobody asked for never starts.
+    func testEitherReduceMotionSourceStopsThePulse() {
+        func pulses(_ active: Bool, system: Bool, app: Bool) -> Bool {
+            AlarmPulse.pulses(isActive: active, systemReduceMotion: system, appReducedMotion: app)
         }
-        func swing(alarmed: Bool) throws -> Double {
-            var masses: [Int] = []
-            for _ in 0..<14 {
-                let view = Readout(label: "Intact", value: "52%", tint: Ink.day.stamp, isAlarmed: alarmed)
-                    .background(Ink.day.page)
-                masses.append(inkMass(try renderPixels(view, width: 120)))
-                RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.09))
-            }
-            let high = Double(masses.max() ?? 0), low = Double(masses.min() ?? 0)
-            return high == 0 ? 0 : (high - low) / high
-        }
-        XCTAssertGreaterThan(try swing(alarmed: true), 0.04, "the alarmed readout does not pulse")
-        XCTAssertLessThan(try swing(alarmed: false), 0.005, "a readout that is not alarmed is moving")
+        XCTAssertTrue(pulses(true, system: false, app: false), "an active pulse with no setting on must run")
+        XCTAssertFalse(pulses(true, system: true, app: false), "the system Reduce Motion setting")
+        XCTAssertFalse(pulses(true, system: false, app: true), "the in-app Reduce Motion toggle")
+        XCTAssertFalse(pulses(true, system: true, app: true))
+        XCTAssertFalse(pulses(false, system: false, app: false), "nothing to signal, so nothing pulses")
     }
 }
 

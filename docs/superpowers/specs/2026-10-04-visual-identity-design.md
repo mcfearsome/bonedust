@@ -179,6 +179,16 @@ that, so the two meanings separate by **motion** rather than hue:
 - **Actions** — flat, static `stamp`. Primary buttons and the wordmark never
   animate in this colour, so they never compete with a bleed.
 
+The same motion marks two numbers that are getting worse rather than merely
+off: the over-limit speed bar and the Intact readout below 60 pulse in opacity.
+It is a fade, but it starts by itself and runs for the rest of the dig, so
+**Reduce Motion stops it**, from either the system setting or the in-app toggle.
+That is WCAG 2.2.2 (Pause, Stop, Hide, Level A: blinking that lasts past five
+seconds needs a way to stop it); the three-flashes limit in 2.3.1 is a different
+rule and a one-cycle-a-second fade was always under it. Nothing is lost: the bar
+has "TOO FAST" beside it and the readout is the number itself, so what carries
+damage under Reduce Motion is the hatch, the word and the figure.
+
 One hue, two behaviours. `Ink.danger` and `Ink.accent` collapse into the single
 token `Ink.stamp`.
 
