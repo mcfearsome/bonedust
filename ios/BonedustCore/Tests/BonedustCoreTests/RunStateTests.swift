@@ -155,11 +155,109 @@ final class RunStateTests: XCTestCase {
         XCTAssertEqual(run.phase, .failed(shortfall: 250))
     }
 
-    func testCrewContributionCountsEveryDollarEarned() {
-        // Including the dollars that went straight to the Collector.
+    func testCrewContributionIsEverythingEarnedWhenNothingIsBought() {
         let run = play(perSlab: 100)
         XCTAssertEqual(run.crewContribution, 500)
         XCTAssertEqual(run.totalEarned, 500)
+        XCTAssertEqual(run.spentOnKit, 0)
+    }
+
+    /// The rule: a dollar spent at the supply tent is a dollar the crew debt never sees.
+    ///
+    /// It used to count both ways -- every dollar earned paid the debt even if it
+    /// immediately bought a pick -- which made "earned" and "paid to the debt" the same
+    /// number by construction, and hid what the kit was costing.
+    func testKitSpendingComesOutOfTheNextSlabPayment() throws {
+        var run = RunState(seed: 7, siteID: "charmouth")
+        run.completeSlab(record(day: 1, total: 400))
+        XCTAssertEqual(run.crewContribution, 400, "nothing bought yet, so all of it")
+
+        run.advance()
+        guard case .supplyTent = run.phase else { return XCTFail("no tent after day one") }
+        run.openShop(reputation: 500)
+        let tool = try XCTUnwrap(ContentCatalog.shared.tool(run.shop.toolIDs.first ?? ""))
+        try run.buyTool(tool.id)
+        run.leaveShop()
+
+        // The payment for day one has already gone. The pick comes out of day two.
+        XCTAssertEqual(run.crewContribution, 400, "a purchase cannot claw back a sent payment")
+        XCTAssertEqual(run.unsettledKit, tool.price)
+
+        run.completeSlab(record(day: 2, total: 400))
+        XCTAssertEqual(run.crewContribution, 800 - tool.price)
+        XCTAssertEqual(run.totalEarned, 800)
+        XCTAssertEqual(run.spentOnKit, tool.price)
+    }
+
+    func testSellingKitBackPutsItTowardTheDebtAgain() throws {
+        var run = RunState(seed: 7, siteID: "charmouth")
+        run.completeSlab(record(day: 1, total: 400))
+        run.advance()
+        run.openShop(reputation: 500)
+        let tool = try XCTUnwrap(ContentCatalog.shared.tool(run.shop.toolIDs.first ?? ""))
+        try run.buyTool(tool.id)
+        run.sellTool(tool.id)
+        // Half price back (§4), so the round trip still costs something.
+        XCTAssertEqual(run.spentOnKit, tool.price - tool.resaleValue)
+        XCTAssertEqual(run.unsettledKit, tool.price - tool.resaleValue)
+    }
+
+    /// Kit can be bought that no later payment is big enough to cover.
+    ///
+    /// `totalEarned - spentOnKit` would go negative and disagree with what the server was
+    /// actually sent, which is why the contribution is summed as it is paid rather than
+    /// derived at the end.
+    func testKitTooExpensiveForTheRemainingDaysStrandsTheRest() throws {
+        var run = RunState(seed: 7, siteID: "charmouth")
+        run.completeSlab(record(day: 1, total: 400))
+        run.advance()
+        run.openShop(reputation: 500)
+        let tool = try XCTUnwrap(ContentCatalog.shared.tool(run.shop.toolIDs.first ?? ""))
+        try run.buyTool(tool.id)
+        run.leaveShop()
+        run.completeSlab(record(day: 2, total: 1))
+
+        XCTAssertEqual(run.crewContribution, 400, "day two earned less than the pick cost")
+        XCTAssertGreaterThan(run.unsettledKit, 0, "the remainder is still owed")
+        XCTAssertGreaterThanOrEqual(run.crewContribution, 0)
+    }
+
+    /// A save written before any of this existed has to survive, because `RunStore` throws
+    /// away anything `JSONDecoder` rejects — a new non-optional field is indistinguishable
+    /// from a corrupt save and would silently wipe a run in progress.
+    func testASaveWithoutTheNewFieldsStillDecodes() throws {
+        var run = play(perSlab: 100)
+        run.charmIDs = []
+        var json = try JSONSerialization.jsonObject(
+            with: try JSONEncoder().encode(run)
+        ) as! [String: Any]
+        for key in ["spentOnKitRaw", "unsettledKitRaw", "paidToCrewRaw"] {
+            XCTAssertNotNil(json.removeValue(forKey: key), "\(key) should have been written")
+        }
+        let older = try JSONSerialization.data(withJSONObject: json)
+
+        let restored = try JSONDecoder().decode(RunState.self, from: older)
+        XCTAssertEqual(restored.spentOnKit, 0)
+        XCTAssertEqual(restored.unsettledKit, 0)
+        XCTAssertEqual(restored.totalEarned, 500)
+    }
+
+    func testAnOlderMetaProgressReadsEarnedAsItsContribution() throws {
+        var meta = MetaProgress()
+        meta.lifetimeContribution = 12_345
+        var json = try JSONSerialization.jsonObject(
+            with: try JSONEncoder().encode(meta)
+        ) as! [String: Any]
+        json.removeValue(forKey: "lifetimeEarnedRaw")
+        json.removeValue(forKey: "lifetimeSpentOnKitRaw")
+
+        let restored = try JSONDecoder().decode(
+            MetaProgress.self, from: try JSONSerialization.data(withJSONObject: json)
+        )
+        // Exact, not a guess: before kit spending was taken out, every dollar earned went
+        // to the debt, so for those saves the two numbers were the same.
+        XCTAssertEqual(restored.lifetimeEarned, 12_345)
+        XCTAssertEqual(restored.lifetimeSpentOnKit, 0)
     }
 
     func testRunRoundTripsThroughJSON() throws {

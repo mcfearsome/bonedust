@@ -128,6 +128,45 @@ public struct RunState: Sendable, Codable, Equatable {
     public var installment: Int
     public var totalDays: Int
     public var cash: Int
+    /// What tools, charms and restocks have cost this run, net of anything sold back.
+    ///
+    /// Stored rather than derived, because `cash` nets purchases against earnings and then
+    /// the installment is taken out of it at settle, so by the time anyone asks there is no
+    /// way to separate "spent on a pick" from "handed to the Collector".
+    ///
+    /// Optional on the wire so a save written before this existed still decodes.
+    /// `RunStore.loadMeta` discards anything `JSONDecoder` throws on, which makes a new
+    /// non-optional field indistinguishable from a corrupt save -- it would silently wipe a
+    /// run in progress. Same reason `currentSchema` does not move: the store compares it for
+    /// equality and throws the save away on a mismatch, so a bump is a wipe unless a
+    /// migration is written first.
+    private var spentOnKitRaw: Int?
+    public var spentOnKit: Int {
+        get { spentOnKitRaw ?? 0 }
+        set { spentOnKitRaw = newValue }
+    }
+    /// Kit bought that no slab payment has covered yet.
+    ///
+    /// Payments go to the server one slab at a time, the moment a slab is bagged, so that a
+    /// run abandoned on day three still credits the two days that were dug. The supply tent
+    /// opens *after* that, which means a week's spending cannot be netted off the payment it
+    /// belongs to -- it has to be carried and taken out of the next one.
+    private var unsettledKitRaw: Int?
+    public var unsettledKit: Int {
+        get { unsettledKitRaw ?? 0 }
+        set { unsettledKitRaw = max(0, newValue) }
+    }
+    /// What this run has actually sent to the crew debt, summed as it went.
+    ///
+    /// Recorded rather than derived because carried kit can be left stranded: buy a pick on
+    /// day four costing more than day five earns, and there is no later payment to take the
+    /// remainder out of. `totalEarned - spentOnKit` would then disagree with the sum of what
+    /// was really paid, and the number on the results screen has to be the true one.
+    private var paidToCrewRaw: Int?
+    public var paidToCrew: Int {
+        get { paidToCrewRaw ?? 0 }
+        set { paidToCrewRaw = newValue }
+    }
     public var slabs: [SlabRecord]
     public var phase: RunPhase
     /// Tool ids the player owns. Three slots (§4).
@@ -160,6 +199,9 @@ public struct RunState: Sendable, Codable, Equatable {
         self.installment = Installments.amount(tier: max(1, tier))
         self.totalDays = max(1, totalDays)
         self.cash = 0
+        self.spentOnKitRaw = 0
+        self.unsettledKitRaw = 0
+        self.paidToCrewRaw = 0
         self.slabs = []
         self.phase = .digging(day: 1)
         self.toolIDs = toolIDs
@@ -182,9 +224,21 @@ public struct RunState: Sendable, Codable, Equatable {
 
     public var totalEarned: Int { slabs.reduce(0) { $0 + $1.payout.total } }
 
-    /// What this run has contributed to the crew debt. Every dollar earned counts,
-    /// including the dollars that then went to the Collector.
-    public var crewContribution: Int { totalEarned }
+    /// What this run has contributed to the crew debt: what came out of the ground, less
+    /// what went back over the counter at the supply tent.
+    ///
+    /// Kit spending used to count. Every dollar earned paid the debt even if it immediately
+    /// bought a pick, which made "total earned" and "total paid to the debt" the same number
+    /// by construction and left the player no way to see what their tools had cost them.
+    ///
+    /// Buying a tool is now a real decision against the debt rather than a free one, and the
+    /// run's *difficulty* is untouched: whether a week is survived is `cash >= installment`,
+    /// which this is not part of. It only changes how fast the debt comes down.
+    ///
+    /// Floored at zero. Selling back more than a run earned is possible with kit carried in
+    /// from a previous week, and a run that hands money *back* to the crew debt is not a
+    /// thing the ledger can represent.
+    public var crewContribution: Int { paidToCrew }
 
     /// The seed for a given day's slab.
     ///
@@ -221,11 +275,20 @@ public struct RunState: Sendable, Codable, Equatable {
     // MARK: Transitions
 
     /// Banks a finished slab and shows its results.
-    public mutating func completeSlab(_ record: SlabRecord) {
-        guard case .digging(let day) = phase, day == record.day else { return }
+    ///
+    /// Returns what the crew debt should be paid for it: the slab's payout less any kit
+    /// still owed from earlier in the week. The caller sends that, not `payout.total`, or
+    /// the server's debt and the player's own total disagree about the same dollars.
+    @discardableResult
+    public mutating func completeSlab(_ record: SlabRecord) -> Int {
+        guard case .digging(let day) = phase, day == record.day else { return 0 }
         slabs.append(record)
         cash += record.payout.total
+        let payment = max(0, record.payout.total - unsettledKit)
+        unsettledKit -= record.payout.total
+        paidToCrew += payment
         phase = .results(day: day)
+        return payment
     }
 
     /// Leaves the results card: into the tent, or settle up.
@@ -280,6 +343,8 @@ public struct RunState: Sendable, Codable, Equatable {
             throw PurchaseFailure.tooExpensive(price: Shop.restockPrice, cash: cash)
         }
         cash -= Shop.restockPrice
+        spentOnKit += Shop.restockPrice
+        unsettledKit += Shop.restockPrice
         shop = Shop.stock(
             runSeed: seed, day: day, restocks: shop.restocks + 1,
             ownedToolIDs: toolIDs, ownedCharmIDs: charmIDs,
@@ -297,6 +362,8 @@ public struct RunState: Sendable, Codable, Equatable {
             throw PurchaseFailure.tooExpensive(price: tool.price, cash: cash)
         }
         cash -= tool.price
+        spentOnKit += tool.price
+        unsettledKit += tool.price
         toolIDs.append(id)
         shop.toolIDs.removeAll { $0 == id }
     }
@@ -311,6 +378,8 @@ public struct RunState: Sendable, Codable, Equatable {
             throw PurchaseFailure.tooExpensive(price: charm.price, cash: cash)
         }
         cash -= charm.price
+        spentOnKit += charm.price
+        unsettledKit += charm.price
         charmIDs.append(id)
         shop.charmIDs.removeAll { $0 == id }
     }
@@ -323,6 +392,8 @@ public struct RunState: Sendable, Codable, Equatable {
               toolIDs.contains(id) else { return 0 }
         toolIDs.removeAll { $0 == id }
         cash += tool.resaleValue
+        spentOnKit -= tool.resaleValue
+        unsettledKit -= tool.resaleValue
         return tool.resaleValue
     }
 
@@ -331,6 +402,8 @@ public struct RunState: Sendable, Codable, Equatable {
         guard let charm = catalog.charm(id), charmIDs.contains(id) else { return 0 }
         charmIDs.removeAll { $0 == id }
         cash += charm.resaleValue
+        spentOnKit -= charm.resaleValue
+        unsettledKit -= charm.resaleValue
         return charm.resaleValue
     }
 
@@ -406,8 +479,28 @@ public struct MetaProgress: Sendable, Codable, Equatable {
     public var currentStreak: Int
     public var longestStreak: Int
     public var bestSlabPayout: Int
-    /// Lifetime dollars contributed to the crew debt.
+    /// Lifetime dollars contributed to the crew debt, after kit spending is taken out.
     public var lifetimeContribution: Int
+    /// Lifetime dollars dug out of the ground, before the supply tent takes its cut.
+    ///
+    /// Backed by an optional so a save written before this existed still decodes, and
+    /// falling back to `lifetimeContribution` is exact rather than a guess: until kit
+    /// spending stopped counting, every dollar earned went to the debt, so for those saves
+    /// the two numbers *were* the same.
+    private var lifetimeEarnedRaw: Int?
+    public var lifetimeEarned: Int {
+        get { lifetimeEarnedRaw ?? lifetimeContribution }
+        set { lifetimeEarnedRaw = newValue }
+    }
+    /// Lifetime dollars spent on tools and charms, net of resales.
+    ///
+    /// Zero for an older save, and unrecoverable: nothing recorded it at the time. The gap
+    /// between earned and contributed is the honest number for those weeks.
+    private var lifetimeSpentOnKitRaw: Int?
+    public var lifetimeSpentOnKit: Int {
+        get { lifetimeSpentOnKitRaw ?? 0 }
+        set { lifetimeSpentOnKitRaw = newValue }
+    }
     /// Every species catalogued (§5).
     public var collection: Collection
     /// Skeleton sets finished, so a perk and its Reputation bonus are awarded once.
@@ -444,6 +537,8 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         self.longestStreak = 0
         self.bestSlabPayout = 0
         self.lifetimeContribution = 0
+        self.lifetimeEarnedRaw = 0
+        self.lifetimeSpentOnKitRaw = 0
         self.collection = Collection()
         self.completedSetIDs = []
         self.reportedAchievementIDs = []
@@ -492,6 +587,8 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         // if the app dies between the slab and the results screen.
         let contributionBefore = lifetimeContribution
         lifetimeContribution += run.crewContribution
+        lifetimeEarned += run.totalEarned
+        lifetimeSpentOnKit += run.spentOnKit
         let claimed = Set(claimedPersonalMilestoneIDs)
         rewards.personalMilestones = ContributionPerks.newlyReached(
             catalog.personalMilestones,

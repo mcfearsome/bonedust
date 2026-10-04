@@ -29,6 +29,10 @@ final class DigScene: SKScene {
     /// but a VoiceOver announcement has to happen every time, because it is the only
     /// channel a player who cannot see the meter has.
     var onCrack: (() -> Void)?
+    /// Debug only: paints orientation markers into the slab. See
+    /// `SlabRenderer.orientationProbe` for why this is a thing you look at rather than
+    /// something a test can settle.
+    var orientationProbe = false
 
     private var renderer = SlabRenderer()
     private var slabNode: SKSpriteNode?
@@ -55,6 +59,7 @@ final class DigScene: SKScene {
         renderer.palette = engine.site.palette
         renderer.tuning = engine.sim.tuning
         renderer.lightLevel = engine.site.modifiers.lightLevel
+        renderer.orientationProbe = orientationProbe
         pendingFullRedraw = true
     }
 

@@ -11,6 +11,7 @@ struct DigView: View {
     @State private var haptics = HapticEngine()
     @State private var audio = DigAudio()
     @State private var showDebug = false
+    @State private var orientationProbe = false
     @State private var showHint = false
     @State private var hintHasBeenShown = false
 
@@ -73,7 +74,10 @@ struct DigView: View {
             if case .finished = phase { finish() }
         }
         .sheet(isPresented: $showDebug) {
-            DebugOverlay(engine: engine) { scene.configureRenderer() }
+            DebugOverlay(engine: engine, orientationProbe: $orientationProbe) {
+                scene.orientationProbe = orientationProbe
+                scene.configureRenderer()
+            }
         }
     }
 

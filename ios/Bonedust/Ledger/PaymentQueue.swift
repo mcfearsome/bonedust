@@ -117,14 +117,18 @@ final class PaymentQueue {
     }
 
     /// Builds the queue entry for a finished slab.
+    /// `amount` is what the crew is actually owed for this slab, which is the payout less
+    /// any kit bought earlier in the week. It defaults to the full payout so a caller that
+    /// has no run context -- the tests, and the retry path -- still behaves as before.
     func enqueue(
-        record: SlabRecord, charmIDs: [String], serverSlabID: String?, localSeed: UInt64?
+        record: SlabRecord, amount: Int? = nil, charmIDs: [String],
+        serverSlabID: String?, localSeed: UInt64?
     ) {
         enqueue(QueuedPayment(
             // A server-issued id when there is one, so the server can match the slab it
             // scored. Otherwise the local seed identifies it.
             slabID: serverSlabID ?? "local-\(record.seed)",
-            amount: record.payout.total,
+            amount: amount ?? record.payout.total,
             fossilID: record.fossilID,
             siteID: record.siteID,
             durationMillis: record.durationMillis,

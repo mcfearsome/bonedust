@@ -28,6 +28,19 @@ public struct SlabRenderer {
     public var lightLevel: Float = 1
     /// X-ray goggles: shows buried bone through the matrix for a few seconds.
     public var revealBuriedBone = false
+    /// Debug: paints unmistakable markers so the slab's orientation on screen can be read
+    /// at a glance.
+    ///
+    /// This exists because the orientation bug could not be settled from here. Whether
+    /// `SKMutableTexture` treats the first row of data as the top or the bottom is a
+    /// question about a framework, and `SKTexture.cgImage()` cannot answer it: row 0 landing
+    /// at the CGImage's bottom is equally consistent with "the texture is bottom-up" and
+    /// "the texture is top-up and cgImage flips it". Both hypotheses predicted the
+    /// measurement, so the measurement decided nothing and a wrong fix shipped.
+    ///
+    /// Red across the top six rows, green down the left six columns. Where those land on a
+    /// real screen is not ambiguous.
+    public var orientationProbe = false
 
     public private(set) var pixels: [UInt8]
 
@@ -51,6 +64,7 @@ public struct SlabRenderer {
         let tuning: SimTuning
         let lightLevel: Float
         let revealBuriedBone: Bool
+        let orientationProbe: Bool
     }
 
     private var style: Style {
@@ -58,7 +72,8 @@ public struct SlabRenderer {
             palette: palette,
             tuning: tuning,
             lightLevel: lightLevel,
-            revealBuriedBone: revealBuriedBone
+            revealBuriedBone: revealBuriedBone,
+            orientationProbe: orientationProbe
         )
     }
 
@@ -136,6 +151,16 @@ public struct SlabRenderer {
 
         result = result.scaled(1 + cell.noise * style.tuning.cellNoise)
         if style.lightLevel != 1 { result = result.scaled(style.lightLevel) }
+
+        // Only over rock that has not been dug, so a trench brushed through a band still
+        // shows. That makes one gesture answer both halves of the question: where the grid
+        // is drawn, and where a finger lands in it.
+        if style.orientationProbe, cell.depth > 0 {
+            // Drawn last so nothing can wash it out, and in grid coordinates, so it goes
+            // through exactly the same upload path as the slab itself.
+            if y < 6 { return RGB8(255, 32, 32) }
+            if x < 6 { return RGB8(32, 255, 32) }
+        }
         return result
     }
 

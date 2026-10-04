@@ -291,16 +291,21 @@ final class RunCoordinator {
     func slabFinished(_ engine: DigEngine) {
         guard var current = run, case .digging(let day) = current.phase else { return }
         let record = engine.slabRecord(day: day)
-        current.completeSlab(record)
+        let crewPayment = current.completeSlab(record)
         run = current
         lastRecord = record
         store.save(run: current)
         store.save(slab: nil)
 
-        // Every dollar pays the crew debt (§6). Queued, not awaited: a slab must never
-        // wait on a network, and the queue is durable so nothing is lost either way.
+        // What the slab earned, less any kit still owed from earlier in the week (§6).
+        // Sending `payout.total` here instead would leave the server's debt and the
+        // player's own contribution disagreeing about the same dollars.
+        //
+        // Queued, not awaited: a slab must never wait on a network, and the queue is
+        // durable so nothing is lost either way.
         ledger.record(
             record,
+            amount: crewPayment,
             charmIDs: current.charmIDs,
             serverSlabID: current.serverSlabID(forDay: day),
             localSeed: current.slabSeed(forDay: day)

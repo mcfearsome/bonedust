@@ -10,13 +10,19 @@ import SwiftUI
 struct DebugOverlay: View {
 
     let engine: DigEngine
+    @Binding var orientationProbe: Bool
     let onChange: () -> Void
 
     @State private var tuning: SimTuning
     @Environment(\.dismiss) private var dismiss
 
-    init(engine: DigEngine, onChange: @escaping () -> Void) {
+    init(
+        engine: DigEngine,
+        orientationProbe: Binding<Bool> = .constant(false),
+        onChange: @escaping () -> Void
+    ) {
         self.engine = engine
+        _orientationProbe = orientationProbe
         self.onChange = onChange
         _tuning = State(initialValue: engine.sim.tuning)
     }
@@ -57,6 +63,18 @@ struct DebugOverlay: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("Orientation") {
+                    Toggle("Orientation probe", isOn: $orientationProbe)
+                        .onChange(of: orientationProbe) { _, _ in onChange() }
+                    Text(
+                        "Red marks grid rows 0-5, green marks columns 0-5. Red belongs at "
+                            + "the TOP and green at the LEFT. Anywhere else and the slab is "
+                            + "mirrored on that axis."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+
                 Section("Slab") {
                     row("Fossil", engine.fossil.name)
                     row("Site", engine.site.name)

@@ -126,10 +126,12 @@ final class CrewLedgerStore {
 
     /// Queues a finished slab and tries to send it straight away.
     func record(
-        _ record: SlabRecord, charmIDs: [String], serverSlabID: String?, localSeed: UInt64?
+        _ record: SlabRecord, amount: Int? = nil, charmIDs: [String],
+        serverSlabID: String?, localSeed: UInt64?
     ) {
         queue.enqueue(
-            record: record, charmIDs: charmIDs, serverSlabID: serverSlabID, localSeed: localSeed
+            record: record, amount: amount, charmIDs: charmIDs,
+            serverSlabID: serverSlabID, localSeed: localSeed
         )
         Task { await flush() }
     }
