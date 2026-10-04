@@ -142,9 +142,13 @@ renders blank.
 - **Graph grid.** 8pt dotted rule in `earth3` at 0.35 alpha. Generated once as
   a single screen-sized texture in `DigScene.didChangeSize`, drawn at
   `zPosition -2`. Shows through behind the slab.
-- **Paper fibre.** 256x256 tile generated at launch via `CIFilter.randomGenerator`,
-  blurred slightly, tinted, cached. Drawn at ~3% alpha, `zPosition -1`.
-  Generated rather than shipped so it tints with the ramp and keeps the bundle flat.
+- **Paper fibre: cut.** It was specified into the SpriteKit scene, where it turned
+  out to be unreachable — the scene is exactly the slab card and the mount fills
+  it, so the fibre sat behind an opaque panel. Moving it to `DigView` with the
+  page was possible but not worth it: at 3% alpha over cream, under a dot grid,
+  it is below the threshold where anyone would notice it, and it would be the
+  only part of the page that is not a flat token. The grid carries the paper
+  reading on its own.
 - **`Measure.cardRadius` goes 4 to 0.** Notebooks have no rounded corners.
   Cards become ruled boxes — a hairline outline over the page — not filled panels.
 - `SpecimenRule` keeps its dashed form but restyles to `earth3`.
