@@ -158,7 +158,10 @@ that, so the two meanings separate by **motion** rather than hue:
 - **Damage** — a transient `stamp` ink-bleed blooms at the fracture point over
   ~200ms, then settles into a permanent diagonal hatch (`earth8` at 0.5, 2px
   spacing) over the fractured cells. Fast enough to read preattentively, and it
-  leaves a record on the page.
+  leaves a record on the page. Under **Reduce Motion** the bloom does not scale:
+  it fades in place. A sudden expanding shape at the point of attention is
+  exactly what that setting exists to suppress, and the hatch carries the
+  information regardless.
 - **Actions** — flat, static `stamp`. Primary buttons and the wordmark never
   animate in this colour, so they never compete with a bleed.
 
@@ -247,8 +250,12 @@ The pass, in order:
    shader cannot tell gem-on-matrix from a noise boundary.
 4. **The soft bone relief is removed.** The ink edge replaces it.
 
-No new plumbing is needed for the neighbour reads: `redraw()` already inflates
-the dirty rect by one cell, for exactly the reason the bone relief needed it.
+**The dirty rect had to grow.** An earlier draft of this spec claimed the
+neighbour reads needed no new plumbing, because `redraw()` already inflated by
+one cell for the bone relief. That was wrong: the run-length guard reads *two*
+cells back, so clearing a cell left the cell two positions behind it stale —
+reproduced at (22,50) and (60,22). `redraw()` now inflates one back and two
+forward.
 
 ### 7a. The tell becomes a stipple
 
@@ -261,15 +268,21 @@ improving on its own terms.
 **The tell becomes a pattern instead of a tint**: on depth-1 sandstone over
 bone, cells where `x % 2 == 0 && y % 2 == 0` go 60% toward bone. A pattern
 survives any future posterize, and hatching is the correct natural-history-plate
-idiom. Rendered at 9x, the stipple reads the buried shell's outline where the
-20% tint is nearly invisible.
+idiom. Rendered at 9x with the cel pass applied, the stipple reads the buried shell's
+outline clearly. How much better it is than the tint is **not settled**: a
+separate 5x render of the shipped renderer found the 20% tint perfectly
+visible, so the earlier claim that it is "nearly invisible" overstated the
+case. What is certain is that the stipple survives a posterize and the tint
+does not, and that the stipple is the louder of the two. Which is *right* is a
+device call, not a measurement — see the A/B step below.
 
 **This is a game-feel change, not only a visual one.** `SlabRenderer`'s own
 comment says learning to see the tell "is the difference between a careful
 player and a fast one". The stipple is not simply better -- it is louder, and a
 louder tell spends that skill. So **both constants ship**: `boneTellTint` stays
-and `boneTellStipple` is added beside it. `SimTuning` already feeds live sliders
-in the debug overlay, so the A/B is a drag rather than a rebuild, and either
+and `boneTellStipple` is added beside it. `DebugOverlay`'s knob list is hand-written, not derived from `SimTuning`, so a
+new constant needs a row adding before it is reachable — `boneTellStipple` has
+one. With both rows present the A/B is a drag rather than a rebuild, and either
 constant set to zero gives the pure case. The default ships as stipple 0.60 /
 tint 0; if it plays worse, the fallback is a slider move, not a code change.
 
