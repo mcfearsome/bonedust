@@ -67,11 +67,28 @@ Accents, all retuned for a light ground:
 | `gem` | `#176574` | Gems only. Darkened from `#56B8C8`, which is both too weak and below AA on cream. |
 | `safe` | `#41642F` | Speed and intact semantics only. Darkened from `#7FBF6A`, same reason. |
 
-**Bone against page.** Bone ivory `#F1E7D3` is within 3% of the page colour, so
-a fully-excavated slab would bleed into the background at its edges. Two fixes,
-both required: bone moves to `#FDFAF2` (brighter and cooler than the page), and
-the slab gets a hard `earth8` border two *texture* pixels wide, so it scales
-with the pixel art instead of hairlining out on a large display.
+**The specimen mount.** A cleared slab is *light*, not dark — `matrix` is the
+top layer and every site paints it pale. Against a cream page this is fatal:
+green_river's `matrix #E8DBBA` sits at 1.09:1 against `earth1`, so a
+fully-excavated slab would vanish into the paper. Four of five sites have the
+same problem to a lesser degree.
+
+The fix is a **mount**: an `earth6 #4A3D2E` panel behind the slab, extending 6pt
+past it on every side. A specimen pinned to dark card is the correct notebook
+object, and it separates the slab from the page at 8.3:1 while clearing the
+palest site matrix at 5.8:1 — regardless of which site is loaded.
+
+The mount also removes three changes an earlier draft of this spec called for.
+Bone stays at its current `RGB8(242, 233, 214)`, and the slab needs no drawn
+border, because the mount margin *is* the border.
+
+**And the palette does not need retuning at all.** Measured against the mount,
+every existing site matrix already clears 3:1 by a wide margin — the palest,
+green_river at `#E8DBBA`, reaches 7.6:1, and the darkest, wheeler at `#C4C0AE`,
+reaches 5.8:1. The site palettes are already warm earth tones in the ramp's
+family; what was broken was the *page*, not the dirt. So the palette work
+collapses from "retune four palettes by eye" to "add a test that pins the
+margin." If that test ever fails, the palette changes then — not now.
 
 ### 3. Type
 
@@ -79,7 +96,7 @@ Three faces, each with one job. Two are new.
 
 | Role | Now | Proposed | Licence |
 |---|---|---|---|
-| Display, wordmark, labels | SF Pro Black Expanded | Bebas Neue | SIL OFL |
+| Display, wordmark, labels | SF Pro Black Expanded | Rubik Dirt | SIL OFL |
 | Numerals | SF Mono | Courier Prime | SIL OFL |
 | Body and controls | SF Pro | SF Pro (unchanged) | system |
 
@@ -87,10 +104,13 @@ Body stays on SF Pro deliberately: it gets Dynamic Type right for free, and a
 notebook's body text being neutral is correct. The character lives in the
 display face and the numerals.
 
-Both new faces are SIL OFL, so they can be committed to the repo. Bebas Neue is
-the safe pick for stamped condensed caps; because it is referenced through a
-single constant, a rougher letterpress face can be swapped in later without
-touching call sites.
+**Rubik Dirt is not a new decision.** `Resources/Fonts/README.md` already names
+it, documents the OFL rationale for bundling it in a paid app, and gives the
+exact four-step drop-in. This spec adopts that decision rather than relitigating
+it; a rough, dirt-textured display face is also a better fit for stamped
+notebook headings than a clean condensed one. Courier Prime for numerals is the
+only genuinely new type choice here. Both faces are SIL OFL and can be committed
+to the repo.
 
 **Fallback chain is mandatory.** `Typography` must resolve each face through a
 lookup that falls back to the current system definition when registration
@@ -148,6 +168,67 @@ Scope control: only `DigView` and `DigScene` consume the dynamic theme in this
 pass. `RootView`, `SpeedMeter`, and `DebugOverlay` read `Ink.day` directly.
 Wiring them to the environment is a later, mechanical change.
 
+### 7. Cel shading
+
+The slab is already four discrete palette colours per layer. What stops it
+reading as cel-shaded is that `SlabRenderer.colour()` then smears those bands
+with four continuous operations: `wearColorBlend` 0.55, `cellNoise` 0.07, the
+`x1.12` / `x0.86` bone relief, and `lightLevel`. Flattening those into steps and
+adding a real edge is the whole change. No shader.
+
+**Quantize the lighting, never the albedo.** Posterizing each channel
+independently shifts hue. Measured on the standard palette at 8 levels:
+
+```
+topsoil  RGB8(74, 52, 40)  ->  (73, 36, 36)     visibly redder
+```
+
+and because `cellNoise` moves each cell +/-7%, neighbouring cells land in
+different buckets and the slab reads as brown-green static rather than flat
+colour. So every palette value stays exact and only the shade multiplier steps.
+This was caught by rendering it, not by reasoning about it.
+
+The pass, in order:
+
+1. **Wear quantizes to 4 steps** before the lerp. Scraping still shows progress
+   -- the renderer's comment warns that without it "brushing feels unresponsive
+   even though it is working" -- but in bands rather than a gradient.
+2. **Cell noise quantizes to 3 shade steps** (-7%, 0, +7%) instead of a
+   continuous jitter.
+3. **A semantic ink edge** on bone and gem at depth 0, right and bottom only,
+   `Earth.s8` at 0.72. Two-sided rather than four keeps a thin specimen's
+   interior, and the edge is skipped where the run is under 3 cells so
+   green_river's paper-thin fish survive. Outlines are drawn from `flags`, not
+   from colour difference, which is why this belongs on the CPU: a fragment
+   shader cannot tell gem-on-matrix from a noise boundary.
+4. **The soft bone relief is removed.** The ink edge replaces it.
+
+No new plumbing is needed for the neighbour reads: `redraw()` already inflates
+the dirty rect by one cell, for exactly the reason the bone relief needed it.
+
+### 7a. The tell becomes a stipple
+
+A naive posterize would have deleted the game's only pre-exposure read on the
+fossil. `boneTellTint` is 0.20, and at 6 levels the tinted and untinted
+sandstone quantize to the identical byte triple -- the tell goes pixel-for-pixel
+invisible. Quantizing only the shade avoids that, but the tell is worth
+improving on its own terms.
+
+**The tell becomes a pattern instead of a tint**: on depth-1 sandstone over
+bone, cells where `x % 2 == 0 && y % 2 == 0` go 60% toward bone. A pattern
+survives any future posterize, and hatching is the correct natural-history-plate
+idiom. Rendered at 9x, the stipple reads the buried shell's outline where the
+20% tint is nearly invisible.
+
+**This is a game-feel change, not only a visual one.** `SlabRenderer`'s own
+comment says learning to see the tell "is the difference between a careful
+player and a fast one". The stipple is not simply better -- it is louder, and a
+louder tell spends that skill. So **both constants ship**: `boneTellTint` stays
+and `boneTellStipple` is added beside it. `SimTuning` already feeds live sliders
+in the debug overlay, so the A/B is a drag rather than a rebuild, and either
+constant set to zero gives the pure case. The default ships as stipple 0.60 /
+tint 0; if it plays worse, the fallback is a slider move, not a code change.
+
 ## Files
 
 | File | Change |
@@ -155,11 +236,13 @@ Wiring them to the environment is a later, mechanical change.
 | `BonedustCore/Sources/BonedustCore/UI/EarthRamp.swift` | **New.** Ramp and accent values as plain `(r,g,b)` tuples. No SwiftUI. |
 | `Bonedust/UI/DesignTokens.swift` | Rewrite. `Ink` becomes a struct over the ramp; `Typography` gains the fallback chain; `Measure.cardRadius` to 0. |
 | `Bonedust/UI/Theme.swift` | **New.** Observable deriving `Ink` from `lightLevel`; environment key. |
-| `Bonedust/Dig/SlabRenderer.swift` | Retune `SlabPalette` against the ramp; bone to `#FDFAF2`; slab border; fracture hatching. |
-| `Bonedust/Dig/DigScene.swift` | Grid texture, paper-fibre tile, page background, `lightLevel` coupling, zPosition order. |
+| `BonedustCore/Sources/BonedustCore/Content/ContentModels.swift` | **No change expected.** `SlabPalette` lives here, not in the renderer; see the note below on why it does not need retuning. |
+| `BonedustCore/Sources/BonedustCore/Resources/content.json` | **No change expected**, for the same reason. Three sites override the palette here (`wheeler`, `green_river`, `hell_creek`); `charmouth` and `night_dig` inherit. |
+| `Bonedust/Dig/SlabRenderer.swift` | Fracture hatching, plus the cel pass of §7: stepped wear, quantized shade, semantic ink edge, stipple tell. |
+| `BonedustCore/Sources/BonedustCore/Sim/SimTuning.swift` | Add `boneTellStipple: Float = 0.60` beside the existing `boneTellTint`, so the debug overlay gets a slider for each. |
+| `Bonedust/Dig/DigScene.swift` | Mount panel, grid texture, paper-fibre tile, page background, `lightLevel` coupling, zPosition order. Also removes the hardcoded `0x221813` at line 41, which duplicates `Ink.ground`. |
 | `Bonedust/Dig/DigView.swift` | Consume `Theme` from the environment; restyle. |
 | `Bonedust/UI/SpeedMeter.swift` | Restyle to `Ink.day`. |
-| `Bonedust/UI/DebugOverlay.swift` | Restyle to `Ink.day`. |
 | `Bonedust/App/RootView.swift` | Restyle to `Ink.day`; install `Theme` in the environment. |
 | `Bonedust/Resources/Fonts/` | Add `BebasNeue-Regular.ttf`, `CourierPrime-Regular.ttf`, `CourierPrime-Bold.ttf`; update README and the `UIAppFonts` entry in `project.yml`. |
 | `Resources/Assets.xcassets/LaunchBackground.colorset` | `earth1`. |
@@ -178,27 +261,41 @@ automate and go in the existing `BonedustCore` suite:
    `earth1`, `earth4` reaches only 2.7:1, and `earth5` is the first stop that
    clears 4.5:1. The test exists to stop a future retune from quietly
    reintroducing light-on-light secondary text.
-3. **Bone/page separation.** Bone and page differ by at least 5% relative
-   luminance, which is the regression that would reintroduce the edge-bleed.
+3. **Mount separation.** For every site in `content.json`, including those that
+   inherit the defaults, `matrix` clears 3:1 against the mount. This is the
+   regression that would reintroduce the edge-bleed, and it must run per site
+   because three sites override the palette independently.
 
 Everything else is visual verification on device, in daylight and in a dark
 room, at the `lightLevel` extremes and at 0.35.
 
-The 94 existing `BonedustCore` tests cover simulation and economy and are
-unaffected; they must stay green.
+The 94 existing `BonedustCore` tests cover simulation and economy. The palette
+retune touches `SlabPalette`, which `ContentTests` round-trips through `Codable`,
+so that suite is in scope and must stay green.
+
+Tests split by target: ramp, contrast, and per-site mount separation go in
+`BonedustCore/Tests/BonedustCoreTests/` (no simulator needed); anything touching
+`Ink` or `Typography` goes in `ios/BonedustTests/AppLayerTests.swift` alongside
+the existing `DigEngineTests`. Both suites are XCTest.
 
 ## Risks
 
 - **Font acquisition blocks the type work.** Both faces are SIL OFL and freely
   downloadable, but nothing in §3 lands until the `.ttf` files are in the repo.
   Every other section proceeds independently.
-- **`SlabPalette` retune is the slow part.** No test tells you the dirt looks
-  right. Budget roughly two hours of looking at it on a device.
+- **The restyle surface is 51 call sites.** `DigView` has 22 `Ink` references,
+  `RootView` 20, `SpeedMeter` 9. Mechanical, but it is the longest diff.
+- **`DebugOverlay.swift` is out of scope.** It references no design token, so
+  the restyle does not reach it.
 - **`Ink` becoming non-static touches every call site.** Mechanical, but it is
   the change most likely to produce a long diff.
 
 ## Effort
 
-About one day. Roughly: ramp and tokens 1h, `SlabPalette` retune and visual
-verification 2h, scene texture and night coupling 1.5h, font integration 0.5h
-once files exist, view restyling 2h, tests 0.5h.
+Roughly 1.5 days. Ramp and tokens 1h, guard tests 0.5h, font integration 0.5h
+once the files exist, mount plus scene texture plus night coupling 2h, fracture
+hatching 1h, the cel pass and the stipple tell 3h, view restyling 2h, assets
+0.5h.
+
+Dropping the palette retune took roughly two hours of by-eye work out of this
+estimate, and took the only genuinely unverifiable task out of the plan.
