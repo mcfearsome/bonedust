@@ -13,6 +13,7 @@ final class GameSettings {
         case reducedMotion = "settings.reducedMotion"
         case leftHandedTray = "settings.leftHandedTray"
         case gentleMode = "settings.gentleMode"
+        case breath = "settings.breath"
     }
 
     var hapticsEnabled: Bool { didSet { store(.haptics, hapticsEnabled) } }
@@ -26,6 +27,13 @@ final class GameSettings {
     /// toward the crew debt in full — see docs/CREW_LEDGER.md.
     var gentleMode: Bool { didSet { store(.gentleMode, gentleMode) } }
 
+    /// Whether the dig screen listens for breath.
+    ///
+    /// On by default, but it only ever asks for the microphone once a dig is actually open,
+    /// and refusing costs the player nothing but the mechanic. A switch exists because a
+    /// game that takes a microphone without an obvious way to say no has not really asked.
+    var breathEnabled: Bool { didSet { store(.breath, breathEnabled) } }
+
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
@@ -37,6 +45,7 @@ final class GameSettings {
         self.reducedMotion = defaults.bool(forKey: Key.reducedMotion.rawValue)
         self.leftHandedTray = defaults.bool(forKey: Key.leftHandedTray.rawValue)
         self.gentleMode = defaults.bool(forKey: Key.gentleMode.rawValue)
+        self.breathEnabled = defaults.object(forKey: Key.breath.rawValue) as? Bool ?? true
     }
 
     private func store(_ key: Key, _ value: Bool) {

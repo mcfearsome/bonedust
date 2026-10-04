@@ -8,10 +8,23 @@ import SwiftUI
 /// cannot distinguish the green from the red can still see the fill pass the notch
 /// and read "TOO FAST" — which, with the crack haptic, is three independent channels
 /// carrying the same information.
+///
+/// **It only says TOO FAST when the brush is actually over exposed bone**, because that is
+/// the only place speed can break anything — `SlabSimulation` guards cracking on
+/// `depth == 0 && bone`. Warning everywhere taught exactly the wrong lesson: a player who
+/// believed the meter brushed slowly across bare rock, and a flawless sweep at safe speed
+/// for the whole sixty seconds reached 0.538 exposure, which does not pay a first
+/// installment. The simulated player that balance was fitted against swept rock at 2.3x
+/// the safe speed and never saw the problem.
+///
+/// Over rock the bar still fills, so the speed is legible, but it stays calm and says
+/// OVER BONE: GO SLOW only when it matters.
 struct SpeedMeter: View {
 
     let speed: Float
     let safeSpeed: Float
+    /// Whether the brush is on exposed bone right now.
+    var overBone: Bool = false
 
     /// Full-scale is three times the safe speed, so the safe zone takes the first
     /// third of the bar. Showing more range would make careful brushing register as
@@ -20,17 +33,28 @@ struct SpeedMeter: View {
     private var fillFraction: CGFloat { CGFloat(min(1, max(0, speed / fullScale))) }
     private var safeFraction: CGFloat { CGFloat(min(1, safeSpeed / fullScale)) }
     private var isOverSafe: Bool { speed > safeSpeed }
+    /// Fast *and* somewhere it costs something.
+    private var isDangerous: Bool { isOverSafe && overBone }
+
+    private var status: String {
+        if isDangerous { return "TOO FAST" }
+        if overBone { return "ON BONE" }
+        if isOverSafe { return "FAST \u{00B7} NO BONE" }
+        return "SAFE"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack {
                 FieldLabel(text: "Brush speed")
                 Spacer()
-                Text(isOverSafe ? "TOO FAST" : "SAFE")
+                Text(status)
                     .font(Typography.label(.caption2))
                     .tracking(1.1)
-                    .foregroundStyle(isOverSafe ? Ink.danger : Ink.safe)
-                    .animation(nil, value: isOverSafe)
+                    .foregroundStyle(
+                        isDangerous ? Ink.danger : (overBone ? Ink.accent : Ink.safe)
+                    )
+                    .animation(nil, value: status)
             }
 
             GeometryReader { geometry in
@@ -39,7 +63,7 @@ struct SpeedMeter: View {
                         .fill(Ink.raised)
 
                     Capsule(style: .continuous)
-                        .fill(isOverSafe ? Ink.danger : Ink.safe)
+                        .fill(isDangerous ? Ink.danger : (overBone ? Ink.accent : Ink.safe))
                         .frame(width: max(2, geometry.size.width * fillFraction))
 
                     // The safe-limit notch. Full height and in the ground colour so it
@@ -59,10 +83,17 @@ struct SpeedMeter: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Brush speed")
+        // VoiceOver gets the same distinction the sighted meter makes, not a weaker
+        // version of it. "Too fast" everywhere would send a player who cannot see the slab
+        // into the one strategy that cannot pay an installment.
         .accessibilityValue(
-            isOverSafe
-                ? "Too fast. Above the safe limit for this tool, bone may crack."
-                : "Safe. Below the limit for this tool."
+            isDangerous
+                ? "Too fast, and over bone. It will crack."
+                : overBone
+                    ? "Over bone. Keep below the limit for this tool."
+                    : isOverSafe
+                        ? "Above the limit, but not over bone. Nothing to break here."
+                        : "Safe."
         )
     }
 }

@@ -10,6 +10,7 @@ struct DigView: View {
     @State private var scene: DigScene
     @State private var haptics = HapticEngine()
     @State private var audio = DigAudio()
+    @State private var breath = BreathDetector()
     @State private var showDebug = false
     @State private var orientationProbe = false
     @State private var showHint = false
@@ -54,7 +55,11 @@ struct DigView: View {
             DaylightBar(remaining: engine.daylightRemaining, total: engine.totalDaylight)
             slab
             readouts
-            SpeedMeter(speed: engine.speed, safeSpeed: engine.safeSpeed)
+            SpeedMeter(
+                speed: engine.speed,
+                safeSpeed: engine.safeSpeed,
+                overBone: engine.isBrushOverBone
+            )
             passiveBadges
             toolTray
         }
@@ -66,7 +71,14 @@ struct DigView: View {
         .onChange(of: scenePhase) { _, phase in
             // §5: killing or backgrounding the app pauses the slab rather than
             // burning daylight the player cannot see.
-            if phase != .active { engine.pause() }
+            if phase != .active {
+                engine.pause()
+                // Holding the microphone open in the background is not something to do
+                // quietly, whatever iOS would allow.
+                breath.stop()
+            } else if settings.breathEnabled, !breath.permissionDenied {
+                Task { await breath.start() }
+            }
         }
         .onChange(of: settings.hapticsEnabled) { _, enabled in haptics.isEnabled = enabled }
         .onChange(of: settings.soundEnabled) { _, enabled in audio.isEnabled = enabled }
@@ -276,6 +288,26 @@ struct DigView: View {
 
     // MARK: Lifecycle
 
+    /// A gust landed. The slab has already changed; this is the part the player feels.
+    private func gusted(_ strength: Float) {
+        guard let result = engine.gust(strength: strength) else { return }
+        guard result.didAnything else { return }
+        if result.cracksStarted > 0 {
+            haptics.crack()
+            audio.playCrack()
+            showCrackHint()
+        } else {
+            haptics.boneRevealed()
+        }
+        // Spoken, because the slab changing everywhere at once is the one event on this
+        // screen with no sound of its own and no place on it to look.
+        AccessibilityNotification.Announcement(
+            result.cracksStarted > 0
+                ? "Dust blows off. Bone cracked."
+                : "Dust blows off the slab."
+        ).post()
+    }
+
     private func start() {
         scene.engine = engine
         scene.haptics = haptics
@@ -288,11 +320,15 @@ struct DigView: View {
         audio.isEnabled = settings.soundEnabled
         haptics.prepare()
         audio.prepare()
+        guard settings.breathEnabled else { return }
+        breath.onGust = { strength in gusted(strength) }
+        Task { await breath.start() }
     }
 
     private func stop() {
         haptics.teardown()
         audio.teardown()
+        breath.teardown()
     }
 
     private func showCrackHint() {

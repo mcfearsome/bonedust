@@ -15,7 +15,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Feel") {
+                Section {
                     Toggle("Haptics", isOn: Binding(
                         get: { settings.hapticsEnabled },
                         set: { settings.hapticsEnabled = $0 }
@@ -28,6 +28,20 @@ struct SettingsView: View {
                         get: { settings.reducedMotion },
                         set: { settings.reducedMotion = $0 }
                     ))
+                    // Named for what it does to the microphone rather than for the
+                    // mechanic, so the switch is findable by someone who wants the mic off
+                    // and does not read as a feature list to someone who does not.
+                    Toggle("Listen while digging", isOn: Binding(
+                        get: { settings.breathEnabled },
+                        set: { settings.breathEnabled = $0 }
+                    ))
+                } header: {
+                    Text("Feel")
+                } footer: {
+                    Text(
+                        "Bonedust can listen while you dig. Audio is never recorded, saved "
+                            + "or sent anywhere."
+                    )
                 }
 
                 Section {

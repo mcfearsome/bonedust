@@ -57,6 +57,17 @@ targets:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
         ITSAppUsesNonExemptEncryption: false
+        # Asked for only when a dig is actually open, never at launch, and refusing costs
+        # the player nothing but one hidden mechanic.
+        #
+        # The string has to be accurate -- Apple requires that, and so does anyone being
+        # asked for a microphone -- which means it necessarily gives the secret away to a
+        # reader. That is the right trade: a game that takes a microphone and will not say
+        # plainly what for has a worse problem than a spoiled surprise. It says what is
+        # listened for and what is not kept, and stops there.
+        NSMicrophoneUsageDescription: >-
+          Bonedust listens for your breath while you are digging. Audio is never recorded,
+          saved, or sent anywhere - only how loud and how breathy the last moment was.
         # The crew ledger. api.bonedust.app in release; the apex is left for a marketing
         # page. A debug build can be pointed at a local server by editing this.
         BonedustLedgerBaseURL: "https://api.bonedust.app"

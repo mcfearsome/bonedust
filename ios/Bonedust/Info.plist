@@ -26,6 +26,8 @@
 	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Bonedust listens for your breath while you are digging. Audio is never recorded, saved, or sent anywhere - only how loud and how breathy the last moment was.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

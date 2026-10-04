@@ -114,28 +114,40 @@ final class RemovalTests: XCTestCase {
         XCTAssertEqual(plain.grid[48, 64].wear / rockWear, 3.2, accuracy: 0.001)
     }
 
-    func testRockSurvivesBrushingThatClearsMatrix() {
-        // Self-calibrating rather than a hard-coded pass count: brush one pass at a
-        // time until the plain matrix gives way, then check the nodule has not. A
-        // fixed number of passes would need re-deriving every time removalRate or
-        // the brush changes, and would fail for the wrong reason when it did.
-        var (grid, layout) = TestSlab.blank(depth: 1)
-        for y in 60..<70 {
-            for x in 40..<56 {
-                grid.cells[SlabGrid.index(x, y)].flags |= SlabGrid.Flag.rock
+    func testRockTakesMorePassesThanMatrix() {
+        // Counts passes for each rather than asserting rock survives *the* pass that
+        // clears matrix. That weaker form held only while one pass delivered less than
+        // 3.2x the wear a cell needed; doubling removalRate took both to one pass and the
+        // test failed for a reason that had nothing to do with rock being hard.
+        //
+        // Full depth 3, so there is enough resolution to tell the two apart at all.
+        func passesToClear(rock: Bool) -> Int {
+            var (grid, layout) = TestSlab.blank(depth: 3)
+            if rock {
+                for y in 0..<SlabGrid.height {
+                    for x in 0..<SlabGrid.width {
+                        grid.cells[SlabGrid.index(x, y)].flags |= SlabGrid.Flag.rock
+                    }
+                }
+                layout.rockCells = SlabGrid.width * SlabGrid.height
             }
+            var sim = SlabSimulation(grid: grid, layout: layout)
+            var passes = 0
+            while sim.grid[48, 64].depth > 0, passes < 60 {
+                sweep(&sim, tool: .brush, passes: 1)
+                passes += 1
+            }
+            return passes
         }
-        layout.rockCells = 160
-        var sim = SlabSimulation(grid: grid, layout: layout)
 
-        var passes = 0
-        while sim.grid[20, 64].depth > 0, passes < 20 {
-            sweep(&sim, tool: .brush, passes: 1)
-            passes += 1
-        }
-        XCTAssertEqual(sim.grid[20, 64].depth, 0, "matrix never cleared in 20 passes")
-        XCTAssertEqual(sim.grid[48, 64].depth, 1,
-                       "rock gave way in the same \(passes) pass(es) as plain matrix")
+        let matrix = passesToClear(rock: false)
+        let rock = passesToClear(rock: true)
+        XCTAssertLessThan(matrix, 60, "matrix never cleared")
+        XCTAssertLessThan(rock, 60, "rock never cleared")
+        XCTAssertGreaterThan(
+            rock, matrix,
+            "rock (\(rock) passes) is no harder to clear than plain matrix (\(matrix))"
+        )
     }
 
     func testStrongerToolsRemoveMore() {

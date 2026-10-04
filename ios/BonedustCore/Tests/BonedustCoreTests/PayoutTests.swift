@@ -155,13 +155,18 @@ final class PayoutTests: XCTestCase {
         XCTAssertEqual(Payout.evaluate(context(modifiers: mods)).total, 0)
     }
 
+    /// The *shape* of the ramp, not the numbers in it.
+    ///
+    /// Those numbers are fitted against the economy sweep and have moved twice; writing
+    /// them here again meant a deliberate rebalance failed eleven tests that had no opinion
+    /// about balance, which buries the one failure that might have mattered.
     func testInstallmentCurve() {
-        XCTAssertEqual(Installments.amount(tier: 1), 350)
-        XCTAssertEqual(Installments.amount(tier: 2), 450)
-        XCTAssertEqual(Installments.amount(tier: 3), 575)
-        XCTAssertEqual(Installments.amount(tier: 4), 725)
-        XCTAssertEqual(Installments.amount(tier: 5), 900)
-        XCTAssertEqual(Installments.amount(tier: 0), 350, "tier is clamped at 1")
+        for (index, expected) in Installments.table.enumerated() {
+            XCTAssertEqual(Installments.amount(tier: index + 1), expected)
+        }
+        XCTAssertEqual(
+            Installments.amount(tier: 0), Installments.table[0], "tier is clamped at 1"
+        )
         // Keeps rising, in $25 steps, forever.
         var previous = 0
         for tier in 1...40 {

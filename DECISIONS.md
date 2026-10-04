@@ -463,3 +463,98 @@ piece already passed.
 The lesson worth keeping: a headless renderer verifies the renderer, not the composition with
 the framework that displays it. Any convention a framework imposes needs a test that measures
 the framework.
+
+## The game was not winnable by hand, and the sweep could not see it
+
+A flawless serpentine at exactly the brush's safe speed, for the whole sixty seconds,
+reached **0.538 exposure**. Payout scales as `exposure^1.5`, so that is 39% of a slab's
+value — roughly $43 a day against a $350 first installment. No amount of skill closed the
+gap, because the limit was the clock, not the player.
+
+`EconomySimulator` reported tier 1 at 75% the whole time. Its model sweeps non-bone ground
+at `clearingSpeed: 3.2`, more than twice the brush's safe speed of 1.4, and switches between
+a fast survey brush and a careful dig brush every sample, for free. Both are *legal* —
+`SlabSimulation` guards cracking on `depth == 0 && bone`, so speed over bare rock costs
+nothing — but no hand can switch tools through a tray at 30 Hz, and the speed meter said
+TOO FAST at 1.4 regardless of what was under the brush.
+
+So the balance targets were being met by a player that ignores the game's own advice, while
+anyone who followed it got nothing. Two separate defects wearing one symptom:
+
+**The rate.** `removalRate` 0.24 → 0.48, which puts a careful safe-speed sweep at 0.92
+exposure, just under the model's 0.971. A methodical human should land a little below a
+machine, not at zero. `HumanCeilingTests` measures this directly and fails if a flawless
+single-brush dig can no longer clear a slab — the number the economy sweep structurally
+cannot report, because its player is not one.
+
+**The meter.** It now says TOO FAST only when the brush is over exposed bone, and
+FAST · NO BONE otherwise. Warning everywhere was not a cosmetic problem: it taught the one
+strategy that cannot pay an installment.
+
+Installments were re-fitted afterwards, to [425, 575, 780, 1055, 1425, …] — tier 1 at 68%
+against a 70% target, tier 5 at 33% against 30%. The middle stays lumpy on purpose: mean
+income jumps from ~$720 at tier 3 to ~$1,200 at tier 4 because a site unlocks there, and a
+difficulty ramp that lurches to flatten that graph is fitting the model player rather than
+the game.
+
+The general lesson is about the simulation, not the constants. A sweep that plays the game
+differently from a person measures a different game. It still earns its place for comparing
+*changes*, but it cannot answer "is this playable" — and for six milestones nothing else
+was asking.
+
+## Gems are 3x3, and one to four a slab
+
+A 2x2 gem on a 96x128 slab is four pixels on a phone, smaller than the matrix noise around
+it, so it was not something a player spotted and decided to go carefully around — which is
+the whole point of a gem. The count went from 0–2 to 1–4 so most slabs have one.
+
+Size is its own counterweight: a gem only pays when every cell is clear, so 9 cells is more
+than twice the daylight of 4. More gems, bigger, each harder to actually free.
+
+## Blowing on the slab
+
+A gust lifts one layer from sixteen patches scattered over the whole slab. The brush is
+local; breath is the opposite, and that contrast is the mechanic.
+
+Three rules stop it being a free win:
+
+- **It never goes below depth 1.** Breath moves overburden, so it cannot uncover the fossil
+  for you, and brushing stays the verb the game is about.
+- **It cracks bone that is already exposed.** Early in a slab a gust is most of a dig; late
+  it is vandalism. *When* to use it is the entire decision, and it mirrors the air blower,
+  which already trades speed for damage.
+- **Every draw comes from the gameplay PRNG.** The result is part of `randomState`, so
+  force-quitting to re-roll an unlucky gust fails for exactly the reason it fails on a crack.
+
+### Detecting breath, and not detecting a conversation
+
+Breath is broadband: the waveform crosses zero constantly and at no particular rate. Speech
+and music are pitched and cross far less for the same energy. The detector gates on
+*noisiness* as well as loudness, because a loudness threshold alone fires on a cough, a car,
+or someone talking over your shoulder — and in a game where a gust shatters an exposed
+fossil, that is a way to lose a specimen to a passing bus.
+
+The spectral test is a zero-crossing rate, not an FFT: over 0.1 s of mono it separates
+breath from voice well enough, costs one pass, and can never cost a frame on the dig screen.
+
+`consume(_:)` is deliberately split out of the audio callback so it is a pure function of
+two scalars. Every judgement the detector makes lives there, which is why all eight breath
+tests run headlessly — including the one that matters, that loud speech never fires.
+
+### The microphone
+
+**Nothing is recorded.** Each buffer is reduced to loudness and noisiness inside the audio
+callback and the samples are gone when it returns. Nothing is written, kept, or sent; the
+app has no network path for audio to take. That is the only basis on which a game promising
+no analytics should be asking for a microphone.
+
+**It cannot be fully secret, and should not be.** iOS requires a purpose string and Apple
+requires it to be accurate, so anyone reading the dialog learns that breath matters. That is
+the right trade: a game that takes a microphone and will not say plainly what for has a
+worse problem than a spoiled surprise. The string says what is listened for and what is not
+kept, and stops there. Permission is asked only once a dig is open, never at launch, and
+refusing costs nothing but the mechanic.
+
+**The player's music keeps playing.** Recording normally forces `.playAndRecord` and stops
+whatever they were listening to; `.mixWithOthers` avoids that. Silencing someone's music to
+add a hidden mechanic they did not ask for is not a trade worth making.

@@ -62,18 +62,23 @@ final class GenerationTests: XCTestCase {
         }
     }
 
-    func testGemsAreWholeTwoByTwoClustersOnClearGround() {
+    /// Gem size is read from the tuning rather than written in, because it has moved once
+    /// already: a 2x2 gem on a 96x128 slab is four pixels on a phone, smaller than the
+    /// matrix noise around it, which is not something a player spots and decides to go
+    /// carefully around.
+    func testGemsAreWholeSquareClustersOnClearGround() {
+        let side = SimTuning.standard.gemSize
         for site in sites {
             for seed in UInt64(0)..<40 {
                 let (grid, layout) = SlabGenerator.generate(seed: seed, site: site)
                 XCTAssertLessThanOrEqual(layout.gemClusters.count, SimTuning.standard.gemsMax)
                 let gemCells = grid.count { $0.flags & SlabGrid.Flag.gem != 0 }
-                XCTAssertEqual(gemCells, layout.gemClusters.count * 4,
+                XCTAssertEqual(gemCells, layout.gemClusters.count * side * side,
                                "\(site.id) seed \(seed): gem cells are not whole clusters")
                 for origin in layout.gemClusters {
                     let x = origin % SlabGrid.width
                     let y = origin / SlabGrid.width
-                    for (dx, dy) in [(0, 0), (1, 0), (0, 1), (1, 1)] {
+                    for (dx, dy) in (0..<side).flatMap({ dy in (0..<side).map { ($0, dy) } }) {
                         let cell = grid[x + dx, y + dy]
                         XCTAssertNotEqual(cell.flags & SlabGrid.Flag.gem, 0)
                         XCTAssertEqual(cell.flags & SlabGrid.Flag.bone, 0, "gem on bone")

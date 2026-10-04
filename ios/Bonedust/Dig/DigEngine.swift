@@ -48,6 +48,14 @@ final class DigEngine {
     private(set) var intactPercent = 100
     private(set) var estimatedValue = 0
     private(set) var speed: Float = 0
+    /// Whether the last brush sample was on exposed bone.
+    ///
+    /// Published for the speed meter, which only warns about speed where speed can break
+    /// something. The simulation guards cracking on `depth == 0 && bone`, so over bare rock
+    /// going fast costs nothing — and a meter that said otherwise sent careful players into
+    /// the one strategy that cannot pay an installment.
+    private(set) var isBrushOverBone = false
+    @ObservationIgnored private var lastGustAt: TimeInterval = -.greatestFiniteMagnitude
     private(set) var safeSpeed: Float = 1.4
     private(set) var isIdentified = false
     private(set) var wholeGems = 0
@@ -272,17 +280,38 @@ final class DigEngine {
     func brushBegan(at point: Vec2) -> StrokeResult {
         startDaylightIfNeeded()
         guard !isFinished else { return StrokeResult() }
+        isBrushOverBone = isOverBone(point)
         return record(sim.beginStroke(at: point, tool: tool))
     }
 
     @discardableResult
     func brushMoved(to point: Vec2, deltaMillis: Float) -> StrokeResult {
         guard !isFinished else { return StrokeResult() }
+        isBrushOverBone = isOverBone(point)
         return record(sim.moveStroke(to: point, deltaMillis: deltaMillis, tool: tool))
+    }
+
+    /// Blows loose material off patches across the whole slab (§ breath).
+    ///
+    /// Rate-limited here rather than in the detector, because the cooldown is a rule of the
+    /// game and belongs with the other rules -- the detector only knows about microphones.
+    /// Returns nil when the gust was swallowed by the cooldown or the slab is over.
+    @discardableResult
+    func gust(strength: Float) -> SlabSimulation.GustResult? {
+        guard !isFinished, strength > 0 else { return nil }
+        let now = Date.timeIntervalSinceReferenceDate
+        let cooldown = Double(sim.tuning.gustCooldownSeconds)
+        guard now - lastGustAt >= cooldown else { return nil }
+        lastGustAt = now
+        let result = sim.gust(strength: strength)
+        publish(force: true)
+        return result
     }
 
     func brushEnded() {
         sim.endStroke()
+        // Finger up: there is no brush, so it is not over anything.
+        isBrushOverBone = false
     }
 
     private func record(_ result: StrokeResult) -> StrokeResult {

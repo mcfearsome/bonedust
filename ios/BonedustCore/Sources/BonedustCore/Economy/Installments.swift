@@ -13,7 +13,21 @@ import Foundation
 /// near that fast, so it put tier 3 at a 5% win rate against a 48% target. This curve
 /// climbs about 22%, which is what the economy can actually support.
 public enum Installments {
-    public static let table = [350, 450, 575, 725, 900, 1100, 1350, 1650]
+    /// Re-fitted after `removalRate` doubled. The old ramp was measured against a
+    /// simulated player who could not be matched by hand, so it was simultaneously too
+    /// hard to actually play and too easy for the model once the brush worked.
+    ///
+    /// Means the sweep reports per tier are roughly 540, 555, 760, 1060, 1100, 1160, 1240,
+    /// 1380. The ramp has to cross those: below the mean early, above it later, which is
+    /// what turns a 70% week into a 30% one.
+    /// Fitted to §9's two stated numbers — tier 1 near 70%, tier 5 near 30% — and
+    /// geometric in between rather than fitted tier by tier.
+    ///
+    /// The middle stays lumpy on purpose. Mean income jumps from about $720 at tier 3 to
+    /// $1,170 at tier 4 because a site unlocks there, so smooth win rates would need a
+    /// ramp that jumps to match. A difficulty curve that lurches to flatten a graph is
+    /// fitting the model player rather than the game.
+    public static let table = [425, 575, 775, 1050, 1425, 1650, 1875, 2175]
     public static let growth: Float = 1.22
 
     /// `tier` is 1-based: tier 1 is a player's first run.

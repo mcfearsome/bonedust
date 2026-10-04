@@ -379,6 +379,119 @@ public struct SlabSimulation: Sendable {
         return result
     }
 
+    // MARK: - Breath
+
+    /// What one gust did, for haptics, audio and the hint system.
+    public struct GustResult: Sendable, Equatable {
+        public var patches = 0
+        public var cellsLifted = 0
+        public var boneRevealed = 0
+        public var cracksStarted = 0
+        public var crackedCells = 0
+        /// True if the gust landed on bone that was already showing.
+        public var hitExposedBone = false
+
+        public init() {}
+        public var didAnything: Bool { cellsLifted > 0 || cracksStarted > 0 }
+    }
+
+    /// Blows loose material off patches scattered across the whole slab.
+    ///
+    /// `strength` is 0 to 1. It scales how many patches land and how likely each exposed
+    /// bone cell inside one is to crack.
+    ///
+    /// Three things make this a decision rather than a free win:
+    ///
+    /// **It stops at `gustFloorDepth`.** Breath moves overburden, never the last layer, so
+    /// it cannot uncover a fossil for you. Brushing stays the verb the game is about.
+    ///
+    /// **It cracks bone that is already exposed.** Blowing across a slab you have opened up
+    /// wrecks the specimen, exactly as the air blower does, which is why *when* you use it
+    /// is the whole question. Early it is most of a dig; late it is vandalism.
+    ///
+    /// **Every draw comes from the gameplay PRNG**, the same one cracking uses, so the
+    /// result is part of `randomState` and survives a save. Force-quitting to re-roll an
+    /// unlucky gust does not work, for the same reason it does not work on a crack.
+    @discardableResult
+    public mutating func gust(strength: Float) -> GustResult {
+        var result = GustResult()
+        let strength = min(max(strength, 0), 1)
+        guard strength > 0 else { return result }
+
+        let patches = Int((Float(tuning.gustPatchesAtFullStrength) * strength).rounded())
+        guard patches > 0 else { return result }
+
+        let radius = tuning.gustRadius
+        let reach = Int(radius.rounded(.up))
+        let radiusSquared = radius * radius
+        let floor = tuning.gustFloorDepth
+        let crackChance = tuning.gustCrackRate * strength
+        let boneFlag = SlabGrid.Flag.bone
+        let crackedFlag = SlabGrid.Flag.cracked
+
+        var dirty = self.dirty
+        var rng = self.rng
+        let boneCellsExposed = exposedBone
+        var crackSeeds: [Int] = []
+
+        grid.cells.withUnsafeMutableBufferPointer { cells in
+            for _ in 0..<patches {
+                // Centres are drawn across the whole slab, which is the point of it: the
+                // brush is local and breath is not.
+                let cx = rng.nextInt(0, through: SlabGrid.width - 1)
+                let cy = rng.nextInt(0, through: SlabGrid.height - 1)
+                result.patches += 1
+
+                for y in max(0, cy - reach)...min(SlabGrid.height - 1, cy + reach) {
+                    let dy = Float(y - cy)
+                    for x in max(0, cx - reach)...min(SlabGrid.width - 1, cx + reach) {
+                        let dx = Float(x - cx)
+                        guard dx * dx + dy * dy <= radiusSquared else { continue }
+                        let i = SlabGrid.index(x, y)
+                        var cell = cells[i]
+
+                        if cell.depth > floor {
+                            cell.depth -= 1
+                            cell.wear = 0
+                            cells[i] = cell
+                            result.cellsLifted += 1
+                            dirty.insert(x: x, y: y)
+                            continue
+                        }
+
+                        // Already open. Breath cannot help here, and on bone it hurts.
+                        guard cell.depth == 0, cell.flags & boneFlag != 0,
+                              cell.flags & crackedFlag == 0
+                        else { continue }
+                        result.hitExposedBone = true
+                        guard rng.nextUnit() < crackChance else { continue }
+                        crackSeeds.append(i)
+                    }
+                }
+            }
+
+            for origin in crackSeeds {
+                guard cells[origin].flags & crackedFlag == 0 else { continue }
+                let length = rng.nextInt(tuning.crackWalkMin, through: tuning.crackWalkMax)
+                let marked = SlabSimulation.propagateCrack(
+                    from: origin, length: length, cells: cells, rng: &rng, dirty: &dirty
+                )
+                result.crackedCells += marked
+                result.cracksStarted += 1
+            }
+        }
+
+        self.rng = rng
+        self.dirty = dirty
+        // Recomputed rather than adjusted. Lifting a layer can take a cell to depth 0 over
+        // bone, and the loop cannot tell "was already open" from "just opened" without
+        // checking twice -- and `recountMetrics` is the one authority on these counts
+        // anyway, so tracking them in parallel here would be a second place to be wrong.
+        recountMetrics()
+        result.boneRevealed = max(0, exposedBone - boneCellsExposed)
+        return result
+    }
+
     /// A crack is a random walk across adjacent bone cells, marking each one.
     ///
     /// The walk is not restricted to *exposed* bone, per §3. That is deliberate:

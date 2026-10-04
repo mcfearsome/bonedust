@@ -8,7 +8,7 @@ public struct SlabLayout: Sendable, Equatable {
     public var instances: Int
     public var boneCells: Int
     public var rockCells: Int
-    /// Top-left cell index of each 2x2 gem cluster.
+    /// Top-left cell index of each gem cluster, which is `tuning.gemSize` cells a side.
     public var gemClusters: [Int]
     public var maxDepth: UInt8
 
@@ -77,7 +77,7 @@ public enum SlabGenerator {
             rockCells += placeNodule(&rng, tuning: tuning, into: &grid)
         }
 
-        // 3. Gems — 2x2, clear of bone and rock.
+        // 3. Gems — square clusters, clear of bone and rock.
         let gemCount = rng.nextInt(tuning.gemsMin, through: tuning.gemsMax)
         var gemClusters: [Int] = []
         for _ in 0..<gemCount {
@@ -179,20 +179,25 @@ public enum SlabGenerator {
         return placed
     }
 
-    /// A gem is a 2x2 cluster on clear ground. Rock is excluded as well as bone:
-    /// a gem buried under 3.2x hardness would cost more daylight than its $20 is
-    /// worth, which makes it a trap rather than a reward.
+    /// A gem is a square cluster on clear ground, `tuning.gemSize` a side. Rock is excluded
+    /// as well as bone: a gem buried under 3.2x hardness would cost more daylight than its
+    /// $20 is worth, which makes it a trap rather than a reward.
+    ///
+    /// Two draws per attempt regardless of size, so the PRNG consumes the same amount
+    /// whatever `gemSize` is and the draw order documented at the top of this file holds.
     private static func placeGem(
         _ rng: inout SplitMix64, tuning: SimTuning, into grid: inout SlabGrid
     ) -> Int? {
         let blocked = SlabGrid.Flag.bone | SlabGrid.Flag.rock | SlabGrid.Flag.gem
+        let side = max(1, tuning.gemSize)
         for _ in 0..<tuning.gemPlacementAttempts {
-            let x = rng.nextInt(1, through: SlabGrid.width - 3)
-            let y = rng.nextInt(1, through: SlabGrid.height - 3)
-            let indices = [
-                SlabGrid.index(x, y), SlabGrid.index(x + 1, y),
-                SlabGrid.index(x, y + 1), SlabGrid.index(x + 1, y + 1),
-            ]
+            let x = rng.nextInt(1, through: SlabGrid.width - side - 1)
+            let y = rng.nextInt(1, through: SlabGrid.height - side - 1)
+            var indices: [Int] = []
+            indices.reserveCapacity(side * side)
+            for dy in 0..<side {
+                for dx in 0..<side { indices.append(SlabGrid.index(x + dx, y + dy)) }
+            }
             guard indices.allSatisfy({ grid.cells[$0].flags & blocked == 0 }) else { continue }
             for i in indices { grid.cells[i].flags |= SlabGrid.Flag.gem }
             return indices[0]
