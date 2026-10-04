@@ -53,7 +53,12 @@ struct Ink: Equatable {
         stamp: Color(Earth.stampNight),
         gem: Color(Earth.gemNight),
         safe: Color(Earth.safeNight),
-        mount: Color(Earth.s8)
+        // Cream, so the mount inverts with the page. A dark one is no mount at night: `s8` on
+        // `nightPage` is 1.15:1, and no dark colour could do better, since black itself is only
+        // 1.40:1 against that page. `s1` is 11.9:1 against the page and 3.85:1 against
+        // night_dig's matrix as it is drawn at lightLevel 0.55, which is lighter than the page,
+        // so a pale mount is the one kind that clears 3:1 against both. See spec §2.
+        mount: Color(Earth.s1)
     )
 
     /// `fraction` is clamped, so an out-of-range `lightLevel` cannot produce a

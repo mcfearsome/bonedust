@@ -349,9 +349,13 @@ automate and go in the existing `BonedustCore` suite:
    clears 4.5:1. The test exists to stop a future retune from quietly
    reintroducing light-on-light secondary text.
 3. **Mount separation.** For every site in `content.json`, including those that
-   inherit the defaults, `matrix` clears 3:1 against the mount. This is the
-   regression that would reintroduce the edge-bleed, and it must run per site
-   because three sites override the palette independently.
+   inherit the defaults, `matrix` clears 3:1 against the mount, at the site's
+   own `lightLevel`. This is the regression that would reintroduce the
+   edge-bleed, and it must run per site because three sites override the
+   palette independently. The mount also clears 3:1 against the **page**, in
+   both palettes: that is the other pair the mount exists for, and with no test
+   on it the night mount shipped at 1.15:1. It needs `Ink`, so it lives in
+   `AppLayerTests.swift` (`testTheMountSeparatesFromThePageInBothPalettes`).
 
 Everything else is visual verification on device, in daylight and in a dark
 room, at the `lightLevel` extremes and at 0.35.
