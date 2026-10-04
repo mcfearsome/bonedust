@@ -38,6 +38,7 @@ struct DebugOverlay: View {
         ("Daylight", "Seconds", \.daylightSeconds, 10...180),
         ("Look", "Wear blend", \.wearColorBlend, 0...1),
         ("Look", "Bone tell tint", \.boneTellTint, 0...0.6),
+        ("Look", "Bone tell stipple", \.boneTellStipple, 0...1),
         ("Look", "Cell noise", \.cellNoise, 0...0.3),
     ]
 

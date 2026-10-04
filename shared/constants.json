@@ -903,7 +903,8 @@
     }
   ],
   "tuning" : {
-    "boneTellTint" : 0.2,
+    "boneTellStipple" : 0.6,
+    "boneTellTint" : 0,
     "cellNoise" : 0.07,
     "crackRate" : 0.0011,
     "crackWalkMax" : 8,

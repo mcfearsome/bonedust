@@ -57,17 +57,19 @@ struct SlabRenderer {
         )
     }
 
-    /// Recomputes the dirty rectangle, inflated by one cell.
+    /// Recomputes the dirty rectangle, inflated by one cell back and two forward.
     ///
-    /// The inflation is not paranoia: bone edge shading reads the cells above and
-    /// below, so clearing cell *y* changes the appearance of *y-1* and *y+1* too.
-    /// Without it, digging leaves a one-pixel stale seam along every edge.
+    /// The inflation is not paranoia: the ink edge decides a cell from its neighbours,
+    /// two behind it (the length of its run) and one ahead (the far side). So clearing
+    /// cell *p* changes the appearance of *p-1* and *p+1*, and of *p+2*, whose run it
+    /// has just joined, on both axes. Without it, digging leaves a stale seam along
+    /// every edge.
     mutating func redraw(_ grid: SlabGrid, region: DirtyRegion) {
         guard !region.isEmpty else { return }
         let x0 = max(0, region.minX - 1)
-        let x1 = min(SlabRenderer.width - 1, region.maxX + 1)
+        let x1 = min(SlabRenderer.width - 1, region.maxX + 2)
         let y0 = max(0, region.minY - 1)
-        let y1 = min(SlabRenderer.height - 1, region.maxY + 1)
+        let y1 = min(SlabRenderer.height - 1, region.maxY + 2)
         guard x0 <= x1, y0 <= y1 else { return }
         let style = self.style
 
@@ -105,32 +107,88 @@ struct SlabRenderer {
         isHatched(x: x, y: y) ? colour.lerp(to: Earth.s8, 0.5) : colour
     }
 
+    /// The tell's dot grid: 1 in 4, no two orthogonally adjacent.
+    ///
+    /// Isolated dots matter. A 50% checkerboard averages back into a flat tint at
+    /// this cell size, which is the problem the stipple exists to solve.
+    static func isStippled(x: Int, y: Int) -> Bool {
+        x % 2 == 0 && y % 2 == 0
+    }
+
+    /// Per-cell noise as a stepped shade multiplier rather than a continuous one.
+    ///
+    /// Returns a multiplier, never a colour, because quantizing colour channels
+    /// shifts hue: topsoil (74,52,40) posterized at 8 levels lands on (73,36,36).
+    ///
+    /// `amount` is the live `SimTuning.cellNoise`. It is passed in rather than read
+    /// from `SimTuning.standard` so that the debug overlay's slider reaches it.
+    static func celShade(_ noise: Float, amount: Float) -> Float {
+        if noise > 0.33 { return 1 - amount }
+        if noise < -0.33 { return 1 + amount }
+        return 1
+    }
+
+    /// Whether this cell takes an ink edge.
+    ///
+    /// `runBehind` is the length of the run of this material that ends at the cell,
+    /// the cell itself included, counted up to 3. Under 3 and the edge is skipped,
+    /// so a paper-thin fossil keeps an interior instead of becoming solid outline.
+    static func inkEdge(runBehind: Int, neighbourDiffers: Bool) -> Bool {
+        neighbourDiffers && runBehind >= 3
+    }
+
+    /// A cell on an ink edge: its own colour, most of the way to ink.
+    static func inked(_ colour: RGB8) -> RGB8 {
+        colour.lerp(to: Earth.s8, 0.72)
+    }
+
     private static func colour(
         _ grid: SlabGrid, _ x: Int, _ y: Int, _ style: Style
     ) -> RGB8 {
         let index = SlabGrid.index(x, y)
         let cell = grid.cells[index]
 
-        var result = surface(cell, depth: cell.depth, style)
+        var result = surface(cell, depth: cell.depth, x: x, y: y, style)
 
         // Wear lerps toward whatever is one layer down, so scraping *shows* before
         // it breaks through. Without this the slab only ever changes in steps and
         // brushing feels unresponsive even though it is working.
         if cell.depth > 0, cell.wear > 0 {
+            // Cel: wear advances in four visible steps rather than a gradient. The
+            // note above still holds, so the blend stays; only its resolution changes.
+            let wear = (cell.wear * 4).rounded() / 4
             result = result.lerp(
-                to: surface(cell, depth: cell.depth - 1, style),
-                cell.wear * style.tuning.wearColorBlend
+                to: surface(cell, depth: cell.depth - 1, x: x, y: y, style),
+                wear * style.tuning.wearColorBlend
             )
         }
 
-        // Bone edge shading: a lit top edge and a shadowed bottom edge give the
-        // fossil relief at 96x128, where there is no room for an outline.
-        if cell.depth == 0, cell.flags & SlabGrid.Flag.bone != 0 {
-            let boneAbove = y > 0 && grid.isBone(SlabGrid.index(x, y - 1))
-            let boneBelow = y < SlabRenderer.height - 1
-                && grid.isBone(SlabGrid.index(x, y + 1))
-            if !boneAbove { result = result.scaled(1.12) }
-            if !boneBelow { result = result.scaled(0.86) }
+        // A semantic edge, drawn from flags rather than colour difference — which is
+        // why this is on the CPU. A fragment shader cannot tell gem-on-matrix from a
+        // noise boundary. Right and bottom only: two sides read as ink without eating
+        // a thin specimen from both ends. This replaced a lit top edge and a shadowed
+        // bottom edge, which gave the fossil relief at 96x128 but never separated
+        // pale bone from a pale matrix. It draws before the hatch below, so a cracked
+        // cell on an edge carries both marks.
+        if cell.depth == 0, cell.flags & (SlabGrid.Flag.bone | SlabGrid.Flag.gem) != 0 {
+            let mine = cell.flags & SlabGrid.Flag.bone != 0
+                ? SlabGrid.Flag.bone : SlabGrid.Flag.gem
+            func same(_ dx: Int, _ dy: Int) -> Bool {
+                let nx = x + dx, ny = y + dy
+                guard nx >= 0, nx < SlabRenderer.width, ny >= 0, ny < SlabRenderer.height
+                else { return false }
+                let neighbour = grid.cells[SlabGrid.index(nx, ny)]
+                return neighbour.depth == 0 && neighbour.flags & mine != 0
+            }
+            let right = SlabRenderer.inkEdge(
+                runBehind: same(-1, 0) ? (same(-2, 0) ? 3 : 2) : 1,
+                neighbourDiffers: !same(1, 0)
+            )
+            let down = SlabRenderer.inkEdge(
+                runBehind: same(0, -1) ? (same(0, -2) ? 3 : 2) : 1,
+                neighbourDiffers: !same(0, 1)
+            )
+            if right || down { result = SlabRenderer.inked(result) }
         }
 
         // Fracture leaves a permanent record on the page. The transient red bloom is
@@ -143,14 +201,19 @@ struct SlabRenderer {
             result = result.lerp(to: style.palette.bone, 0.5)
         }
 
-        result = result.scaled(1 + cell.noise * style.tuning.cellNoise)
+        // The live tuning, not `SimTuning.standard`: the debug overlay's Cell noise
+        // slider has to reach this.
+        result = result.scaled(
+            SlabRenderer.celShade(cell.noise, amount: style.tuning.cellNoise)
+        )
         if style.lightLevel != 1 { result = result.scaled(style.lightLevel) }
         return result
     }
 
-    /// What a cell looks like once cleared to `depth`, before wear and noise.
+    /// What a cell looks like once cleared to `depth`, before wear and noise. `x` and
+    /// `y` place the cell on the tell's dot grid.
     private static func surface(
-        _ cell: SlabGrid.Cell, depth: UInt8, _ style: Style
+        _ cell: SlabGrid.Cell, depth: UInt8, x: Int, y: Int, _ style: Style
     ) -> RGB8 {
         let palette = style.palette
         guard depth > 0 else {
@@ -171,12 +234,19 @@ struct SlabRenderer {
         if cell.flags & SlabGrid.Flag.rock != 0 {
             layer = layer.lerp(to: palette.rock, 0.45)
         }
-        // The tell, from §3: depth-1 sandstone sitting on bone is tinted 20% toward
-        // bone. It is the only legitimate way to read the fossil before exposing it,
-        // and learning to see it is the difference between a careful player and a
-        // fast one.
+        // The tell, from §3: the only legitimate way to read the fossil before
+        // exposing it, and learning to see it is the difference between a careful
+        // player and a fast one. Depth-1 sandstone sitting on bone goes toward bone,
+        // as a pattern rather than a tint, so it survives any future posterize and
+        // reads as a shape instead of a faint shift in colour. Both constants stay
+        // live so the debug overlay can A/B them. See spec §7a.
         if depth == 1, cell.flags & SlabGrid.Flag.bone != 0 {
-            layer = layer.lerp(to: palette.bone, style.tuning.boneTellTint)
+            if style.tuning.boneTellTint > 0 {
+                layer = layer.lerp(to: palette.bone, style.tuning.boneTellTint)
+            }
+            if style.tuning.boneTellStipple > 0, SlabRenderer.isStippled(x: x, y: y) {
+                layer = layer.lerp(to: palette.bone, style.tuning.boneTellStipple)
+            }
         }
         return layer
     }
