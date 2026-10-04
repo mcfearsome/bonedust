@@ -738,8 +738,12 @@ final class ThemeTests: XCTestCase {
         for site in ContentCatalog.shared.sites {
             let level = site.modifiers.lightLevel
             let onScreen = site.palette.matrix.scaled(level)
-            let mount = Earth.s6.lerp(to: Earth.s8, Float(Theme.nightFraction(for: level)))
-            let ratio = onScreen.contrastRatio(against: mount)
+            // Read the mount the Theme actually produces. Modelling it as a
+            // blend was left over from before the switch ruling: it overstated
+            // day-side dim sites and could not see `switchPoint` move at all.
+            let theme = Theme()
+            theme.lightLevel = level
+            let ratio = onScreen.contrastRatio(against: rgb8(of: theme.ink.mount))
             XCTAssertGreaterThanOrEqual(
                 ratio, 3.0,
                 "site '\(site.id)' at lightLevel \(level): slab and mount converge (\(ratio))"
@@ -841,7 +845,15 @@ final class Theme {
 }
 
 extension EnvironmentValues {
-    @Entry var theme = Theme()
+    /// One shared instance, not `Theme()` inline.
+    ///
+    /// `@Entry`'s default expression is evaluated on every read, so writing
+    /// `@Entry var theme = Theme()` hands each reading view its own Theme. Views
+    /// that were never explicitly injected would then disagree about the palette,
+    /// and nothing would look wrong until two of them were on screen at once.
+    fileprivate static let environmentDefault = Theme()
+
+    @Entry var theme = Theme.environmentDefault
 }
 ```
 
@@ -850,7 +862,7 @@ Note: `@Entry` requires iOS 17 with Xcode 16's macro, which this project has. If
 - [ ] **Step 4: Run the tests**
 
 Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/ThemeTests`
-Expected: PASS, 9 tests. night_dig is the thin one — expect roughly 3.12 against a 3.0 floor.
+Expected: PASS, 10 tests. night_dig now measures 3.56:1 against the 3.0 floor — the switch gives it the full `s8` mount instead of a partial blend, so the margin is wider than the 3.12 an earlier draft predicted.
 
 - [ ] **Step 5: Commit**
 
