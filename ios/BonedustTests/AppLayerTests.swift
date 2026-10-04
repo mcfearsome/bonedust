@@ -1,4 +1,5 @@
 import BonedustCore
+import SwiftUI
 import XCTest
 @testable import Bonedust
 
@@ -202,5 +203,58 @@ extension SlabGrid {
             hash.combine(cell.wear)
         }
         return hash.finalize()
+    }
+}
+
+/// Design-token tests. These live in the app target because `Ink` and `Typography`
+/// need SwiftUI and UIKit; the ramp's own guarantees are tested in BonedustCore.
+final class DesignTokenTests: XCTestCase {
+
+    func testDayAndNightAreDifferentPalettes() {
+        XCTAssertNotEqual(Ink.day, Ink.night)
+    }
+
+    func testLerpReturnsTheEndpointsExactly() {
+        XCTAssertEqual(Ink.lerp(from: .day, to: .night, 0), Ink.day)
+        XCTAssertEqual(Ink.lerp(from: .day, to: .night, 1), Ink.night)
+    }
+
+    /// The night accents must actually be the night ones. Reusing the day accents
+    /// here was the defect Task 1's review caught, and nothing else would notice:
+    /// Ink has no contrast assertion of its own, and the page still renders.
+    func testNightUsesTheNightAccentsNotTheDayOnes() {
+        XCTAssertNotEqual(Ink.night.stamp, Ink.day.stamp)
+        XCTAssertNotEqual(Ink.night.gem, Ink.day.gem)
+        XCTAssertNotEqual(Ink.night.safe, Ink.day.safe)
+        XCTAssertEqual(Ink.night.stamp, Color(Earth.stampNight))
+        XCTAssertEqual(Ink.night.gem, Color(Earth.gemNight))
+        XCTAssertEqual(Ink.night.safe, Color(Earth.safeNight))
+    }
+
+    func testLerpClampsOutOfRangeFractions() {
+        XCTAssertEqual(Ink.lerp(from: .day, to: .night, -5), Ink.day)
+        XCTAssertEqual(Ink.lerp(from: .day, to: .night, 42), Ink.night)
+    }
+
+    /// Review Focus 4. Dynamic Type must reach the custom faces. A font built with
+    /// `Font.custom(_:fixedSize:)` would return the same metrics at every size.
+    func testDisplayFontScalesWithDynamicType() {
+        let small = Typography.resolvedDisplayPointSize(
+            40, for: UITraitCollection(preferredContentSizeCategory: .small)
+        )
+        let huge = Typography.resolvedDisplayPointSize(
+            40, for: UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+        )
+        XCTAssertGreaterThan(huge, small, "display face ignores Dynamic Type")
+    }
+
+    func testNumberFontScalesWithDynamicType() {
+        let small = Typography.resolvedNumberPointSize(
+            17, for: UITraitCollection(preferredContentSizeCategory: .small)
+        )
+        let huge = Typography.resolvedNumberPointSize(
+            17, for: UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+        )
+        XCTAssertGreaterThan(huge, small, "numeral face ignores Dynamic Type")
     }
 }
