@@ -85,11 +85,16 @@ render:
 # a message about a missing profile, which reads like a certificate problem and is not.
 DEVICE_BUILD ?= build/device
 device: project
-	@udid=$$(xcrun devicectl list devices 2>/dev/null \
-		| awk '$$NF == "physical" { for (i = 1; i <= NF; i++) if ($$i ~ /^[0-9A-F]{8}-[0-9A-F]{16}$$/) print $$i }' \
-		| head -1); \
-	if [ -z "$$udid" ]; then echo "no physical device attached"; exit 1; fi; \
-	echo "device $$udid"; \
+	@line=$$(xcrun devicectl list devices 2>/dev/null \
+		| awk '$$NF == "physical" && /iPhone|iPad/'); \
+	if [ -z "$$line" ]; then echo "no iPhone paired"; exit 1; fi; \
+	udid=$$(echo "$$line" | grep -oE '[0-9A-F]{8}-[0-9A-F]{16}' | head -1); \
+	state=$$(echo "$$line" | grep -oE 'available \(paired\)|unavailable|connected' | head -1); \
+	if [ "$$state" = "unavailable" ]; then \
+		echo "iPhone is $$state -- unlock it and check the cable, then run make device again"; \
+		exit 1; \
+	fi; \
+	echo "device $$udid ($$state)"; \
 	xcodebuild build -project ios/Bonedust.xcodeproj -scheme Bonedust \
 		-destination "id=$$udid" -derivedDataPath $(DEVICE_BUILD) \
 		-allowProvisioningUpdates | tail -3; \
