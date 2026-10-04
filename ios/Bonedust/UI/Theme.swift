@@ -18,7 +18,14 @@ final class Theme {
     static let switchPoint: Double = 0.5
 
     var lightLevel: Float = 1 {
-        didSet { ink = Theme.nightFraction(for: lightLevel) >= Theme.switchPoint ? .night : .day }
+        didSet {
+            // `RootView` sets this when a dig starts and the scene sets the same value again
+            // once it is up. Nothing changed, so nothing is recomputed or published. The macro
+            // already withholds an equal `ink` from its observers because `Ink` is Equatable;
+            // this keeps the page's redraw from depending on that, and skips the work.
+            guard lightLevel != oldValue else { return }
+            ink = Theme.nightFraction(for: lightLevel) >= Theme.switchPoint ? .night : .day
+        }
     }
 
     private(set) var ink: Ink = .day
