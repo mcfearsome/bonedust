@@ -85,7 +85,12 @@ that safe.
 
 ## Team ID
 
-Game Center, like App Attest, is scoped to `teamID.bundleID`. Publishing under an
-organization means a different team from a personal membership — `make team-id` prints what
-the installed certificates actually claim, reading each certificate's `OU` rather than the
-parenthetical in its common name, which is the *user* id and a different value.
+Game Center, like App Attest, is scoped to `teamID.bundleID` — here
+`VHH2P6SR8R.dev.codenerd.bonedust`, the individual membership. The team and the bundle id
+are independent: Bonedust is published by Code Nerd LLC and signed by the personal team, and
+nothing in either system requires them to agree.
+
+`make team-id` prints what the installed certificates actually claim, reading each
+certificate's `OU` rather than the parenthetical in its common name — those are different
+values on this machine (`VHH2P6SR8R` against `KVYH9JS6NS`), and the parenthetical is the
+*user* id.

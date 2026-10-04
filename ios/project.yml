@@ -65,9 +65,14 @@ targets:
         # APP_ATTEST_APP_ID set -- so this string and the server's env var move together,
         # and a mismatch is a total attestation outage rather than a degraded one.
         #
-        # VHH2P6SR8R is the personal team. Published under Code Nerd LLC this becomes the
-        # LLC's Team ID, which is a different value: an organization membership is its own
-        # team. `make team-id` prints what the installed certificates actually say.
+        # VHH2P6SR8R is the personal membership, and it stays: Bonedust is published by
+        # Code Nerd LLC but signed by the individual team. Those are independent -- the
+        # bundle id does not have to match the team's name, and App Attest only cares that
+        # this string is the team actually signing the binary.
+        #
+        # If the LLC ever takes its own membership, that is a different Team ID and this
+        # line, DEVELOPMENT_TEAM, and the server's APP_ATTEST_APP_ID all move together.
+        # `make team-id` prints what the installed certificates actually say.
         BonedustAppAttestAppID: "VHH2P6SR8R.dev.codenerd.bonedust"
       debug:
         BonedustLedgerBaseURL: "https://api.bonedust.app"

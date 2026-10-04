@@ -399,3 +399,35 @@ to shade, and a test covers the hairline case.
 The test that found it first asserted the wrong threshold, and probing the actual pixel
 values rather than guessing is what turned "my assertion was too strict" into "and here is a
 genuine rendering bug underneath it".
+
+## Signed by the personal team, published by Code Nerd LLC
+
+`DEVELOPMENT_TEAM` stays `VHH2P6SR8R`, the individual Apple Developer Program membership,
+while the bundle id is `dev.codenerd.bonedust`. The two are independent — nothing in code
+signing, App Attest or Game Center requires a bundle id to match the signing team's name, and
+App Attest's `teamID.bundleID` only has to name the team actually signing the binary.
+
+One consequence worth knowing before submission rather than after: on an **individual**
+membership the App Store seller name is the person's legal name, not the LLC's. Showing
+"Code Nerd LLC" as the publisher needs an Organization membership, which needs a D-U-N-S
+number — worth confirming against Apple's current rules, which have moved in this area. It
+changes the store listing, not a line of code, so it is not blocking.
+
+If the LLC does take its own membership later, that is a *different* Team ID and three things
+move together or attestation stops entirely:
+
+1. `DEVELOPMENT_TEAM` in `ios/project.yml`
+2. `BonedustAppAttestAppID` in `ios/project.yml`
+3. `APP_ATTEST_APP_ID` wherever the server is deployed
+
+The third is the one that bites. `config/initializers/bonedust.rb` refuses to boot in
+production without it, and `AppAttest.verify_rp_id!` fails closed — so a stale value is a
+total attestation outage, not a degraded mode. `make team-id` reads each certificate's `OU`
+rather than the parenthetical in its common name, because those are different values here
+(`VHH2P6SR8R` against `KVYH9JS6NS`) and confusing them is exactly how that string goes wrong.
+
+The rename also found a real bug. `server/.env.example` still carried
+`dev.mcfearsome.bonedust` after the other four call sites were updated, because the search
+that found them filtered by file extension and `.env.example` has none. A fail-closed check
+is only as good as the config it compares against, and an example env file is where someone
+copies production values from.
