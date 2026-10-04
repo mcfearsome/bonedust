@@ -39,7 +39,7 @@ final class DigScene: SKScene {
     /// The palette the page is drawn in. A scene has no SwiftUI environment, so the
     /// view hands it over; `configureRenderer()` then sets its light level.
     var theme: Theme?
-    /// Suppresses particle bursts, per §7.
+    /// Suppresses particle bursts, per §7, and the fracture bloom's growth.
     var reducedMotion = false
     /// Cosmetic brush trail (§5). The default tints dust by the layer coming off, per §3;
     /// any earned trail overrides that with its own colour, which is the whole point of
@@ -480,7 +480,19 @@ final class DigScene: SKScene {
     /// This is the *motion* half of spec §5. It exists for 200ms and then it is gone,
     /// which is what lets the same red sit flat and permanent on a button without the
     /// two reading as the same thing. The lasting record is the hatch, in SlabRenderer.
-    func bloomFracture(at point: Vec2) {
+    ///
+    /// Under Reduce Motion it fades in place and does not grow. An expanding shape at
+    /// the point of attention is exactly what that setting exists to suppress, and
+    /// nothing is lost: the hatch carries the information either way.
+    ///
+    /// Either source counts. `DigView` hands the scene the in-app toggle and the system
+    /// setting already combined, but only once, when the dig starts, so the system
+    /// flag is read live here as well: switching Reduce Motion on mid-dig takes effect
+    /// at the next fracture instead of the next slab. It is a parameter, not a read in
+    /// the body, so a test can drive both branches. The default is the real setting.
+    func bloomFracture(
+        at point: Vec2, systemReduceMotion: Bool = UIAccessibility.isReduceMotionEnabled
+    ) {
         // A child of the slab, placed with the same grid-to-node conversion as
         // `emitDust`. Task 6 inset the slab by `mountMargin` so the mount can show
         // around it, so anything positioned against the scene instead lands up to 6pt
@@ -496,9 +508,11 @@ final class DigScene: SKScene {
         )
         bloom.zPosition = 2
         slab.addChild(bloom)
+        let fade = SKAction.fadeOut(withDuration: 0.2)
+        let reduced = reducedMotion || systemReduceMotion
         bloom.run(
             .sequence([
-                .group([.scale(to: 5, duration: 0.2), .fadeOut(withDuration: 0.2)]),
+                reduced ? fade : .group([.scale(to: 5, duration: 0.2), fade]),
                 .removeFromParent(),
             ]),
             withKey: DigScene.bloomActionKey

@@ -918,16 +918,27 @@ final class DigSceneBackdropTests: XCTestCase {
         }
     }
 
-    /// A bloom is meant to be gone in 200ms, and one that never left would pile up a
-    /// shape node on the slab for every fracture of a long session.
+    /// What a bloom did, read back once it had finished.
+    private struct PlayedBloom {
+        let node: SKShapeNode
+        /// Read while the bloom was still on the slab.
+        let scheduledDuration: TimeInterval
+        let removedItself: Bool
+    }
+
+    /// Fires a bloom with `fire` and lets it run to the end.
     ///
     /// SpriteKit only advances actions while the view is on screen, so this puts the
-    /// view in a window and runs the loop until the bloom has gone. It does not put a
-    /// clock on the fade: the first frame can arrive a few hundred milliseconds late,
-    /// which would make any wall-clock bound flaky. The 200ms is pinned on the action
-    /// itself instead.
-    func testTheBloomRemovesItselfAndIsScheduledForTwoHundredMilliseconds() throws {
-        let (scene, view) = present()
+    /// view in a window and runs the loop until the bloom has gone. It puts no clock on
+    /// the fade: the first frame can arrive a few hundred milliseconds late, which would
+    /// make any wall-clock bound flaky.
+    ///
+    /// The node comes back so a test can read what the actions did to it. An `SKAction`
+    /// cannot be inspected, but a finished node keeps what its actions left: a scale
+    /// action ends on its target and a fade ends at alpha 0, however late any frame was.
+    private func playBloom(
+        in scene: DigScene, view: SKView, fire: (DigScene) -> Void
+    ) throws -> PlayedBloom {
         let windowScene = try XCTUnwrap(
             UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first,
             "the test host has no window scene, so SpriteKit's clock cannot run"
@@ -941,16 +952,92 @@ final class DigSceneBackdropTests: XCTestCase {
             window.isHidden = true
         }
 
-        scene.bloomFracture(at: Vec2(48, 64))
+        fire(scene)
         let bloom = try XCTUnwrap(blooms(in: scene).first)
         let fade = try XCTUnwrap(bloom.action(forKey: DigScene.bloomActionKey))
-        XCTAssertEqual(fade.duration, 0.2, accuracy: 0.001, "the bloom is meant to be gone in 200ms")
 
         let deadline = Date().addingTimeInterval(3)
         while !blooms(in: scene).isEmpty, Date() < deadline {
             RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.02))
         }
-        XCTAssertTrue(blooms(in: scene).isEmpty, "the bloom never left the slab")
+        return PlayedBloom(
+            node: bloom, scheduledDuration: fade.duration, removedItself: blooms(in: scene).isEmpty
+        )
+    }
+
+    /// A bloom is meant to be gone in 200ms, and one that never left would pile up a
+    /// shape node on the slab for every fracture of a long session. The 200ms is pinned
+    /// on the action itself rather than on a clock; see `playBloom`.
+    func testTheBloomRemovesItselfAndIsScheduledForTwoHundredMilliseconds() throws {
+        let (scene, view) = present()
+        let played = try playBloom(in: scene, view: view) {
+            $0.bloomFracture(at: Vec2(48, 64), systemReduceMotion: false)
+        }
+        XCTAssertEqual(
+            played.scheduledDuration, 0.2, accuracy: 0.001, "the bloom is meant to be gone in 200ms"
+        )
+        XCTAssertTrue(played.removedItself, "the bloom never left the slab")
+    }
+
+    /// The control for the Reduce Motion test below. A finished bloom keeps the scale its
+    /// action left it at, so this shows the readback can see a scale action at all. Without
+    /// it, `xScale == 1` under Reduce Motion would also pass if the readback were blind.
+    func testTheBloomGrowsToFiveTimesItsSizeWhenMotionIsNotReduced() throws {
+        let (scene, view) = present()
+        scene.reducedMotion = false
+        let played = try playBloom(in: scene, view: view) {
+            $0.bloomFracture(at: Vec2(48, 64), systemReduceMotion: false)
+        }
+        XCTAssertTrue(played.removedItself, "the bloom never left the slab")
+        XCTAssertEqual(played.node.xScale, 5, accuracy: 0.001)
+        XCTAssertEqual(played.node.yScale, 5, accuracy: 0.001)
+        XCTAssertEqual(played.node.alpha, 0, accuracy: 0.001)
+    }
+
+    /// Spec §5 and Reduce Motion. An expanding shape at the point of attention is what the
+    /// setting exists to suppress, so the bloom fades where it stands: still there, still
+    /// red, still gone in 200ms, never any bigger than it was born. The permanent hatch
+    /// carries the information either way.
+    ///
+    /// Both sources are driven separately, because either one alone must be enough: the
+    /// system flag is read live, and the scene's own flag is the in-app toggle.
+    func testUnderReduceMotionTheBloomFadesInPlaceAndNeverGrows() throws {
+        for (name, sceneFlag, systemFlag) in [
+            ("the system setting", false, true),
+            ("the in-app toggle", true, false),
+        ] {
+            let (scene, view) = present()
+            scene.reducedMotion = sceneFlag
+            let played = try playBloom(in: scene, view: view) {
+                $0.bloomFracture(at: Vec2(48, 64), systemReduceMotion: systemFlag)
+            }
+            XCTAssertTrue(played.removedItself, "\(name): the bloom never left the slab")
+            XCTAssertEqual(
+                played.node.alpha, 0, accuracy: 0.001,
+                "\(name): the fade did not run, so the scale check below proves nothing"
+            )
+            XCTAssertEqual(played.node.xScale, 1, "\(name): the bloom grew under Reduce Motion")
+            XCTAssertEqual(played.node.yScale, 1, "\(name): the bloom grew under Reduce Motion")
+            XCTAssertEqual(
+                played.scheduledDuration, 0.2, accuracy: 0.001,
+                "\(name): the reduced bloom is still 200ms"
+            )
+        }
+    }
+
+    /// `apply` fires the bloom with no argument, so the live system setting is what it
+    /// gets. The suite cannot flip that setting, so this asserts whichever state the run
+    /// is in; a default of `false` would only be caught with Reduce Motion switched on in
+    /// the simulator's Settings.
+    func testTheDefaultBloomFollowsTheSystemSetting() throws {
+        let (scene, view) = present()
+        scene.reducedMotion = false
+        let played = try playBloom(in: scene, view: view) { $0.bloomFracture(at: Vec2(48, 64)) }
+        let reduced = UIAccessibility.isReduceMotionEnabled
+        XCTAssertEqual(
+            played.node.xScale, reduced ? 1 : 5, accuracy: 0.001,
+            "Reduce Motion is \(reduced ? "on" : "off")"
+        )
     }
 
     /// `StrokeResult.cracksStarted` is the signal `DigEngine` already uses for
