@@ -140,14 +140,18 @@ final class SlabRendererTests: XCTestCase {
         grid.cells[bone].depth = 0
         grid.cells[bone].flags |= SlabGrid.Flag.bone
 
-        var renderer = SlabRenderer()
-        renderer.redrawEverything(grid)
-        func luma(_ x: Int, _ y: Int) -> Int {
-            let offset = (y * SlabGrid.width + x) * 4
-            return Int(renderer.pixels[offset]) + Int(renderer.pixels[offset + 1])
-                + Int(renderer.pixels[offset + 2])
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: .standard, lightLevel: level)
+            renderer.redrawEverything(grid)
+            func luma(_ x: Int, _ y: Int) -> Int {
+                let offset = (y * SlabGrid.width + x) * 4
+                return Int(renderer.pixels[offset]) + Int(renderer.pixels[offset + 1])
+                    + Int(renderer.pixels[offset + 2])
+            }
+            XCTAssertGreaterThan(
+                luma(48, 64), luma(10, 10), "bone should read brighter than topsoil at lightLevel \(level)"
+            )
         }
-        XCTAssertGreaterThan(luma(48, 64), luma(10, 10), "bone should read brighter than topsoil")
     }
 
     func testTheBoneTellBrightensSandstoneOverBone() {
@@ -161,37 +165,120 @@ final class SlabRendererTests: XCTestCase {
         // Remove cosmetic noise so the comparison is only about the tell.
         for index in 0..<SlabGrid.cellCount { grid.cells[index].noise = 0 }
 
-        var renderer = SlabRenderer()
-        renderer.redrawEverything(grid)
-        func luma(_ x: Int, _ y: Int) -> Int {
-            let offset = (y * SlabGrid.width + x) * 4
-            return Int(renderer.pixels[offset]) + Int(renderer.pixels[offset + 1])
-                + Int(renderer.pixels[offset + 2])
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: .standard, lightLevel: level)
+            renderer.redrawEverything(grid)
+            func luma(_ x: Int, _ y: Int) -> Int {
+                let offset = (y * SlabGrid.width + x) * 4
+                return Int(renderer.pixels[offset]) + Int(renderer.pixels[offset + 1])
+                    + Int(renderer.pixels[offset + 2])
+            }
+            XCTAssertGreaterThan(
+                luma(30, 30), luma(60, 60), "sandstone over bone is not tinted at lightLevel \(level)"
+            )
         }
-        XCTAssertGreaterThan(luma(30, 30), luma(60, 60), "sandstone over bone is not tinted")
     }
 
     func testDirtyRedrawMatchesAFullRedraw() {
         // The renderer inflates the dirty rect by one cell for edge shading. If that
         // inflation is wrong, digging leaves stale seams, which this catches.
         let site = ContentCatalog.shared.site("hell_creek")!
-        var sim = SlabSimulation(seed: 88, site: site)
-        var incremental = SlabRenderer(palette: site.palette)
-        incremental.redrawEverything(sim.grid)
-        _ = sim.consumeDirty()
+        for level in shippedLightLevels {
+            var sim = SlabSimulation(seed: 88, site: site)
+            var incremental = SlabRenderer(palette: site.palette, lightLevel: level)
+            incremental.redrawEverything(sim.grid)
+            _ = sim.consumeDirty()
 
-        sim.beginStroke(at: Vec2(20, 30), tool: .brush)
-        for step in 0..<120 {
-            let x = 20 + Float(step) * 0.5
-            sim.moveStroke(to: Vec2(x, 30 + Float(step) * 0.3), deltaMillis: 16.67, tool: .brush)
+            sim.beginStroke(at: Vec2(20, 30), tool: .brush)
+            for step in 0..<120 {
+                let x = 20 + Float(step) * 0.5
+                sim.moveStroke(to: Vec2(x, 30 + Float(step) * 0.3), deltaMillis: 16.67, tool: .brush)
+            }
+            sim.endStroke()
+            incremental.redraw(sim.grid, region: sim.consumeDirty())
+
+            var full = SlabRenderer(palette: site.palette, lightLevel: level)
+            full.redrawEverything(sim.grid)
+            XCTAssertEqual(incremental.pixels, full.pixels,
+                           "incremental redraw left stale pixels at lightLevel \(level)")
         }
-        sim.endStroke()
-        incremental.redraw(sim.grid, region: sim.consumeDirty())
+    }
 
-        var full = SlabRenderer(palette: site.palette)
-        full.redrawEverything(sim.grid)
-        XCTAssertEqual(incremental.pixels, full.pixels,
-                       "incremental redraw left stale pixels")
+    /// A slab with a 6x6 block of every kind of cell `colour()` decides a colour for, and a
+    /// different shade step across each block. Blocks, so a run of bone is long enough to take
+    /// an ink edge and a cracked one carries the hatch as well.
+    private func everyKindOfCell() -> SlabGrid {
+        let bone = SlabGrid.Flag.bone, gem = SlabGrid.Flag.gem
+        let rock = SlabGrid.Flag.rock, cracked = SlabGrid.Flag.cracked
+        let kinds: [(depth: UInt8, flags: UInt8, wear: Float)] = [
+            (3, 0, 0), (2, 0, 0), (1, 0, 0), (0, 0, 0),        // the four layers
+            (2, 0, 0.6), (3, rock, 0), (0, rock, 0),           // worn clay, buried rock, bare rock
+            (0, bone, 0), (0, bone | cracked, 0),              // bone, cracked bone
+            (0, gem, 0), (1, bone, 0), (2, bone, 0.4),         // a gem, the tell, worn buried bone
+        ]
+        var grid = SlabGrid()
+        for y in 0..<SlabGrid.height {
+            for x in 0..<SlabGrid.width {
+                let kind = kinds[((x / 6) + 3 * (y / 6)) % kinds.count]
+                let noise = Float((x * 37 + y * 101) % 201) / 100 - 1
+                grid[x, y] = SlabGrid.Cell(depth: kind.depth, flags: kind.flags, wear: kind.wear, noise: noise)
+            }
+        }
+        return grid
+    }
+
+    /// The light level is the last thing `colour()` does, after the wear, the ink edge, the
+    /// hatch and the shade step, so a pixel at any light level is exactly the full-light pixel
+    /// scaled. Anything else means some step ran on a colour that was already dimmed, or on one
+    /// that never was: on night_dig an ink edge drawn toward ink *after* dimming comes out
+    /// lighter than the one the contrast test measures.
+    ///
+    /// This compares real renderer output cell by cell over every kind of cell, with and without
+    /// the X-ray goggles, so it holds for the paths the tests below only sample.
+    func testTheLightLevelScalesTheFinishedPixelOfEveryKindOfCell() {
+        let grid = everyKindOfCell()
+        for xray in [false, true] {
+            var full = SlabRenderer(palette: .standard, lightLevel: 1)
+            full.revealBuriedBone = xray
+            full.redrawEverything(grid)
+            let colours = Set((0..<SlabGrid.width * SlabGrid.height).map { index in
+                let pixel = full.pixel(index % SlabGrid.width, index / SlabGrid.width)
+                return "\(pixel.r),\(pixel.g),\(pixel.b)"
+            })
+            XCTAssertGreaterThan(colours.count, 40, "the grid does not exercise the renderer, so this proves nothing")
+
+            for level in shippedLightLevels where level != 1 {
+                var lit = SlabRenderer(palette: .standard, lightLevel: level)
+                lit.revealBuriedBone = xray
+                lit.redrawEverything(grid)
+                XCTAssertNotEqual(lit.pixels, full.pixels, "lightLevel \(level) changed nothing")
+                var wrong: [String] = []
+                for y in 0..<SlabGrid.height {
+                    for x in 0..<SlabGrid.width where lit.pixel(x, y) != full.pixel(x, y).scaled(level) {
+                        wrong.append("(\(x), \(y))")
+                    }
+                }
+                XCTAssertEqual(
+                    wrong.count, 0,
+                    "lightLevel \(level), goggles \(xray): \(wrong.count) cells are not the full-light pixel scaled, first \(wrong.prefix(4))"
+                )
+            }
+        }
+    }
+
+    /// The dust is the colour of the layer coming off. By night it has to be dimmed with the
+    /// slab, or a bright speck flies off a dark one.
+    func testTheDustIsLitLikeTheSlab() {
+        let palette = SlabPalette.standard
+        for level in shippedLightLevels {
+            let renderer = SlabRenderer(palette: palette, lightLevel: level)
+            for depth in UInt8(0)...3 {
+                XCTAssertEqual(
+                    renderer.dustColour(forLayer: depth), palette.layerColor(depth: depth).scaled(level),
+                    "layer \(depth) at lightLevel \(level)"
+                )
+            }
+        }
     }
 }
 
@@ -1133,7 +1220,23 @@ final class DigSceneBackdropTests: XCTestCase {
     }
 }
 
+/// The light levels that ship: 1.0 for every day site and 0.55 for night_dig. Read from the
+/// catalogue, so a new dim site is covered without anyone editing a test.
+///
+/// `SlabRenderer.colour()` scales every cell by this, last, and no renderer test used to set it:
+/// they all ran at 1.0, so everything that is different about night_dig was untested. That is
+/// how an ink edge that measured 4.76:1 passed while the pixels on screen were 2.78:1.
+private let shippedLightLevels: [Float] = Array(
+    Set(ContentCatalog.shared.sites.map { $0.modifiers.lightLevel })
+).sorted()
+
 extension SlabRenderer {
+    /// A renderer lit the way a site's slab is.
+    fileprivate init(palette: SlabPalette, lightLevel: Float) {
+        self.init(palette: palette)
+        self.lightLevel = lightLevel
+    }
+
     /// One pixel of the rendered buffer, for tests that want to see what `colour()` decided.
     fileprivate func pixel(_ x: Int, _ y: Int) -> RGB8 {
         let offset = (y * SlabGrid.width + x) * SlabRenderer.bytesPerPixel
@@ -1199,6 +1302,9 @@ final class FractureHatchTests: XCTestCase {
     /// Noise is zero, so the hatch is the only thing that can move a pixel. Only the
     /// patch's interior is sampled, because its rim belongs to the renderer's edge
     /// treatment, not to this feature.
+    ///
+    /// At every light level that ships. The renderer scales each cell by it last, so each
+    /// expectation is the colour the hatch decides, then scaled.
     func testTheRendererHatchesCrackedBoneAndLeavesIntactBoneAlone() {
         let palette = SlabPalette.standard
         var grid = SlabGrid()
@@ -1209,32 +1315,45 @@ final class FractureHatchTests: XCTestCase {
                 grid[x, y] = SlabGrid.Cell(depth: 0, flags: flags, wear: 0, noise: 0)
             }
         }
-        var renderer = SlabRenderer(palette: palette)
-        renderer.redrawEverything(grid)
 
-        var hatchedCells = 0
-        var plainCells = 0
-        for y in 22..<38 {
-            for x in 22..<28 {
-                let drawn = renderer.pixel(x, y)
-                if SlabRenderer.isHatched(x: x, y: y) {
-                    hatchedCells += 1
-                    XCTAssertEqual(drawn, SlabRenderer.hatched(palette.crackedBone, x: x, y: y),
-                                   "cracked cell (\(x), \(y)) is on a hatch stripe and was not hatched")
-                    XCTAssertLessThan(drawn.relativeLuminance, palette.crackedBone.relativeLuminance)
-                } else {
-                    plainCells += 1
-                    XCTAssertEqual(drawn, palette.crackedBone,
-                                   "cracked cell (\(x), \(y)) is between stripes and was changed")
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.redrawEverything(grid)
+            let cracked = palette.crackedBone.scaled(level)
+
+            var hatchedCells = 0
+            var plainCells = 0
+            for y in 22..<38 {
+                for x in 22..<28 {
+                    let drawn = renderer.pixel(x, y)
+                    if SlabRenderer.isHatched(x: x, y: y) {
+                        hatchedCells += 1
+                        XCTAssertEqual(
+                            drawn, SlabRenderer.hatched(palette.crackedBone, x: x, y: y).scaled(level),
+                            "cracked cell (\(x), \(y)) is on a hatch stripe and was not hatched, at lightLevel \(level)"
+                        )
+                        XCTAssertLessThan(
+                            drawn.relativeLuminance, cracked.relativeLuminance,
+                            "the hatch is not darker than plain cracked bone at lightLevel \(level)"
+                        )
+                    } else {
+                        plainCells += 1
+                        XCTAssertEqual(
+                            drawn, cracked,
+                            "cracked cell (\(x), \(y)) is between stripes and was changed, at lightLevel \(level)"
+                        )
+                    }
+                }
+                for x in 32..<38 {
+                    XCTAssertEqual(
+                        renderer.pixel(x, y), palette.bone.scaled(level),
+                        "intact bone at (\(x), \(y)) took the hatch, at lightLevel \(level)"
+                    )
                 }
             }
-            for x in 32..<38 {
-                XCTAssertEqual(renderer.pixel(x, y), palette.bone,
-                               "intact bone at (\(x), \(y)) took the hatch")
-            }
+            XCTAssertGreaterThan(hatchedCells, 0, "no sampled cell was on a stripe")
+            XCTAssertGreaterThan(plainCells, 0, "every sampled cell was on a stripe")
         }
-        XCTAssertGreaterThan(hatchedCells, 0, "no sampled cell was on a stripe")
-        XCTAssertGreaterThan(plainCells, 0, "every sampled cell was on a stripe")
     }
 }
 
@@ -1412,19 +1531,22 @@ final class CelShadingTests: XCTestCase {
                 grid[x, y] = SlabGrid.Cell(depth: 3, flags: 0, wear: 0, noise: noise)
             }
         }
-        var renderer = SlabRenderer(palette: palette)
-        renderer.redrawEverything(grid)
-
         let amount = SimTuning.standard.cellNoise
-        let expected = Set([
-            palette.topsoil.scaled(1 - amount), palette.topsoil, palette.topsoil.scaled(1 + amount),
-        ].map(packed))
-        var seen = Set<UInt32>()
-        for y in 0..<SlabGrid.height {
-            for x in 0..<SlabGrid.width { seen.insert(packed(renderer.pixel(x, y))) }
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.redrawEverything(grid)
+
+            // The shade steps, each then dimmed by the light level.
+            let expected = Set([
+                palette.topsoil.scaled(1 - amount), palette.topsoil, palette.topsoil.scaled(1 + amount),
+            ].map { packed($0.scaled(level)) })
+            var seen = Set<UInt32>()
+            for y in 0..<SlabGrid.height {
+                for x in 0..<SlabGrid.width { seen.insert(packed(renderer.pixel(x, y))) }
+            }
+            XCTAssertEqual(seen, expected, "lightLevel \(level)")
+            XCTAssertEqual(seen.count, 3, "the three shade steps collapsed at lightLevel \(level)")
         }
-        XCTAssertEqual(seen, expected)
-        XCTAssertEqual(seen.count, 3)
     }
 
     /// `colour()` once read `SimTuning.standard.cellNoise`, which would have made the debug
@@ -1434,14 +1556,18 @@ final class CelShadingTests: XCTestCase {
         var grid = SlabGrid()
         grid[10, 10] = SlabGrid.Cell(depth: 3, flags: 0, wear: 0, noise: 0.9)
 
-        var renderer = SlabRenderer(palette: palette)
-        renderer.tuning.cellNoise = 0.2
-        renderer.redrawEverything(grid)
-        XCTAssertEqual(renderer.pixel(10, 10), palette.topsoil.scaled(0.8))
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.tuning.cellNoise = 0.2
+            renderer.redrawEverything(grid)
+            XCTAssertEqual(
+                renderer.pixel(10, 10), palette.topsoil.scaled(0.8).scaled(level), "lightLevel \(level)"
+            )
 
-        renderer.tuning.cellNoise = 0
-        renderer.redrawEverything(grid)
-        XCTAssertEqual(renderer.pixel(10, 10), palette.topsoil)
+            renderer.tuning.cellNoise = 0
+            renderer.redrawEverything(grid)
+            XCTAssertEqual(renderer.pixel(10, 10), palette.topsoil.scaled(level), "lightLevel \(level)")
+        }
     }
 
     /// Wear still shows before a cell breaks through, in steps instead of a gradient.
@@ -1455,20 +1581,26 @@ final class CelShadingTests: XCTestCase {
                 depth: 3, flags: 0, wear: Float(x) / Float(SlabGrid.width), noise: 0
             )
         }
-        var renderer = SlabRenderer(palette: palette)
-        renderer.redrawEverything(grid)
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.redrawEverything(grid)
 
-        let row = (0..<SlabGrid.width).map { renderer.pixel($0, 10) }
-        XCTAssertEqual(Set(row.map(packed)).count, 5, "the unworn colour plus four wear steps")
-        XCTAssertEqual(row.first, palette.topsoil)
-        XCTAssertEqual(
-            row.last, palette.topsoil.lerp(to: palette.clay, SimTuning.standard.wearColorBlend)
-        )
-        for index in 1..<row.count {
-            XCTAssertGreaterThanOrEqual(
-                distance(row[index], palette.topsoil), distance(row[index - 1], palette.topsoil),
-                "wear stepped back toward the surface at column \(index)"
+            let unworn = palette.topsoil.scaled(level)
+            let row = (0..<SlabGrid.width).map { renderer.pixel($0, 10) }
+            XCTAssertEqual(
+                Set(row.map(packed)).count, 5, "the unworn colour plus four wear steps, at lightLevel \(level)"
             )
+            XCTAssertEqual(row.first, unworn)
+            XCTAssertEqual(
+                row.last,
+                palette.topsoil.lerp(to: palette.clay, SimTuning.standard.wearColorBlend).scaled(level)
+            )
+            for index in 1..<row.count {
+                XCTAssertGreaterThanOrEqual(
+                    distance(row[index], unworn), distance(row[index - 1], unworn),
+                    "wear stepped back toward the surface at column \(index), lightLevel \(level)"
+                )
+            }
         }
     }
 
@@ -1487,29 +1619,34 @@ final class CelShadingTests: XCTestCase {
         fill(&grid, x: 20..<40, y: 20..<40,
              with: SlabGrid.Cell(depth: 1, flags: SlabGrid.Flag.bone, wear: 0, noise: 0))
 
-        // As shipped: a flat tint over the bone and nothing outside it.
-        var renderer = SlabRenderer(palette: palette)
-        renderer.redrawEverything(grid)
-        let tint = palette.sandstone.lerp(to: palette.bone, SimTuning.standard.boneTellTint)
-        for y in 18..<42 {
-            for x in 18..<42 {
-                let inside = (20..<40).contains(x) && (20..<40).contains(y)
-                XCTAssertEqual(
-                    renderer.pixel(x, y), inside ? tint : palette.sandstone, "cell (\(x), \(y))"
-                )
+        for level in shippedLightLevels {
+            // As shipped: a flat tint over the bone and nothing outside it.
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.redrawEverything(grid)
+            let tint = palette.sandstone.lerp(to: palette.bone, SimTuning.standard.boneTellTint).scaled(level)
+            let plain = palette.sandstone.scaled(level)
+            for y in 18..<42 {
+                for x in 18..<42 {
+                    let inside = (20..<40).contains(x) && (20..<40).contains(y)
+                    XCTAssertEqual(
+                        renderer.pixel(x, y), inside ? tint : plain, "cell (\(x), \(y)), lightLevel \(level)"
+                    )
+                }
             }
-        }
 
-        // One drag the other way: dots on their grid, and no tint under them.
-        renderer.tuning.boneTellTint = 0
-        renderer.tuning.boneTellStipple = 0.60
-        renderer.redrawEverything(grid)
-        let dot = palette.sandstone.lerp(to: palette.bone, 0.60)
-        for y in 18..<42 {
-            for x in 18..<42 {
-                let inside = (20..<40).contains(x) && (20..<40).contains(y)
-                let expected = inside && SlabRenderer.isStippled(x: x, y: y) ? dot : palette.sandstone
-                XCTAssertEqual(renderer.pixel(x, y), expected, "stipple only, cell (\(x), \(y))")
+            // One drag the other way: dots on their grid, and no tint under them.
+            renderer.tuning.boneTellTint = 0
+            renderer.tuning.boneTellStipple = 0.60
+            renderer.redrawEverything(grid)
+            let dot = palette.sandstone.lerp(to: palette.bone, 0.60).scaled(level)
+            for y in 18..<42 {
+                for x in 18..<42 {
+                    let inside = (20..<40).contains(x) && (20..<40).contains(y)
+                    let expected = inside && SlabRenderer.isStippled(x: x, y: y) ? dot : plain
+                    XCTAssertEqual(
+                        renderer.pixel(x, y), expected, "stipple only, cell (\(x), \(y)), lightLevel \(level)"
+                    )
+                }
             }
         }
     }
@@ -1520,15 +1657,21 @@ final class CelShadingTests: XCTestCase {
         let palette = SlabPalette.standard
         var grid = SlabGrid()
         fill(&grid, x: 20..<30, y: 20..<30, with: exposedBone())
-        var renderer = SlabRenderer(palette: palette)
-        renderer.redrawEverything(grid)
 
-        let edge = SlabRenderer.inked(palette.bone)
-        XCTAssertGreaterThan(distance(edge, palette.bone), 100, "the edge must be visibly different")
-        for y in 20..<30 {
-            for x in 20..<30 {
-                let expected = (x == 29 || y == 29) ? edge : palette.bone
-                XCTAssertEqual(renderer.pixel(x, y), expected, "cell (\(x), \(y))")
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.redrawEverything(grid)
+
+            let edge = SlabRenderer.inked(palette.bone).scaled(level)
+            let bone = palette.bone.scaled(level)
+            XCTAssertGreaterThan(
+                distance(edge, bone), 100, "the edge must be visibly different at lightLevel \(level)"
+            )
+            for y in 20..<30 {
+                for x in 20..<30 {
+                    let expected = (x == 29 || y == 29) ? edge : bone
+                    XCTAssertEqual(renderer.pixel(x, y), expected, "cell (\(x), \(y)), lightLevel \(level)")
+                }
             }
         }
     }
@@ -1539,14 +1682,23 @@ final class CelShadingTests: XCTestCase {
         let palette = SlabPalette.standard
         var grid = SlabGrid()
         fill(&grid, x: 20..<32, y: 50..<52, with: exposedBone())
-        var renderer = SlabRenderer(palette: palette)
-        renderer.redrawEverything(grid)
 
-        for y in 50..<52 {
-            for x in 20..<31 {
-                XCTAssertEqual(renderer.pixel(x, y), palette.bone, "interior cell (\(x), \(y)) was inked")
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.redrawEverything(grid)
+
+            for y in 50..<52 {
+                for x in 20..<31 {
+                    XCTAssertEqual(
+                        renderer.pixel(x, y), palette.bone.scaled(level),
+                        "interior cell (\(x), \(y)) was inked, lightLevel \(level)"
+                    )
+                }
+                XCTAssertEqual(
+                    renderer.pixel(31, y), SlabRenderer.inked(palette.bone).scaled(level),
+                    "end cap (31, \(y)), lightLevel \(level)"
+                )
             }
-            XCTAssertEqual(renderer.pixel(31, y), SlabRenderer.inked(palette.bone), "end cap (31, \(y))")
         }
     }
 
@@ -1557,10 +1709,16 @@ final class CelShadingTests: XCTestCase {
         var grid = SlabGrid()
         fill(&grid, x: 60..<62, y: 60..<62,
              with: SlabGrid.Cell(depth: 0, flags: SlabGrid.Flag.gem, wear: 0, noise: 0))
-        var renderer = SlabRenderer(palette: palette)
-        renderer.redrawEverything(grid)
-        for y in 60..<62 {
-            for x in 60..<62 { XCTAssertEqual(renderer.pixel(x, y), palette.gem, "gem cell (\(x), \(y))") }
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.redrawEverything(grid)
+            for y in 60..<62 {
+                for x in 60..<62 {
+                    XCTAssertEqual(
+                        renderer.pixel(x, y), palette.gem.scaled(level), "gem cell (\(x), \(y)), lightLevel \(level)"
+                    )
+                }
+            }
         }
     }
 
@@ -1571,26 +1729,32 @@ final class CelShadingTests: XCTestCase {
         let palette = SlabPalette.standard
         var grid = SlabGrid()
         fill(&grid, x: 20..<30, y: 20..<30, with: exposedBone(extra: SlabGrid.Flag.cracked))
-        var renderer = SlabRenderer(palette: palette)
-        renderer.redrawEverything(grid)
 
-        let inked = SlabRenderer.inked(palette.crackedBone)
-        var checked = 0
-        for y in 22..<28 {
-            let drawn = renderer.pixel(29, y)
-            if SlabRenderer.isHatched(x: 29, y: y) {
-                checked += 1
-                XCTAssertLessThan(drawn.relativeLuminance, inked.relativeLuminance, "no hatch at (29, \(y))")
-                XCTAssertLessThan(
-                    drawn.relativeLuminance,
-                    SlabRenderer.hatched(palette.crackedBone, x: 29, y: y).relativeLuminance,
-                    "no ink at (29, \(y))"
-                )
-            } else {
-                XCTAssertEqual(drawn, inked, "an edge cell between stripes at (29, \(y))")
+        for level in shippedLightLevels {
+            var renderer = SlabRenderer(palette: palette, lightLevel: level)
+            renderer.redrawEverything(grid)
+
+            let inked = SlabRenderer.inked(palette.crackedBone).scaled(level)
+            var checked = 0
+            for y in 22..<28 {
+                let drawn = renderer.pixel(29, y)
+                if SlabRenderer.isHatched(x: 29, y: y) {
+                    checked += 1
+                    XCTAssertLessThan(
+                        drawn.relativeLuminance, inked.relativeLuminance,
+                        "no hatch at (29, \(y)), lightLevel \(level)"
+                    )
+                    XCTAssertLessThan(
+                        drawn.relativeLuminance,
+                        SlabRenderer.hatched(palette.crackedBone, x: 29, y: y).scaled(level).relativeLuminance,
+                        "no ink at (29, \(y)), lightLevel \(level)"
+                    )
+                } else {
+                    XCTAssertEqual(drawn, inked, "an edge cell between stripes at (29, \(y)), lightLevel \(level)")
+                }
             }
+            XCTAssertGreaterThan(checked, 0, "no sampled cell was on a stripe")
         }
-        XCTAssertGreaterThan(checked, 0, "no sampled cell was on a stripe")
     }
 
     /// The ink edge asks how long the run behind a cell is, which reads two cells back.
@@ -1599,8 +1763,11 @@ final class CelShadingTests: XCTestCase {
     /// its end cap to ink. A stale pixel here is a seam left behind by digging.
     func testAnIncrementalRedrawCatchesAnEdgeTwoCellsFromTheChange() {
         let palette = SlabPalette.standard
-        for vertical in [false, true] {
-            let name = vertical ? "vertical" : "horizontal"
+        let cases = shippedLightLevels.flatMap { level in
+            [false, true].map { (level: level, vertical: $0) }
+        }
+        for (level, vertical) in cases {
+            let name = "\(vertical ? "vertical" : "horizontal") at lightLevel \(level)"
             func at(_ along: Int) -> (x: Int, y: Int) {
                 vertical ? (60, 20 + along) : (20 + along, 50)
             }
@@ -1612,9 +1779,9 @@ final class CelShadingTests: XCTestCase {
             var after = before
             after[at(0).x, at(0).y].depth = 0
 
-            var incremental = SlabRenderer(palette: palette)
+            var incremental = SlabRenderer(palette: palette, lightLevel: level)
             incremental.redrawEverything(before)
-            var full = SlabRenderer(palette: palette)
+            var full = SlabRenderer(palette: palette, lightLevel: level)
             full.redrawEverything(after)
             let changed = at(2)
             XCTAssertNotEqual(
