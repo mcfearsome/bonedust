@@ -257,34 +257,35 @@ cells back, so clearing a cell left the cell two positions behind it stale —
 reproduced at (22,50) and (60,22). `redraw()` now inflates one back and two
 forward.
 
-### 7a. The tell becomes a stipple
+### 7a. The tell: the tint stays, the stipple is built but off
 
-A naive posterize would have deleted the game's only pre-exposure read on the
-fossil. `boneTellTint` is 0.20, and at 6 levels the tinted and untinted
-sandstone quantize to the identical byte triple -- the tell goes pixel-for-pixel
-invisible. Quantizing only the shade avoids that, but the tell is worth
-improving on its own terms.
+An earlier draft of this spec replaced the 20% `boneTellTint` with a stipple —
+cells where `x % 2 == 0 && y % 2 == 0` taken 60% toward bone — on the grounds
+that a posterize would erase a tint. **That reasoning does not survive §7.**
 
-**The tell becomes a pattern instead of a tint**: on depth-1 sandstone over
-bone, cells where `x % 2 == 0 && y % 2 == 0` go 60% toward bone. A pattern
-survives any future posterize, and hatching is the correct natural-history-plate
-idiom. Rendered at 9x with the cel pass applied, the stipple reads the buried shell's
-outline clearly. How much better it is than the tint is **not settled**: a
-separate 5x render of the shipped renderer found the 20% tint perfectly
-visible, so the earlier claim that it is "nearly invisible" overstated the
-case. What is certain is that the stipple survives a posterize and the tint
-does not, and that the stipple is the louder of the two. Which is *right* is a
-device call, not a measurement — see the A/B step below.
+The posterize that erased the tint was the per-channel one, and §7 abandoned it:
+the shipped cel pass quantizes the *lighting* and leaves every palette value
+exact. A multiplicative shade step does not erase a 20% tint. The fix to the
+hue-shift bug removed the stipple's whole justification.
 
-**This is a game-feel change, not only a visual one.** `SlabRenderer`'s own
-comment says learning to see the tell "is the difference between a careful
-player and a fast one". The stipple is not simply better -- it is louder, and a
-louder tell spends that skill. So **both constants ship**: `boneTellTint` stays
-and `boneTellStipple` is added beside it. `DebugOverlay`'s knob list is hand-written, not derived from `SimTuning`, so a
-new constant needs a row adding before it is reachable — `boneTellStipple` has
-one. With both rows present the A/B is a drag rather than a rebuild, and either
-constant set to zero gives the pure case. The default ships as stipple 0.60 /
-tint 0; if it plays worse, the fallback is a slider move, not a code change.
+Rendering both settled the rest. On green_river at 5x:
+
+| setting | what it shows |
+|---|---|
+| neither | the fish genuinely cannot be seen |
+| `tint 0.20` | the fish reads clearly, **fin-ray structure intact** |
+| `stipple 0.60` | louder, but the rays are gone — "something is here", not "what shape" |
+| `stipple 0.35` | shape vague, detail still gone, competing with the cell noise |
+
+The tell's job is not to announce that bone exists; it is to let a careful
+player read the *shape* and judge where to brush. green_river's twist is "the
+fish are paper", and the stipple throws away exactly the delicacy that makes
+that site what it is.
+
+**So the default is `boneTellTint` 0.20, `boneTellStipple` 0.** Both constants
+ship and both have a row in `DebugOverlay`, so the stipple is one slider drag
+away if a playtest disagrees. Nothing about the mechanism was wasted — only the
+default moved.
 
 ## Files
 
