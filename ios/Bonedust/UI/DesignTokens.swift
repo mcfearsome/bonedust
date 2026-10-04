@@ -47,7 +47,9 @@ struct Ink: Equatable {
         raised: Color(Earth.s7),
         hairline: Color(Earth.s5),
         ink: Color(Earth.s1),
-        muted: Color(Earth.s4),
+        // s4 is 4.49:1 on `nightPage` and 4.46:1 on `raised`: under AA at the 11pt
+        // `FieldLabel` size. s3 is 7.4:1 on both.
+        muted: Color(Earth.s3),
         stamp: Color(Earth.stampNight),
         gem: Color(Earth.gemNight),
         safe: Color(Earth.safeNight),
@@ -55,8 +57,12 @@ struct Ink: Equatable {
     )
 
     /// `fraction` is clamped, so an out-of-range `lightLevel` cannot produce a
-    /// palette that is neither day nor night. See Review Focus 3.
+    /// palette that is neither day nor night. NaN is not out of range, it is
+    /// unordered: `min` and `max` pass it straight through, and a NaN `Color` traps
+    /// when anything prints it. So it is caught first and read as "not started",
+    /// which is `from`. See Review Focus 3.
     static func lerp(from: Ink, to: Ink, _ fraction: Double) -> Ink {
+        guard !fraction.isNaN else { return from }
         let t = min(max(fraction, 0), 1)
         if t == 0 { return from }
         if t == 1 { return to }
@@ -117,18 +123,16 @@ enum Typography {
 
     static let displayFace = "RubikDirt-Regular"
     static let numberFace = "CourierPrime-Regular"
+    static let numberBoldFace = "CourierPrime-Bold"
 
     /// Resolved once. `UIFont(name:size:)` is a dictionary lookup, but this is read
     /// on every text render and there is no reason to repeat it.
     static let displayAvailable = UIFont(name: displayFace, size: 12) != nil
     static let numberAvailable = UIFont(name: numberFace, size: 12) != nil
+    static let numberBoldAvailable = UIFont(name: numberBoldFace, size: 12) != nil
 
     static func display(_ size: CGFloat, relativeTo style: Font.TextStyle = .largeTitle) -> Font {
-        guard displayAvailable else {
-            let base = UIFont.systemFont(ofSize: size, weight: .black, width: .expanded)
-            return Font(UIFontMetrics(forTextStyle: style.uiStyle).scaledFont(for: base))
-        }
-        return .custom(displayFace, size: size, relativeTo: style)
+        displayFont(size, relativeTo: style, customFaceAvailable: displayAvailable)
     }
 
     static func ui(_ style: Font.TextStyle, weight: Font.Weight = .regular) -> Font {
@@ -144,37 +148,67 @@ enum Typography {
     }
 
     /// Tabular figures. Use for every number that changes while you watch it.
+    ///
+    /// The weight picks a *face*, not a synthetic bold: Courier Prime ships Regular
+    /// and Bold as separate files, and `.weight()` on a named custom face would
+    /// smear the Regular outlines instead of using the real Bold.
     static func number(_ style: Font.TextStyle, weight: Font.Weight = .medium) -> Font {
-        guard numberAvailable else {
+        numberFont(
+            style, weight: weight,
+            regularAvailable: numberAvailable, boldAvailable: numberBoldAvailable
+        )
+    }
+
+    // MARK: Seams
+    //
+    // `display` and `number` are one-line calls into the functions below. These take
+    // font availability as an argument, so a test can drive the code the app really
+    // runs down both of its branches without registering or removing a font.
+    //
+    // SwiftUI's `Font` is opaque: a test cannot read a point size back out of one. It
+    // can compare two, because `Font` is Equatable, and that is how it tells
+    // `Font.custom(_:size:relativeTo:)`, which follows Dynamic Type, from
+    // `Font.custom(_:fixedSize:)`, which looks the same and does not.
+
+    /// `traits` is for tests, like the availability flag: the app leaves it nil and
+    /// gets the current Dynamic Type setting. A test passes one because at the default
+    /// size a scaled font and an unscaled one are the same font, and a check that
+    /// cannot tell them apart cannot notice the scaling being dropped.
+    static func displayFont(
+        _ size: CGFloat, relativeTo style: Font.TextStyle, customFaceAvailable: Bool,
+        traits: UITraitCollection? = nil
+    ) -> Font {
+        guard customFaceAvailable else {
+            return Font(scaledFallbackDisplayFont(size, style: style.uiStyle, traits: traits))
+        }
+        return .custom(displayFace, size: size, relativeTo: style)
+    }
+
+    /// What `displayFont` hands to SwiftUI when the custom face is missing. The
+    /// scaling happens here, so a test that resizes `traits` is exercising the real
+    /// thing rather than a copy of it.
+    static func scaledFallbackDisplayFont(
+        _ size: CGFloat, style: UIFont.TextStyle, traits: UITraitCollection? = nil
+    ) -> UIFont {
+        let base = UIFont.systemFont(ofSize: size, weight: .black, width: .expanded)
+        let metrics = UIFontMetrics(forTextStyle: style)
+        guard let traits else { return metrics.scaledFont(for: base) }
+        return metrics.scaledFont(for: base, compatibleWith: traits)
+    }
+
+    static func numberFont(
+        _ style: Font.TextStyle, weight: Font.Weight,
+        regularAvailable: Bool, boldAvailable: Bool
+    ) -> Font {
+        // `Font.Weight` is Hashable but not Comparable, so this is a membership test:
+        // semibold and heavier take the Bold face, everything lighter takes Regular.
+        let wantsBold = [Font.Weight.semibold, .bold, .heavy, .black].contains(weight)
+        let face = wantsBold ? numberBoldFace : numberFace
+        let available = wantsBold ? boldAvailable : regularAvailable
+        guard available else {
             return .system(style, design: .monospaced).weight(weight)
         }
-        return .custom(numberFace, size: style.baseSize, relativeTo: style)
-    }
-
-    // MARK: Test seams
-    //
-    // SwiftUI's `Font` is opaque, so a test cannot read a point size back out of it.
-    // These mirror what `display` and `number` ask for, against an explicit trait
-    // collection, which is what makes the Dynamic Type guarantee testable at all.
-
-    static func resolvedDisplayPointSize(
-        _ size: CGFloat, for traits: UITraitCollection
-    ) -> CGFloat {
-        let base = displayAvailable
-            ? UIFont(name: displayFace, size: size)!
-            : UIFont.systemFont(ofSize: size, weight: .black, width: .expanded)
-        return UIFontMetrics(forTextStyle: .largeTitle)
-            .scaledFont(for: base, compatibleWith: traits).pointSize
-    }
-
-    static func resolvedNumberPointSize(
-        _ size: CGFloat, for traits: UITraitCollection
-    ) -> CGFloat {
-        let base = numberAvailable
-            ? UIFont(name: numberFace, size: size)!
-            : UIFont.monospacedSystemFont(ofSize: size, weight: .medium)
-        return UIFontMetrics(forTextStyle: .body)
-            .scaledFont(for: base, compatibleWith: traits).pointSize
+        return .custom(face, size: style.baseSize, relativeTo: style)
     }
 }
 

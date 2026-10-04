@@ -236,25 +236,163 @@ final class DesignTokenTests: XCTestCase {
         XCTAssertEqual(Ink.lerp(from: .day, to: .night, 42), Ink.night)
     }
 
-    /// Review Focus 4. Dynamic Type must reach the custom faces. A font built with
-    /// `Font.custom(_:fixedSize:)` would return the same metrics at every size.
+    /// `min` and `max` hand NaN straight through, so the clamp alone would give every
+    /// colour NaN components. A NaN light level means "not started": the `from` palette.
+    func testLerpTreatsNaNAsTheFromPalette() {
+        // `XCTAssertTrue` on purpose: a failed `XCTAssertEqual` prints both palettes,
+        // and printing a NaN `Color` traps, which would take the whole run down.
+        XCTAssertTrue(Ink.lerp(from: .day, to: .night, .nan) == Ink.day)
+        XCTAssertTrue(Ink.lerp(from: .night, to: .day, .nan) == Ink.night)
+    }
+
+    /// Every assertion above lands on an early return, so none of them reaches
+    /// `Color.mixed`. This reads each colour's channels back out at the midpoint and
+    /// compares them with the average of the two endpoints. A swapped channel, or a
+    /// colour blended with the wrong partner, fails here and nowhere else.
+    func testLerpInteriorBlendsEveryChannelOfEveryColour() {
+        let mid = Ink.lerp(from: .day, to: .night, 0.5)
+        XCTAssertNotEqual(mid, Ink.day)
+        XCTAssertNotEqual(mid, Ink.night)
+
+        let colours: [(String, KeyPath<Ink, Color>)] = [
+            ("page", \.page), ("raised", \.raised), ("hairline", \.hairline),
+            ("ink", \.ink), ("muted", \.muted), ("stamp", \.stamp),
+            ("gem", \.gem), ("safe", \.safe), ("mount", \.mount),
+        ]
+        for (name, colour) in colours {
+            let day = channels(of: Ink.day[keyPath: colour])
+            let night = channels(of: Ink.night[keyPath: colour])
+            let blended = channels(of: mid[keyPath: colour])
+            XCTAssertEqual(blended.red, (day.red + night.red) / 2, accuracy: 0.0001, "\(name) red")
+            XCTAssertEqual(blended.green, (day.green + night.green) / 2, accuracy: 0.0001, "\(name) green")
+            XCTAssertEqual(blended.blue, (day.blue + night.blue) / 2, accuracy: 0.0001, "\(name) blue")
+        }
+    }
+
+    /// Ink has no contrast assertion of its own, and a page with faint text still
+    /// renders. This reads the text colours back out of each palette and holds them to
+    /// AA on the surfaces they are drawn on. `Ink.night.muted` was s4, 4.49:1 on the
+    /// night page, until review caught it.
+    func testTextColoursClearAAOnTheirOwnSurfaces() {
+        for (palette, ink) in [("day", Ink.day), ("night", Ink.night)] {
+            for (textName, text) in [("ink", ink.ink), ("muted", ink.muted)] {
+                for (surfaceName, surface) in [("page", ink.page), ("raised", ink.raised)] {
+                    let ratio = rgb8(of: text).contrastRatio(against: rgb8(of: surface))
+                    XCTAssertGreaterThanOrEqual(
+                        ratio, 4.5, "\(palette).\(textName) on \(palette).\(surfaceName) is \(ratio):1"
+                    )
+                }
+            }
+        }
+    }
+
+    /// Review Focus 4. Dynamic Type must reach the custom faces. SwiftUI's `Font` is
+    /// opaque, so the only way to see how `display` built one is to compare it with a
+    /// Font built the right way. `Font.custom(_:fixedSize:)` is the regression this
+    /// exists for: it looks identical at the default size and ignores Dynamic Type.
     func testDisplayFontScalesWithDynamicType() {
-        let small = Typography.resolvedDisplayPointSize(
-            40, for: UITraitCollection(preferredContentSizeCategory: .small)
+        let scaled = Font.custom(Typography.displayFace, size: 40, relativeTo: .largeTitle)
+        let fixed = Font.custom(Typography.displayFace, fixedSize: 40)
+        XCTAssertNotEqual(
+            scaled, fixed, "Font equality cannot tell scaled from fixed, so this test proves nothing"
         )
-        let huge = Typography.resolvedDisplayPointSize(
-            40, for: UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+        XCTAssertEqual(
+            Typography.displayFont(40, relativeTo: .largeTitle, customFaceAvailable: true), scaled,
+            "display must be Font.custom(_:size:relativeTo:); fixedSize ignores Dynamic Type"
         )
-        XCTAssertGreaterThan(huge, small, "display face ignores Dynamic Type")
+    }
+
+    /// The fallback is the system face the app used before the custom one existed, and
+    /// it has to keep scaling. The point size is read out of the same UIFont that
+    /// `display` hands to SwiftUI.
+    func testDisplayFallbackScalesWithDynamicType() {
+        let smallTraits = UITraitCollection(preferredContentSizeCategory: .small)
+        let hugeTraits = UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+        let small = Typography.scaledFallbackDisplayFont(40, style: .largeTitle, traits: smallTraits)
+        let huge = Typography.scaledFallbackDisplayFont(40, style: .largeTitle, traits: hugeTraits)
+        XCTAssertGreaterThan(
+            huge.pointSize, small.pointSize, "fallback display face ignores Dynamic Type"
+        )
+
+        // And `display` hands SwiftUI exactly that font. This is checked at a size where
+        // scaled and unscaled differ: at the default size they are the same font.
+        XCTAssertNotEqual(
+            Font(small), Font(huge), "Font equality cannot tell sizes apart, so the next check proves nothing"
+        )
+        XCTAssertEqual(
+            Typography.displayFont(
+                40, relativeTo: .largeTitle, customFaceAvailable: false, traits: hugeTraits
+            ),
+            Font(huge), "display must hand SwiftUI the scaled fallback font"
+        )
     }
 
     func testNumberFontScalesWithDynamicType() {
-        let small = Typography.resolvedNumberPointSize(
-            17, for: UITraitCollection(preferredContentSizeCategory: .small)
+        let size = Font.TextStyle.body.baseSize
+        let regular = Font.custom(Typography.numberFace, size: size, relativeTo: .body)
+        let bold = Font.custom(Typography.numberBoldFace, size: size, relativeTo: .body)
+        XCTAssertNotEqual(
+            regular, Font.custom(Typography.numberFace, fixedSize: size),
+            "Font equality cannot tell scaled from fixed, so this test proves nothing"
         )
-        let huge = Typography.resolvedNumberPointSize(
-            17, for: UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+        XCTAssertEqual(
+            Typography.numberFont(.body, weight: .regular, regularAvailable: true, boldAvailable: true),
+            regular, "number must be Font.custom(_:size:relativeTo:); fixedSize ignores Dynamic Type"
         )
-        XCTAssertGreaterThan(huge, small, "numeral face ignores Dynamic Type")
+        XCTAssertEqual(
+            Typography.numberFont(.body, weight: .bold, regularAvailable: true, boldAvailable: true),
+            bold, "the Bold face must scale with Dynamic Type too"
+        )
+    }
+
+    /// `number` once took a weight and dropped it on the custom path. Four callers ask
+    /// for bold or semibold, and every one of them would have rendered Regular the
+    /// moment the face was registered. The weight picks a face.
+    func testNumberWeightSelectsTheFace() {
+        func custom(_ weight: Font.Weight) -> Font {
+            Typography.numberFont(.body, weight: weight, regularAvailable: true, boldAvailable: true)
+        }
+        let regular = custom(.regular)
+        let bold = custom(.bold)
+        XCTAssertNotEqual(regular, bold)
+        for weight in [Font.Weight.semibold, .bold, .heavy, .black] {
+            XCTAssertEqual(custom(weight), bold, "\(weight) should select the Bold face")
+        }
+        for weight in [Font.Weight.ultraLight, .thin, .light, .regular, .medium] {
+            XCTAssertEqual(custom(weight), regular, "\(weight) should select the Regular face")
+        }
+        // The same through the public accessor, on whichever path this process is on.
+        XCTAssertNotEqual(
+            Typography.number(.body, weight: .bold), Typography.number(.body, weight: .regular)
+        )
+    }
+
+    /// A missing face degrades to the system face at the weight that was asked for. In
+    /// particular a missing Bold file must not quietly fall back to the Regular custom
+    /// face, which would look exactly like a dropped weight.
+    func testNumberFallsBackToSystemWhenTheMatchingFaceIsMissing() {
+        XCTAssertEqual(
+            Typography.numberFont(.body, weight: .bold, regularAvailable: true, boldAvailable: false),
+            Font.system(.body, design: .monospaced).weight(.bold)
+        )
+        XCTAssertEqual(
+            Typography.numberFont(.body, weight: .regular, regularAvailable: false, boldAvailable: true),
+            Font.system(.body, design: .monospaced).weight(.regular)
+        )
+    }
+
+    private func channels(of colour: Color) -> (red: CGFloat, green: CGFloat, blue: CGFloat) {
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        UIColor(colour).getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        return (red, green, blue)
+    }
+
+    private func rgb8(of colour: Color) -> RGB8 {
+        let c = channels(of: colour)
+        return RGB8(
+            UInt8((c.red * 255).rounded()),
+            UInt8((c.green * 255).rounded()),
+            UInt8((c.blue * 255).rounded())
+        )
     }
 }

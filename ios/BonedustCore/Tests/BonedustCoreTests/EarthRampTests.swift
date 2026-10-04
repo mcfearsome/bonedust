@@ -60,10 +60,13 @@ final class EarthRampTests: XCTestCase {
         )
     }
 
+    /// Primary and secondary text, and the three night accents, on the night page.
     func testNightPageKeepsPrimaryTextReadableWhenInverted() {
         let nightPage = Earth.nightPage
         let nightPairs: [(String, RGB8)] = [
             ("primary text", Earth.s1),
+            // s3, not s4: s4 is 4.49 here, under AA at caption2 size.
+            ("secondary text", Earth.s3),
             ("stamp", Earth.stampNight),
             ("gem", Earth.gemNight),
             ("safe", Earth.safeNight),
