@@ -80,26 +80,6 @@ struct Ink: Equatable {
     }
 }
 
-// MARK: - Deprecated static accessors
-//
-// The 51 call sites across RootView, DigView and SpeedMeter still use the old flat
-// names. These keep the app compiling until Task 9 migrates them, then this block
-// is deleted. Do not add new uses.
-
-extension Ink {
-    static var ground: Color { Ink.day.page }
-    static var ivory: Color { Ink.day.ink }
-    static var accent: Color { Ink.day.stamp }
-    /// Damage is now motion, not hue. Maps to the same red; see spec §5.
-    static var danger: Color { Ink.day.stamp }
-    static var raised: Color { Ink.day.raised }
-    static var hairline: Color { Ink.day.hairline }
-    static var muted: Color { Ink.day.muted }
-    static var gem: Color { Ink.day.gem }
-    static var safe: Color { Ink.day.safe }
-    static var launchBackground: Color { Ink.day.page }
-}
-
 enum Measure {
     static let gutter: CGFloat = 16
     /// Notebooks have no rounded corners. Cards are ruled boxes, not filled panels.
@@ -274,10 +254,15 @@ extension Font.TextStyle {
 }
 
 /// A dashed rule, the museum-label motif from §7.
+///
+/// It reads the theme from the environment, and a view with no `Theme` above it gets
+/// the shared day default, so an un-injected rule is still the day rule.
 struct SpecimenRule: View {
+    @Environment(\.theme) private var theme
+
     var body: some View {
         Rectangle()
-            .fill(Ink.day.hairline)
+            .fill(theme.ink.hairline)
             .frame(height: Measure.hairline)
             .overlay(
                 GeometryReader { geometry in
@@ -286,7 +271,7 @@ struct SpecimenRule: View {
                         path.addLine(to: CGPoint(x: geometry.size.width, y: 0.5))
                     }
                     .stroke(
-                        Ink.day.muted.opacity(0.55),
+                        theme.ink.muted.opacity(0.55),
                         style: StrokeStyle(lineWidth: 1, dash: [3, 3])
                     )
                 }
@@ -296,13 +281,69 @@ struct SpecimenRule: View {
 }
 
 /// Small-caps field label.
+///
+/// It follows the theme. Pinned to the day palette it would be `earth5` on a night
+/// page, 2.4:1, where the night `muted` is 7.4:1; `Ink.night.muted`'s own comment
+/// about 11pt labels was written about this view.
 struct FieldLabel: View {
+    @Environment(\.theme) private var theme
     let text: String
 
     var body: some View {
         Text(text.uppercased())
             .font(Typography.label())
             .tracking(1.1)
-            .foregroundStyle(Ink.day.muted)
+            .foregroundStyle(theme.ink.muted)
+    }
+}
+
+/// The page the dig screen sits on: stock in the theme's page colour with the 8pt
+/// dotted graph grid on it, spec §4.
+///
+/// A view of its own with nothing stored, rather than a `.background` closure in
+/// `DigView.body`. `DigView` re-evaluates its body every frame the engine publishes,
+/// and a `Canvas` in there would be redrawn with it: some five thousand dots, sixty
+/// times a second. With no inputs there is nothing for SwiftUI to find changed, so
+/// this runs again only when the theme or the contrast setting does.
+struct NotebookPage: View {
+    @Environment(\.theme) private var theme
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    var body: some View {
+        // A 0.35-alpha dot pattern is exactly the low-contrast decoration Increase
+        // Contrast exists to remove, so under it the page is plain stock.
+        NotebookPageDrawing(ink: theme.ink, showsGrid: contrast == .standard)
+    }
+}
+
+/// `NotebookPage`'s drawing with its inputs as arguments, so a test can render both
+/// states: the environment's contrast setting is read-only and cannot be set from one.
+struct NotebookPageDrawing: View {
+    let ink: Ink
+    let showsGrid: Bool
+
+    /// The grid's pitch in points, and the dots' opacity over the page.
+    static let gridPitch: CGFloat = 8
+    static let dotOpacity = 0.35
+
+    var body: some View {
+        ink.page
+            .overlay {
+                if showsGrid {
+                    Canvas { context, size in
+                        // One path and one fill: a fill per dot is thousands of draws.
+                        var dots = Path()
+                        for y in stride(from: 0, to: size.height, by: Self.gridPitch) {
+                            for x in stride(from: 0, to: size.width, by: Self.gridPitch) {
+                                dots.addEllipse(in: CGRect(x: x, y: y, width: 1, height: 1))
+                            }
+                        }
+                        context.fill(dots, with: .color(ink.hairline.opacity(Self.dotOpacity)))
+                    }
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+                }
+            }
+            .ignoresSafeArea()
     }
 }

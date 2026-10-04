@@ -9,6 +9,9 @@ import SwiftUI
 struct RootView: View {
 
     @State private var settings = GameSettings()
+    /// The one palette the whole app reads. A dig on a dim site flips it through
+    /// `DigScene.configureRenderer()`, so this is also where it is put back.
+    @State private var theme = Theme()
     @State private var route: Route = .menu
     @State private var seed: UInt64 = UInt64.random(in: 1...UInt64.max >> 2)
     @State private var siteID = "charmouth"
@@ -35,8 +38,11 @@ struct RootView: View {
     var body: some View {
         content
             .environment(settings)
-            .preferredColorScheme(.dark)
-            .tint(Ink.accent)
+            .environment(\.theme, theme)
+            // The page is cream by day and lamp-lit at night, and the status bar and
+            // system controls follow it. Forced dark, the clock is white on cream.
+            .preferredColorScheme(theme.ink == .night ? .dark : .light)
+            .tint(theme.ink.stamp)
     }
 
     @ViewBuilder
@@ -65,11 +71,11 @@ struct RootView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("BONEDUST")
                         .font(Typography.display(40))
-                        .foregroundStyle(Ink.ivory)
+                        .foregroundStyle(theme.ink.ink)
                     Text("Milestone 1 · brush feel")
                         .font(Typography.label(.caption))
                         .tracking(1.2)
-                        .foregroundStyle(Ink.accent)
+                        .foregroundStyle(theme.ink.stamp)
                 }
                 .padding(.top, 18)
 
@@ -84,25 +90,29 @@ struct RootView: View {
 
                 Toggle("Gentle mode", isOn: $settings.gentleMode)
                     .font(Typography.ui(.subheadline))
-                    .foregroundStyle(Ink.ivory)
+                    .foregroundStyle(theme.ink.ink)
 
                 Button {
                     seed = UInt64.random(in: 1...UInt64.max >> 2)
+                    // The dig opens already in its site's light. The scene sets the same
+                    // value once it is up, but until then the page would be drawn in
+                    // whatever the menu was, and a night dig would flash day first.
+                    theme.lightLevel = site.modifiers.lightLevel
                     route = .digging
                 } label: {
                     Text("New slab")
                         .font(Typography.ui(.headline, weight: .bold))
-                        .foregroundStyle(Ink.ground)
+                        .foregroundStyle(theme.ink.page)
                         .frame(maxWidth: .infinity)
                         .frame(height: 54)
-                        .background(Ink.accent)
+                        .background(theme.ink.stamp)
                         .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
                 }
             }
             .padding(.horizontal, Measure.gutter)
             .padding(.bottom, 32)
         }
-        .background(Ink.ground.ignoresSafeArea())
+        .background(theme.ink.page.ignoresSafeArea())
     }
 
     private func siteRow(_ candidate: Site) -> some View {
@@ -113,27 +123,27 @@ struct RootView: View {
                 HStack {
                     Text(candidate.name)
                         .font(Typography.ui(.subheadline, weight: .semibold))
-                        .foregroundStyle(Ink.ivory)
+                        .foregroundStyle(theme.ink.ink)
                     Spacer()
                     Text(candidate.period.uppercased())
                         .font(Typography.label(.caption2))
                         .tracking(1)
-                        .foregroundStyle(Ink.muted)
+                        .foregroundStyle(theme.ink.muted)
                 }
                 Text(candidate.twist)
                     .font(Typography.ui(.caption))
-                    .foregroundStyle(Ink.muted)
+                    .foregroundStyle(theme.ink.muted)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(11)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Ink.raised)
+            .background(theme.ink.raised)
             .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: Measure.cardRadius)
                     .stroke(
-                        candidate.id == siteID ? Ink.accent : Ink.hairline,
+                        candidate.id == siteID ? theme.ink.stamp : theme.ink.hairline,
                         lineWidth: candidate.id == siteID ? 1.5 : Measure.hairline
                     )
             )
@@ -147,10 +157,10 @@ struct RootView: View {
             FieldLabel(text: result.bagged ? "Bagged" : "Out of daylight")
             Text(result.fossilName)
                 .font(Typography.display(21))
-                .foregroundStyle(Ink.ivory)
+                .foregroundStyle(theme.ink.ink)
             Text("\(result.period) · \(result.formation)")
                 .font(Typography.ui(.caption))
-                .foregroundStyle(Ink.muted)
+                .foregroundStyle(theme.ink.muted)
             SpecimenRule()
             grid(result)
             SpecimenRule()
@@ -158,20 +168,20 @@ struct RootView: View {
                 Text("TOTAL")
                     .font(Typography.label(.caption2))
                     .tracking(1.2)
-                    .foregroundStyle(Ink.muted)
+                    .foregroundStyle(theme.ink.muted)
                 Spacer()
                 Text("$\(result.breakdown.total)")
                     .font(Typography.number(.title3, weight: .bold))
-                    .foregroundStyle(Ink.accent)
+                    .foregroundStyle(theme.ink.stamp)
                     .monospacedDigit()
             }
         }
         .padding(13)
-        .background(Ink.raised)
+        .background(theme.ink.raised)
         .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: Measure.cardRadius)
-                .stroke(Ink.hairline, lineWidth: Measure.hairline)
+                .stroke(theme.ink.hairline, lineWidth: Measure.hairline)
         )
     }
 
@@ -196,11 +206,11 @@ struct RootView: View {
         HStack {
             Text(name)
                 .font(Typography.ui(.caption))
-                .foregroundStyle(Ink.muted)
+                .foregroundStyle(theme.ink.muted)
             Spacer()
             Text(value)
                 .font(Typography.number(.caption, weight: .medium))
-                .foregroundStyle(Ink.ivory)
+                .foregroundStyle(theme.ink.ink)
                 .monospacedDigit()
         }
     }
@@ -216,6 +226,9 @@ struct RootView: View {
             bagged: bagged,
             gems: engine.wholeGems
         )
+        // The menu is not lit by any site. Left alone, a night dig would leave it in
+        // the night palette until the next dig happened to set the light again.
+        theme.lightLevel = 1
         route = .menu
     }
 }
