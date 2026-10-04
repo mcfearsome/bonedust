@@ -162,6 +162,24 @@ public struct SimTuning: Sendable, Codable, Equatable {
     public var gradeBonusA: Float = 0.12
     public var gradeBonusB: Float = 0.05
 
+    // MARK: Contact size
+
+    /// The fingertip radius assumed before any touch has been seen, in points.
+    ///
+    /// A starting guess that the calibration walks down from, not a constant anyone should
+    /// trust: Apple documents the units of `majorRadius` and nothing about what a finger
+    /// produces on a given device.
+    public var contactAssumedTipPoints: Float = 11
+    /// The smallest the calibration will ever believe a fingertip is.
+    ///
+    /// Without a floor, one freak sample of near-zero makes every later touch read as an
+    /// enormous multiplier, and the brush never recovers for the rest of the dig.
+    public var contactMinTipPoints: Float = 4
+    /// The largest the brush can grow from contact size alone.
+    public var contactMaxScale: Float = 1.6
+    /// How fast the fingertip baseline walks toward a smaller sample. 0 never learns.
+    public var contactCalibrationRate: Float = 0.25
+
     // MARK: Breath
 
     /// Patches a full-strength breath lifts, scattered over the whole slab.

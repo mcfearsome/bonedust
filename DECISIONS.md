@@ -920,3 +920,36 @@ are rare on purpose. Draws are Poisson, so the spread goes as `sqrt(expected)`: 
 species expected 600 times lands within a few percent, while a skeleton expected 13 times has
 a sigma of 3.6, and 35% of 13 is barely one of those. The tolerance is now
 `max(20%, 4·sqrt(expected))`, which is the same statement for both ends of the roster.
+
+## The brush follows the finger
+
+iOS gives exactly one number about the shape of a touch: `UITouch.majorRadius`, in points.
+No orientation and no minor axis — `azimuthAngle` and `altitudeAngle` are documented as
+stylus-only, and `force` needs 3D Touch, which no current iPhone has. So a fingertip cannot
+be told from the side of a finger by *direction*. It can be told by *size*.
+
+That one scalar buys the thing worth having: the tip for detail around exposed bone, the
+flat of a finger to sweep overburden. It is the real motion of the job, with no button for
+it.
+
+**The trade is in the safe speed.** Radius grows with the contact patch and safe speed falls
+as its square root, so a broad contact covers ground quickly and is harder to place. Without
+that, pressing harder would be strictly better and the tip would be pointless.
+
+**Self-calibrating, because the absolute numbers are undocumented.** Apple states the units
+and an error bar and nothing about what a finger produces, and the answer varies by device
+and by how hard somebody presses. So the smallest patch seen is taken to be that player's
+fingertip and everything is measured against it. `testCalibrationAdaptsToTheHand` asserts
+that a 6-point tip laid flat to 12 and a 14-point tip laid flat to 28 mean the *same thing*,
+which a hardcoded threshold could never do.
+
+The baseline only shrinks, slowly, and has a floor — one freak near-zero sample would
+otherwise make every later touch read as an enormous brush for the rest of the dig.
+
+The mapping lives in Core as a pure function of one scalar, so all seven tests run without a
+touchscreen. `DigScene` reads `majorRadius` and hands over a number; everything UIKit-shaped
+stops there. Same split as the breath detector, for the same reason.
+
+The debug sheet shows the raw radius, the learned fingertip and the current multiplier,
+because guessing at hardware behaviour from a machine without that hardware is how the
+breath gate shipped rejecting actual breath.

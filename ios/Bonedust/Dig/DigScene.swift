@@ -176,6 +176,7 @@ final class DigScene: SKScene {
               let point = gridPoint(for: touch)
         else { return }
         lastTouchTimestamp = touch.timestamp
+        engine.noteContact(radius: Float(touch.majorRadius))
         haptics?.startTexture()
         audio?.startScrape()
         apply(engine.brushBegan(at: point), at: point, engine: engine)
@@ -188,6 +189,9 @@ final class DigScene: SKScene {
         let samples = event?.coalescedTouches(for: touch) ?? [touch]
         for sample in samples {
             guard let point = gridPoint(for: sample) else { continue }
+            // Every coalesced sample, so laying a finger flat mid-stroke widens the brush
+            // immediately rather than at the next touch-down.
+            engine.noteContact(radius: Float(sample.majorRadius))
             let previous = lastTouchTimestamp ?? sample.timestamp
             let deltaMillis = Float(max(0.001, sample.timestamp - previous) * 1_000)
             lastTouchTimestamp = sample.timestamp

@@ -55,6 +55,24 @@ final class DigEngine {
     /// going fast costs nothing — and a meter that said otherwise sent careful players into
     /// the one strategy that cannot pay an installment.
     private(set) var isBrushOverBone = false
+    /// Brush size from how much finger is on the glass. See `ContactScale`.
+    @ObservationIgnored private(set) var contact = ContactScale()
+    /// Published so the speed meter reads against the brush actually in use -- a broad
+    /// contact has a lower safe speed, and a meter showing the tool's nominal figure would
+    /// be telling the player they are safe while they crack the fossil.
+    private(set) var contactScale: Float = 1
+
+    /// Folds in a touch's contact radius, in points.
+    func noteContact(radius: Float) {
+        let scale = contact.accept(radius: radius)
+        if scale != contactScale {
+            contactScale = scale
+            safeSpeed = sim.safeSpeed(for: contact.applied(to: tool))
+        }
+    }
+
+    /// The tool as the finger is holding it right now.
+    private var effectiveTool: BrushTool { contact.applied(to: tool) }
     /// Whether this species is not yet in the Collection, and so pays the first-find bonus.
     ///
     /// Shown the moment the specimen is identified, which is what makes identifying it
@@ -310,14 +328,14 @@ final class DigEngine {
         startDaylightIfNeeded()
         guard !isFinished else { return StrokeResult() }
         isBrushOverBone = isOverBone(point)
-        return record(sim.beginStroke(at: point, tool: tool))
+        return record(sim.beginStroke(at: point, tool: effectiveTool))
     }
 
     @discardableResult
     func brushMoved(to point: Vec2, deltaMillis: Float) -> StrokeResult {
         guard !isFinished else { return StrokeResult() }
         isBrushOverBone = isOverBone(point)
-        return record(sim.moveStroke(to: point, deltaMillis: deltaMillis, tool: tool))
+        return record(sim.moveStroke(to: point, deltaMillis: deltaMillis, tool: effectiveTool))
     }
 
     /// Blows loose material off patches across the whole slab (§ breath).
