@@ -790,28 +790,19 @@ final class DigSceneBackdropTests: XCTestCase {
         }
     }
 
-    // MARK: Page and theme
+    // MARK: Theme
+    //
+    // These read the mount, because it is the one colour the scene owns that reaches a
+    // screen. The scene's own `backgroundColor` never does: the mount is exactly scene-sized,
+    // so a test that read it for "the theme was applied" stayed green with the page deleted
+    // from `DigView`. The page is `NotebookPage`, and it is read off a real window in
+    // `DigViewThemeWiringTests.testThePageBesideTheSlabCardIsTheThemesPageByDayAndByNight`.
 
-    func testThePageBehindTheSlabIsCreamNotDarkUmber() throws {
-        let (scene, view) = present()
-        scene.buildBackdrop()
-        scene.mountNode?.isHidden = true
-        scene.slabNode?.isHidden = true
-        let pixels = try render(scene, in: view)
-        assertPixel(
-            pixels.rgb(pixels.width / 2, pixels.height / 2), is: rgb(Ink.day.page),
-            "the page", tolerance: 2
-        )
-        // The raw literal this replaced.
-        XCTAssertGreaterThan(distance(pixels.rgb(0, 0), [0x22, 0x18, 0x13]), 100)
-    }
-
-    func testApplyThemeRepaintsThePageAndTheMount() throws {
+    func testApplyThemeRepaintsTheMount() throws {
         let (scene, _) = present()
         scene.buildBackdrop()
         for ink in [Ink.night, Ink.day] {
             scene.applyTheme(ink: ink)
-            XCTAssertEqual(rgb(scene.backgroundColor), rgb(ink.page))
             XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(ink.mount))
         }
     }
@@ -824,7 +815,6 @@ final class DigSceneBackdropTests: XCTestCase {
         scene.buildBackdrop()
         scene.applyTheme(ink: .night)
         scene.size = CGSize(width: 768, height: 1024)
-        XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.night.page))
         XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.night.mount))
     }
 
@@ -837,10 +827,6 @@ final class DigSceneBackdropTests: XCTestCase {
             let (scene, _) = present(engine: subject, theme: theme)
             XCTAssertEqual(theme.lightLevel, site.modifiers.lightLevel, "site '\(site.id)'")
             XCTAssertEqual(
-                rgb(scene.backgroundColor), rgb(theme.ink.page),
-                "site '\(site.id)': the page is not in the palette the theme chose"
-            )
-            XCTAssertEqual(
                 rgb(try XCTUnwrap(scene.mountNode).color), rgb(theme.ink.mount),
                 "site '\(site.id)': the mount is not in the palette the theme chose"
             )
@@ -848,20 +834,20 @@ final class DigSceneBackdropTests: XCTestCase {
     }
 
     /// The debug overlay calls `configureRenderer()` again, and a different site can
-    /// follow a night one, so the page must follow the engine, not only the first call.
-    func testTheNightSiteDarkensThePageAndTheNextDaySiteBringsItBack() throws {
+    /// follow a night one, so the palette must follow the engine, not only the first call.
+    /// `theme.ink` is what `NotebookPage` reads for the page; the mount is what the scene draws.
+    func testTheNightSiteDarkensTheMountAndTheNextDaySiteBringsItBack() throws {
         XCTAssertNotNil(ContentCatalog.shared.site("night_dig"), "night_dig left the catalog; update this test")
         let night = engine("night_dig")
         let day = engine("charmouth")
         let theme = Theme()
         let (scene, _) = present(engine: night, theme: theme)
         XCTAssertEqual(theme.ink, Ink.night)
-        XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.night.page))
+        XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.night.mount))
 
         scene.engine = day
         scene.configureRenderer()
         XCTAssertEqual(theme.ink, Ink.day)
-        XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.day.page))
         XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.day.mount))
     }
 
@@ -869,7 +855,6 @@ final class DigSceneBackdropTests: XCTestCase {
         let night = engine("night_dig")
         let (scene, _) = present(engine: night, theme: nil)
         scene.configureRenderer()
-        XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.day.page))
         XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.day.mount))
     }
 
@@ -2001,6 +1986,37 @@ final class DigViewThemeWiringTests: XCTestCase {
                 "the slab is \(slab): the scene less the mount's margin on every side"
             )
             XCTAssertEqual(slab.height, skView.bounds.height - 2 * Measure.mountMargin, accuracy: 0.5)
+        }
+    }
+
+    /// The page is most of what a player sees, and the only thing that draws it is
+    /// `NotebookPage`, in `DigView`'s background. The scene's `backgroundColor`, which tests
+    /// used to read for this, never shows: the mount is exactly scene-sized, so they passed
+    /// with the page deleted. This reads a real window in the gutter beside the slab's card,
+    /// in both palettes, so it fails if the page is gone or drawn in the wrong colours.
+    func testThePageBesideTheSlabCardIsTheThemesPageByDayAndByNight() throws {
+        for (siteID, ink) in [("charmouth", Ink.day), ("night_dig", Ink.night)] {
+            let theme = Theme()
+            try withDig(site: siteID, theme: theme) { window in
+                XCTAssertTrue(
+                    spin(until: { theme.ink == ink }),
+                    "\(siteID): the dig never put the theme in the palette this test reads"
+                )
+                RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.4))
+                let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
+                    window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+                }
+                let pixels = try readPixels(try XCTUnwrap(image.cgImage), scale: Int(image.scale))
+                // 4pt in from the left edge is inside the 16pt gutter, where only the page is
+                // drawn. Mid-screen, and midway between two rows of the grid's dots, which sit
+                // on an 8pt lattice counting down from the top.
+                let y = 8 * (Int(window.bounds.height) / 16) + 4
+                let pixel = pixels.rgb(4 * pixels.scale, y * pixels.scale)
+                XCTAssertLessThanOrEqual(
+                    distance(pixel, rgb255(ink.page)), 3,
+                    "\(siteID): the page beside the card is \(pixel), not \(rgb255(ink.page))"
+                )
+            }
         }
     }
 
