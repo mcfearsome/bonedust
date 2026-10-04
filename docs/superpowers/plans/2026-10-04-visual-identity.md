@@ -1187,12 +1187,17 @@ func bloomFracture(at point: Vec2) {
     bloom.strokeColor = .clear
     bloom.alpha = 0.9
     // Same grid-to-scene conversion the dust emitter uses; see `emitDust`.
+    // Node-relative, and a CHILD of the slab. Task 6 inset the slab by
+    // `mountMargin` so the mount can show around it, so anything positioned
+    // against the scene now lands up to 6pt off. `emitDust` already does it this
+    // way; match it rather than the scene.
+    guard let slab = slabNode else { return }
     bloom.position = CGPoint(
-        x: CGFloat(point.x) / CGFloat(SlabGrid.width) * size.width,
-        y: (1 - CGFloat(point.y) / CGFloat(SlabGrid.height)) * size.height
+        x: (CGFloat(point.x) / CGFloat(SlabGrid.width) - 0.5) * slab.size.width,
+        y: (0.5 - CGFloat(point.y) / CGFloat(SlabGrid.height)) * slab.size.height
     )
     bloom.zPosition = 2
-    addChild(bloom)
+    slab.addChild(bloom)
     bloom.run(.sequence([
         .group([.scale(to: 5, duration: 0.2), .fadeOut(withDuration: 0.2)]),
         .removeFromParent(),
@@ -1200,7 +1205,7 @@ func bloomFracture(at point: Vec2) {
 }
 ```
 
-Check the two position lines against the existing conversion at `DigScene.swift:237` and match it exactly rather than trusting the above — if `emitDust` flips the y axis differently, the bloom will appear mirrored.
+Check this against `emitDust`'s conversion in the same file and match it exactly. Both must be node-relative: Task 6 inset the slab inside the mount, so scene-relative positioning is now wrong by up to 6pt.
 
 - [ ] **Step 6: Trigger it**
 
