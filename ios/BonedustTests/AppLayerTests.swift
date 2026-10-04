@@ -459,3 +459,117 @@ final class FontRegistrationTests: XCTestCase {
         }
     }
 }
+
+final class ThemeTests: XCTestCase {
+
+    func testFullDaylightIsTheDayPalette() {
+        XCTAssertEqual(Theme.nightFraction(for: 1), 0, accuracy: 0.0001)
+    }
+
+    func testTheNightFloorIsReachedAtThePointThreeFiveMark() {
+        XCTAssertEqual(Theme.nightFraction(for: 0.35), 1, accuracy: 0.0001)
+    }
+
+    func testMidDuskIsPartway() {
+        let t = Theme.nightFraction(for: 0.675)
+        XCTAssertGreaterThan(t, 0.4)
+        XCTAssertLessThan(t, 0.6)
+    }
+
+    /// Review Focus 3. `SiteModifiers.lightLevel` is a Float that charms and set
+    /// perks multiply, so it can leave 0...1 in either direction.
+    func testOutOfRangeLightLevelsClampInsteadOfOvershooting() {
+        for level in [Float(-5), -0.001, 0, 0.1, 0.35, 1, 1.0001, 3, .infinity] {
+            let t = Theme.nightFraction(for: level)
+            XCTAssertGreaterThanOrEqual(t, 0, "lightLevel \(level) produced \(t)")
+            XCTAssertLessThanOrEqual(t, 1, "lightLevel \(level) produced \(t)")
+        }
+    }
+
+    /// Carried forward from Task 2's review. Task 2 pins each site's matrix
+    /// against the mount at full daylight — but night_dig renders at
+    /// `lightLevel` 0.55, and `SlabRenderer` scales every cell by it, so the
+    /// colour Task 2 measured for that site never reaches a screen. On screen
+    /// the matrix is (123, 112, 91) against the night mount, s8, which is 3.56:1.
+    /// That clears 3:1 by about half a point, the kind of margin that regresses
+    /// silently when someone nudges `nightFloor` or `switchPoint`.
+    ///
+    /// The mount is read from the palette `Theme` actually selects. It is s6 on
+    /// the day palette and s8 on the night one, never a blend, so a model that
+    /// lerped between them would overstate the contrast of any dim site on the
+    /// day side of the switch (the default matrix at lightLevel 0.70 is 4.23 as
+    /// a blend and 3.28 as shipped).
+    ///
+    /// Iterates the catalog, like Task 2's test: no night_dig literal, so a
+    /// second dim site added later is covered.
+    func testEverySiteMatrixSeparatesFromTheMountAtItsOwnLightLevel() {
+        for site in ContentCatalog.shared.sites {
+            let level = site.modifiers.lightLevel
+            let theme = Theme()
+            theme.lightLevel = level
+            let onScreen = site.palette.matrix.scaled(level)
+            let ratio = onScreen.contrastRatio(against: rgb8(of: theme.ink.mount))
+            XCTAssertGreaterThanOrEqual(
+                ratio, 3.0,
+                "site '\(site.id)' at lightLevel \(level): slab and mount converge (\(ratio))"
+            )
+        }
+    }
+
+    func testNaNLightLevelFallsBackToDaylight() {
+        XCTAssertEqual(Theme.nightFraction(for: .nan), 0, accuracy: 0.0001)
+    }
+
+    func testSettingLightLevelUpdatesTheInk() {
+        let theme = Theme()
+        XCTAssertEqual(theme.ink, Ink.day)
+        theme.lightLevel = 0.2
+        XCTAssertEqual(theme.ink, Ink.night)
+        theme.lightLevel = 1
+        XCTAssertEqual(theme.ink, Ink.day)
+    }
+
+    /// The palette is only ever one of the two presets. A blended palette would
+    /// put text and page at 1.09:1 in the middle; this asserts no third value
+    /// can reach a screen, at any light level a site could hold.
+    func testNoIntermediatePaletteIsEverProduced() {
+        let theme = Theme()
+        for step in 0...100 {
+            theme.lightLevel = Float(step) / 100
+            XCTAssertTrue(
+                theme.ink == Ink.day || theme.ink == Ink.night,
+                "lightLevel \(theme.lightLevel) produced a blended palette"
+            )
+        }
+    }
+
+    /// The game's only dim site must land on the night palette, not near the
+    /// crossover. night_dig is lightLevel 0.55 -> nightFraction 0.69.
+    func testTheOneNightSiteLandsOnTheNightPalette() {
+        let site = ContentCatalog.shared.site("night_dig")
+        XCTAssertNotNil(site, "night_dig left the catalog; update this test")
+        let theme = Theme()
+        theme.lightLevel = site!.modifiers.lightLevel
+        XCTAssertEqual(theme.ink, Ink.night)
+    }
+
+    /// `@Entry` expands its initial value into a computed `defaultValue`, so an inline
+    /// `Theme()` is built again on every read of an environment that was never given
+    /// one: whatever was set on one read is gone on the next, and every dependent view
+    /// sees a different object each time. The compiler warns about it; this pins the fix.
+    func testTheEnvironmentDefaultIsOneInstanceNotOnePerRead() {
+        let environment = EnvironmentValues()
+        XCTAssertTrue(environment.theme === environment.theme)
+        XCTAssertTrue(EnvironmentValues().theme === EnvironmentValues().theme)
+    }
+
+    private func rgb8(of colour: Color) -> RGB8 {
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        UIColor(colour).getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        return RGB8(
+            UInt8((red * 255).rounded()),
+            UInt8((green * 255).rounded()),
+            UInt8((blue * 255).rounded())
+        )
+    }
+}
