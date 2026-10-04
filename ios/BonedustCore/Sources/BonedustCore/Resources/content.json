@@ -68,7 +68,8 @@
         "params": {
           "taperFrom": 0.075,
           "taperTo": 0.02,
-          "bend": 0.42
+          "bend": 0.34,
+          "knobEnds": 2.6
         }
       }
     },
@@ -299,7 +300,8 @@
         "params": {
           "taperFrom": 0.085,
           "taperTo": 0.025,
-          "bend": 0.5
+          "bend": 0.32,
+          "knobEnds": 2.6
         }
       }
     },
@@ -576,7 +578,8 @@
         "params": {
           "taperFrom": 0.07,
           "taperTo": 0.03,
-          "bend": 0.3
+          "bend": 0.38,
+          "knobEnds": 2.8
         }
       }
     },
@@ -767,7 +770,8 @@
         "params": {
           "taperFrom": 0.09,
           "taperTo": 0.02,
-          "bend": 0.12
+          "bend": 0.12,
+          "knobEnds": 2.0
         }
       },
       "crackMultiplier": 1.25
@@ -892,7 +896,8 @@
         "params": {
           "taperFrom": 0.12,
           "taperTo": 0.06,
-          "bend": 0.18
+          "bend": 0.18,
+          "knobEnds": 1.6
         }
       },
       "crackMultiplier": 0.8
@@ -910,7 +915,8 @@
         "params": {
           "taperFrom": 0.1,
           "taperTo": 0.04,
-          "bend": 0.02
+          "bend": 0.02,
+          "knobEnds": 1.4
         }
       },
       "crackMultiplier": 1.1
@@ -1601,7 +1607,8 @@
         "params": {
           "taperFrom": 0.06,
           "taperTo": 0.02,
-          "bend": 0.1
+          "bend": 0.1,
+          "knobEnds": 2.2
         }
       },
       "crackMultiplier": 1.3
@@ -1653,7 +1660,8 @@
         "params": {
           "taperFrom": 0.095,
           "taperTo": 0.035,
-          "bend": 0.1
+          "bend": 0.1,
+          "knobEnds": 2.2
         }
       },
       "crackMultiplier": 1.5
@@ -1689,7 +1697,8 @@
         "params": {
           "taperFrom": 0.16,
           "taperTo": 0.1,
-          "bend": 0.06
+          "bend": 0.06,
+          "knobEnds": 1.5
         }
       },
       "crackMultiplier": 0.7
@@ -1747,6 +1756,341 @@
         }
       },
       "crackMultiplier": 1.1
+    },
+    {
+      "id": "trex_skull",
+      "name": "Tyrannosaurus skull",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 980,
+      "note": "The whole head. You will not finish it today, and you will try.",
+      "shape": {
+        "kind": "skull",
+        "spanCells": 96,
+        "params": {
+          "aspect": 0.3,
+          "bend": 0.2,
+          "ribs": 10,
+          "thickness": 0.05
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "trex_tail",
+      "name": "Tyrannosaurus tail",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 760,
+      "note": "Vertebra after vertebra, thinning to nothing. Count them as they come up.",
+      "shape": {
+        "kind": "tail",
+        "spanCells": 120,
+        "params": {
+          "count": 11,
+          "bend": 0.5,
+          "thickness": 0.09,
+          "aspect": 0.42
+        }
+      },
+      "crackMultiplier": 1.25
+    },
+    {
+      "id": "trex_foot",
+      "name": "Tyrannosaurus foot",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 690,
+      "note": "Three toes and a hallux. Each claw the size of your hand.",
+      "shape": {
+        "kind": "foot",
+        "spanCells": 104,
+        "params": {
+          "count": 3,
+          "thickness": 0.11,
+          "aspect": 0.34
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "raptor_foot",
+      "name": "Dromaeosaur foot",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 540,
+      "note": "The killing claw is held off the ground. It is also the first thing to snap.",
+      "shape": {
+        "kind": "foot",
+        "spanCells": 84,
+        "params": {
+          "count": 3,
+          "thickness": 0.075,
+          "aspect": 0.3
+        }
+      },
+      "crackMultiplier": 1.4
+    },
+    {
+      "id": "trike_skull",
+      "name": "Triceratops skull",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 1100,
+      "note": "Beak, horn cores and a frill that will not fit on the slab.",
+      "shape": {
+        "kind": "skull",
+        "spanCells": 98,
+        "params": {
+          "aspect": 0.4,
+          "bend": 0.06,
+          "ribs": 5,
+          "thickness": 0.06
+        }
+      },
+      "crackMultiplier": 1.15
+    },
+    {
+      "id": "hadrosaur_ribcage",
+      "name": "Hadrosaur ribcage",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 640,
+      "note": "A ladder of ribs. Lose one and everybody can tell.",
+      "shape": {
+        "kind": "ribcage",
+        "spanCells": 112,
+        "params": {
+          "ribs": 9,
+          "thickness": 0.07,
+          "aspect": 0.72,
+          "bend": 1
+        }
+      },
+      "crackMultiplier": 1.35
+    },
+    {
+      "id": "ankylosaur_skull",
+      "name": "Ankylosaur skull",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 720,
+      "note": "Built like a kerbstone. One of the few things here you cannot easily ruin.",
+      "shape": {
+        "kind": "skull",
+        "spanCells": 84,
+        "params": {
+          "aspect": 0.34,
+          "bend": 0.03,
+          "ribs": 6,
+          "thickness": 0.062
+        }
+      },
+      "crackMultiplier": 0.95
+    },
+    {
+      "id": "pterosaur_wing",
+      "name": "Pterosaur wing",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 870,
+      "note": "One finger longer than the rest of the animal, and a membrane like tissue paper.",
+      "shape": {
+        "kind": "wing",
+        "spanCells": 122,
+        "params": {
+          "thickness": 0.075,
+          "aspect": 0.42,
+          "ribs": 7
+        }
+      },
+      "crackMultiplier": 1.55
+    },
+    {
+      "id": "mosasaur_skull",
+      "name": "Mosasaur skull",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 820,
+      "note": "Teeth in the roof of its mouth as well. Nothing it bit got away.",
+      "shape": {
+        "kind": "skull",
+        "spanCells": 104,
+        "params": {
+          "aspect": 0.24,
+          "bend": 0.12,
+          "ribs": 13,
+          "thickness": 0.042
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "croc_skull",
+      "name": "Crocodilian skull",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 480,
+      "note": "Flat, long, and grinning. It has not changed much since.",
+      "shape": {
+        "kind": "skull",
+        "spanCells": 100,
+        "params": {
+          "aspect": 0.18,
+          "bend": 0.06,
+          "ribs": 15,
+          "thickness": 0.036
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "ichthyo_tail",
+      "name": "Ichthyosaur tail",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 420,
+      "note": "It bends down at the end, where the fin was.",
+      "shape": {
+        "kind": "tail",
+        "spanCells": 104,
+        "params": {
+          "count": 10,
+          "bend": 0.42,
+          "thickness": 0.075,
+          "aspect": 0.34
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "plesiosaur_ribcage",
+      "name": "Plesiosaur ribcage",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 470,
+      "note": "Barrel-chested. Gastroliths sometimes still inside.",
+      "shape": {
+        "kind": "ribcage",
+        "spanCells": 100,
+        "params": {
+          "ribs": 8,
+          "thickness": 0.065,
+          "aspect": 0.68,
+          "bend": 1
+        }
+      },
+      "crackMultiplier": 1.35
+    },
+    {
+      "id": "plesiosaur_skull",
+      "name": "Plesiosaur skull",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 560,
+      "note": "Small for the animal, and all of it teeth.",
+      "shape": {
+        "kind": "skull",
+        "spanCells": 94,
+        "params": {
+          "aspect": 0.2,
+          "bend": 0.1,
+          "ribs": 12,
+          "thickness": 0.038
+        }
+      },
+      "crackMultiplier": 1.4
+    },
+    {
+      "id": "pterodactylus",
+      "name": "Pterodactylus wing",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 610,
+      "note": "The first one ever found was called a sea-bird. They were not even close.",
+      "shape": {
+        "kind": "wing",
+        "spanCells": 104,
+        "params": {
+          "thickness": 0.06,
+          "aspect": 0.36,
+          "ribs": 6
+        }
+      },
+      "crackMultiplier": 1.6
+    },
+    {
+      "id": "dimorphodon_skull",
+      "name": "Dimorphodon skull",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 580,
+      "note": "A puffin's head on a flying lizard. Hollow everywhere.",
+      "shape": {
+        "kind": "skull",
+        "spanCells": 76,
+        "params": {
+          "aspect": 0.34,
+          "bend": 0.16,
+          "ribs": 8,
+          "thickness": 0.05
+        }
+      },
+      "crackMultiplier": 1.45
+    },
+    {
+      "id": "bird_skeleton",
+      "name": "Fossil bird",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 780,
+      "note": "Hollow bones, and a wishbone you can see. Breathe on it wrong and it is gone.",
+      "shape": {
+        "kind": "ribcage",
+        "spanCells": 92,
+        "params": {
+          "ribs": 7,
+          "thickness": 0.045,
+          "aspect": 0.6
+        }
+      },
+      "crackMultiplier": 1.7
+    },
+    {
+      "id": "bat_wing",
+      "name": "Fossil bat",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 840,
+      "note": "Fingers as wing struts, exactly like the pterosaurs, fifty million years later.",
+      "shape": {
+        "kind": "wing",
+        "spanCells": 96,
+        "params": {
+          "thickness": 0.045,
+          "aspect": 0.34,
+          "ribs": 6
+        }
+      },
+      "crackMultiplier": 1.75
+    },
+    {
+      "id": "anomalocaris_whole",
+      "name": "Anomalocaris, whole",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 690,
+      "note": "Swimming flaps down both sides. The best thing in the shale, and the softest.",
+      "shape": {
+        "kind": "ribcage",
+        "spanCells": 104,
+        "params": {
+          "ribs": 11,
+          "thickness": 0.05,
+          "aspect": 0.5
+        }
+      },
+      "crackMultiplier": 1.6
     }
   ],
   "sites": [
@@ -1784,7 +2128,12 @@
         "plesiosaur_vertebra": 6,
         "ichthyo_jaw": 6,
         "plesiosaur_paddle": 6,
-        "ichthyo_skull": 5
+        "ichthyo_skull": 5,
+        "ichthyo_tail": 3,
+        "plesiosaur_ribcage": 3,
+        "plesiosaur_skull": 3,
+        "dimorphodon_skull": 3,
+        "pterodactylus": 3
       }
     },
     {
@@ -1842,7 +2191,8 @@
         "eldonia": 9,
         "marrella": 8,
         "wiwaxia": 8,
-        "anomalocaris_claw": 8
+        "anomalocaris_claw": 8,
+        "anomalocaris_whole": 3
       }
     },
     {
@@ -1902,7 +2252,9 @@
         "turtle_shell": 8,
         "fossil_feather": 8,
         "fossil_flower": 7,
-        "stingray": 7
+        "stingray": 7,
+        "bird_skeleton": 3,
+        "bat_wing": 3
       }
     },
     {
@@ -1965,7 +2317,17 @@
         "pachycephalosaur_dome": 7,
         "trex_skull_frag": 6,
         "mammal_jaw": 6,
-        "trike_frill": 6
+        "trike_frill": 6,
+        "croc_skull": 3,
+        "raptor_foot": 3,
+        "hadrosaur_ribcage": 3,
+        "trex_foot": 3,
+        "ankylosaur_skull": 3,
+        "trex_tail": 3,
+        "mosasaur_skull": 3,
+        "pterosaur_wing": 3,
+        "trex_skull": 3,
+        "trike_skull": 3
       }
     },
     {
@@ -2080,7 +2442,25 @@
         "petrified_wood": 1,
         "ammonite_sphenodiscus": 1,
         "fossil_magnolia": 1,
-        "theropod_vertebra": 1
+        "theropod_vertebra": 1,
+        "trex_skull": 1,
+        "trex_tail": 1,
+        "trex_foot": 1,
+        "raptor_foot": 1,
+        "trike_skull": 1,
+        "hadrosaur_ribcage": 1,
+        "ankylosaur_skull": 1,
+        "pterosaur_wing": 1,
+        "mosasaur_skull": 1,
+        "croc_skull": 1,
+        "ichthyo_tail": 1,
+        "plesiosaur_ribcage": 1,
+        "plesiosaur_skull": 1,
+        "pterodactylus": 1,
+        "dimorphodon_skull": 1,
+        "bird_skeleton": 1,
+        "bat_wing": 1,
+        "anomalocaris_whole": 1
       }
     }
   ],

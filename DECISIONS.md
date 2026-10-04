@@ -811,3 +811,44 @@ syllable, so consecutive 0.1 s buffers differ far more for talking than for blow
 
 The debug sheet now shows live loudness, noisiness and gust count. Guessing at microphone
 behaviour from a machine with no microphone is how the first version shipped not working.
+
+## Fossils you would actually want to dig up
+
+"I have yet to see something cool like a trex head or tail or a pterodactyl, we don't have
+to stick to reality… all i'm getting are circles and rib bones and spirals."
+
+Correct, and structural. Every shape generator was a parametric primitive — a cone, a coil,
+a disc, a fan — and no amount of tuning makes a cone read as an animal. A render of a Hell
+Creek slab settled it: one curved stick on an empty field.
+
+Five new generators compose the same two primitives (variable-width stroke, rotated ellipse)
+into *silhouettes*: `skull`, `tail`, `ribcage`, `wing`, `foot`. At 96×128 there is no room
+for detail, so each is a few bold masses with the negative space between them doing the
+work — the gap between the jaws is the only thing that says "skull" rather than "log".
+
+Eighteen headline species use them: Tyrannosaurus skull, tail and foot, Triceratops skull,
+pterosaur and pterodactylus wings, mosasaur and plesiosaur skulls, hadrosaur ribcage,
+dromaeosaur foot, a fossil bird, a bat. They are weighted at 3 against a 4–14 scale, so
+about one slab in ten at Hell Creek is a headline find, and the first-find bonus makes that
+slab worth going somewhere for.
+
+### Looking at them was the whole job
+
+`bonedust-tool shapes` renders every species alone and centred, one PNG each. `render` draws
+site scenes, which is fine for checking a palette and useless for checking that a shape reads
+as a skull.
+
+The first skull it produced was a blob: cranium, snout and jaw all heavy enough to merge
+into one lozenge. The second read as a wrench — a circle centred on the jaw line. The third
+had the braincase *below* the jaw and the lower jaw above the upper one, because **grid y
+runs down** and every y in the generator had the wrong sign.
+
+None of that is visible in a test. `ShapeSanityTests` checks that a shape is between 60 cells
+and a third of the slab, which catches the nine unplayable ones it found on its first run,
+and would have passed every one of those three skulls.
+
+### Bones have ends
+
+`knobEnds` adds epiphyses to a taper, defaulting to 0 so a tooth or belemnite stays the
+smooth cone it actually is. Ribs, jaws and limb bones get them, because a bone without them
+rasterises to a featureless line — which is what "a single long thin bone" was describing.

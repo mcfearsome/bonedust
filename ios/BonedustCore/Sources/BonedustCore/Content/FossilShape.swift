@@ -36,6 +36,13 @@ public struct ShapeParams: Sendable, Codable, Equatable {
     public var ribs: Int = 9
     /// Height as a fraction of length, for spindle and blade bodies.
     public var aspect: Float = 0.34
+    /// Bulbous ends on a taper, as a fraction of its width. 0 leaves a plain cone.
+    ///
+    /// A tooth or a belemnite really is a smooth cone and should stay one. A rib, a jaw or
+    /// a limb bone is not: it has epiphyses, and without them it rasterises to a featureless
+    /// line -- reported from play as "just a single long thin bone, these fossils SUCK",
+    /// which was a fair description of what the generator produced.
+    public var knobEnds: Float = 0
 
     public init() {}
 }
@@ -52,6 +59,12 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
         case fan             // brachiopod
         case fish            // Knightia
         case leaf            // fossil leaf
+        // Silhouettes rather than primitives. See the Creatures section below.
+        case skull           // theropod skull in profile
+        case tail            // vertebrae, neural spines, chevrons
+        case ribcage         // spine with ribs down both sides
+        case wing            // pterosaur arm and membrane
+        case foot            // three-toed foot with claws
     }
 
     public var kind: Kind
@@ -76,7 +89,218 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
         case .fan: return Self.fan(params)
         case .fish: return Self.fish(params)
         case .leaf: return Self.leaf(params)
+        case .skull: return Self.skull(params)
+        case .tail: return Self.tail(params)
+        case .ribcage: return Self.ribcage(params)
+        case .wing: return Self.wing(params)
+        case .foot: return Self.foot(params)
         }
+    }
+
+    // MARK: - Creatures
+    //
+    // Everything above this line is a parametric primitive -- a cone, a coil, a disc --
+    // and none of them can ever read as an animal. Reported from play as "all i'm getting
+    // are circles and rib bones and spirals", with a render of a Hell Creek slab that was
+    // one curved stick to prove it.
+    //
+    // These are silhouettes instead: assembled from the same two primitives, but arranged
+    // so the shape under the sandstone is recognisably a skull, a tail, a ribcage. At
+    // 96x128 there is no room for detail, so each is built from a few bold masses and the
+    // negative space between them does the work.
+
+    /// A theropod skull in profile: cranium, snout, jaw, and a row of teeth.
+    ///
+    /// `ribs` is the tooth count, `aspect` the depth of the skull, `bend` how much the
+    /// snout dips. The eye socket cannot be a hole -- the rasteriser only fills -- so it is
+    /// implied by the notch between cranium and snout instead.
+    private static func skull(_ p: ShapeParams) -> [ShapePrimitive] {
+        // Grid y runs *down*, so negative y is toward the top of the slab. Getting this
+        // backwards put the braincase under the jaw and the lower jaw above the upper one,
+        // and the result read as a detached blob beside a comb.
+        let depth = max(0.15, p.aspect)
+        let bone = max(0.02, p.thickness)
+        var out: [ShapePrimitive] = [
+            // Braincase: one mass, small, entirely above the tooth row.
+            .ellipse(center: Vec2(0.54, -depth * 0.95), radii: Vec2(0.26, depth * 0.55), rotation: 0),
+            // The hinge, forward of the braincase so the two do not run together.
+            .ellipse(center: Vec2(0.3, -depth * 0.1), radii: Vec2(0.07, depth * 0.3), rotation: 0),
+        ]
+        let steps = 22
+        // Upper jaw: a bar running forward from the hinge, dipping by `bend`.
+        var upper: [(Vec2, Float)] = []
+        for i in 0...steps {
+            let u = Float(i) / Float(steps)
+            upper.append((
+                Vec2(0.46 - 1.4 * u, -depth * 0.3 + p.bend * u * u),
+                bone * (1.5 - 0.6 * u)
+            ))
+        }
+        out.append(.stroke(vertices: upper))
+        // Lower jaw, slung below it. The gap between the two is the only thing that says
+        // "jaws" rather than "log", so it is widest at the hinge and closes toward the tip.
+        var lower: [(Vec2, Float)] = []
+        for i in 0...steps {
+            let u = Float(i) / Float(steps)
+            let gap = depth * 0.8 * (1 - 0.5 * u * u)
+            lower.append((
+                Vec2(0.34 - 1.24 * u, -depth * 0.3 + gap + p.bend * u * u * 0.7),
+                bone * (1.1 - 0.45 * u)
+            ))
+        }
+        out.append(.stroke(vertices: lower))
+        // Teeth, hanging down into that gap from the upper jaw.
+        let teeth = max(0, p.ribs)
+        for i in 0..<teeth {
+            let u = (Float(i) + 0.5) / Float(max(1, teeth))
+            let x = 0.4 - 1.24 * u
+            let y = -depth * 0.3 + p.bend * u * u + bone * (1.3 - 0.5 * u)
+            out.append(.stroke(vertices: [
+                (Vec2(x, y), bone * 0.55),
+                (Vec2(x - 0.015, y + depth * 0.4 * (1 - 0.4 * u)), bone * 0.2),
+            ]))
+        }
+        return out
+    }
+
+    /// A tail: vertebrae shrinking along a curve, with neural spines and chevrons.
+    ///
+    /// `count` is the vertebra count, `bend` the sweep. The spines are what stop it reading
+    /// as a string of beads -- and they are thin, so a hurried brush shears them off and
+    /// leaves exactly the string of beads it would have been.
+    private static func tail(_ p: ShapeParams) -> [ShapePrimitive] {
+        let n = max(4, p.count)
+        var out: [ShapePrimitive] = []
+        var spine: [(Vec2, Float)] = []
+        for i in 0..<n {
+            let u = Float(i) / Float(n - 1)
+            let x = -1 + 2 * u
+            let y = p.bend * (u * u - 0.25)
+            let scale = 1 - 0.78 * u
+            spine.append((Vec2(x, y), max(0.015, p.thickness * scale)))
+            out.append(.ellipse(
+                center: Vec2(x, y),
+                radii: Vec2(p.thickness * 1.25 * scale, p.thickness * 1.6 * scale),
+                rotation: 0
+            ))
+            // Neural spine up, chevron down. Both shrink toward the tip.
+            let spineLength = p.aspect * scale
+            out.append(.stroke(vertices: [
+                (Vec2(x, y + p.thickness * scale), p.thickness * 0.42 * scale),
+                (Vec2(x - 0.03, y + spineLength), p.thickness * 0.22 * scale),
+            ]))
+            if u < 0.75 {
+                out.append(.stroke(vertices: [
+                    (Vec2(x, y - p.thickness * scale), p.thickness * 0.34 * scale),
+                    (Vec2(x - 0.02, y - spineLength * 0.62), p.thickness * 0.18 * scale),
+                ]))
+            }
+        }
+        out.insert(.stroke(vertices: spine), at: 0)
+        return out
+    }
+
+    /// A ribcage: spine along the top with ribs hanging off both sides.
+    ///
+    /// The single most skeleton-looking thing available, and the ribs are thin enough that
+    /// losing a few is the ordinary outcome of rushing.
+    private static func ribcage(_ p: ShapeParams) -> [ShapePrimitive] {
+        let n = max(4, p.ribs)
+        var out: [ShapePrimitive] = [
+            .stroke(vertices: [
+                (Vec2(-1, p.aspect * 0.9), p.thickness * 1.1),
+                (Vec2(0, p.aspect), p.thickness * 1.25),
+                (Vec2(1, p.aspect * 0.82), p.thickness * 0.95),
+            ])
+        ]
+        for i in 0..<n {
+            let u = Float(i) / Float(n - 1)
+            let x = -0.88 + 1.76 * u
+            // Longest in the middle, like a chest.
+            let length = p.aspect * (0.75 + 0.95 * sin(Float.pi * u))
+            let top = p.aspect * (0.9 - 0.08 * u)
+            for side in [Float(-1), 1] where side < 0 || p.bend > 0 {
+                out.append(.stroke(vertices: [
+                    (Vec2(x, top), p.thickness * 0.5),
+                    (Vec2(x + side * 0.1, top - length * 0.55), p.thickness * 0.42),
+                    (Vec2(x + side * 0.26, top - length), p.thickness * 0.3),
+                ]))
+            }
+        }
+        return out
+    }
+
+    /// A pterosaur wing: arm bones, then one enormous finger, with the membrane behind it.
+    ///
+    /// `ribs` is the number of membrane struts. The fourth finger being longer than the
+    /// whole rest of the animal is the thing that makes a pterosaur read as a pterosaur.
+    private static func wing(_ p: ShapeParams) -> [ShapePrimitive] {
+        var out: [ShapePrimitive] = [
+            .ellipse(center: Vec2(-0.86, -0.12), radii: Vec2(0.2, p.aspect * 0.7), rotation: 0)
+        ]
+        // Humerus, radius, metacarpal: three bones at angles, then the finger.
+        let joints: [Vec2] = [
+            Vec2(-0.78, -0.08), Vec2(-0.42, 0.16), Vec2(-0.02, 0.3), Vec2(0.52, 0.3),
+            Vec2(0.98, 0.04),
+        ]
+        for i in 0..<(joints.count - 1) {
+            let heft = p.thickness * (1.15 - 0.16 * Float(i))
+            out.append(.stroke(vertices: [
+                (joints[i], heft), (joints[i + 1], heft * 0.86),
+            ]))
+            if i < joints.count - 2 {
+                out.append(.ellipse(
+                    center: joints[i + 1],
+                    radii: Vec2(heft * 1.5, heft * 1.5), rotation: 0
+                ))
+            }
+        }
+        // Trailing edge of the membrane, from the wingtip back to the body.
+        out.append(.stroke(vertices: [
+            (joints[joints.count - 1], p.thickness * 0.5),
+            (Vec2(0.3, -0.52), p.thickness * 0.42),
+            (Vec2(-0.5, -0.66), p.thickness * 0.42),
+            (Vec2(-0.82, -0.3), p.thickness * 0.5),
+        ]))
+        // Struts across it, thin and the first thing to go.
+        let struts = max(0, p.ribs)
+        for i in 0..<struts {
+            let u = (Float(i) + 0.5) / Float(max(1, struts))
+            let a = Vec2(-0.5 + 1.4 * u, 0.3 - 0.24 * u * u)
+            let b = Vec2(-0.6 + 1.1 * u, -0.6 + 0.2 * u)
+            out.append(.stroke(vertices: [(a, p.thickness * 0.26), (b, p.thickness * 0.2)]))
+        }
+        return out
+    }
+
+    /// A three-toed foot with claws, pressed flat in the rock.
+    private static func foot(_ p: ShapeParams) -> [ShapePrimitive] {
+        var out: [ShapePrimitive] = [
+            .ellipse(center: Vec2(0.52, 0), radii: Vec2(0.26, p.aspect * 0.9), rotation: 0)
+        ]
+        // Metatarsal going back out of frame.
+        out.append(.stroke(vertices: [
+            (Vec2(0.95, 0.04), p.thickness * 0.9), (Vec2(0.5, 0), p.thickness * 1.05),
+        ]))
+        let toes = max(2, min(4, p.count))
+        for i in 0..<toes {
+            let spread = (Float(i) / Float(toes - 1) - 0.5) * 2    // -1 to 1
+            let tipY = spread * p.aspect * 1.9
+            // Three phalanges and a claw, with a knuckle at each joint.
+            let a = Vec2(0.42, spread * p.aspect * 0.4)
+            let b = Vec2(0.02, tipY * 0.7)
+            let c = Vec2(-0.44, tipY * 0.95)
+            let claw = Vec2(-0.92, tipY * 1.05 - 0.12)
+            out.append(.stroke(vertices: [
+                (a, p.thickness * 0.78), (b, p.thickness * 0.66), (c, p.thickness * 0.5),
+            ]))
+            out.append(.ellipse(center: b, radii: Vec2(p.thickness * 0.9, p.thickness * 0.9), rotation: 0))
+            out.append(.ellipse(center: c, radii: Vec2(p.thickness * 0.72, p.thickness * 0.72), rotation: 0))
+            out.append(.stroke(vertices: [
+                (c, p.thickness * 0.46), (claw, p.thickness * 0.16),
+            ]))
+        }
+        return out
     }
 
     // MARK: - Generators
@@ -115,7 +339,25 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
             let halfWidth = p.taperFrom + (p.taperTo - p.taperFrom) * pow(u, 0.75)
             vertices.append((Vec2(x, y), max(0.012, halfWidth)))
         }
-        return [.stroke(vertices: vertices)]
+        guard p.knobEnds > 0 else { return [.stroke(vertices: vertices)] }
+
+        // Epiphyses. Sized off the shaft at each end rather than a constant, so a slender
+        // rib gets slender knuckles and a femur gets heavy ones from the same number.
+        let base = max(0.012, p.taperFrom)
+        let tip = max(0.012, p.taperTo)
+        return [
+            .stroke(vertices: vertices),
+            .ellipse(
+                center: Vec2(-1, p.bend * 0),
+                radii: Vec2(base * p.knobEnds * 1.1, base * p.knobEnds),
+                rotation: 0
+            ),
+            .ellipse(
+                center: Vec2(1, p.bend * 0),
+                radii: Vec2(tip * p.knobEnds * 1.3, tip * p.knobEnds * 1.15),
+                rotation: 0
+            ),
+        ]
     }
 
     /// Circular arc with a taper: a claw. `bend` is the sweep in radians.

@@ -13,6 +13,26 @@ extension String {
     }
 }
 
+/// Writes a scaled PPM, for the `shapes` command.
+func writeShapePPM(_ pixels: [UInt8], to path: String, scale: Int) throws {
+    let w = SlabGrid.width, h = SlabGrid.height
+    var out = Data("P6\n\(w * scale) \(h * scale)\n255\n".utf8)
+    out.reserveCapacity(out.count + w * h * scale * scale * 3)
+    for y in 0..<h {
+        var row = Data()
+        row.reserveCapacity(w * scale * 3)
+        for x in 0..<w {
+            let o = (y * w + x) * 4
+            for _ in 0..<scale {
+                row.append(pixels[o]); row.append(pixels[o + 1]); row.append(pixels[o + 2])
+            }
+        }
+        for _ in 0..<scale { out.append(row) }
+    }
+    try out.write(to: URL(fileURLWithPath: path))
+}
+
+
 let arguments = Array(CommandLine.arguments.dropFirst())
 let command = arguments.first ?? "help"
 
@@ -240,6 +260,45 @@ case "golden":
     FileHandle.standardError.write(
         Data("wrote \(derivations.count) derivations to \(path)\n".utf8)
     )
+
+case "shapes":
+    // One PNG per species, the fossil centred and alone.
+    //
+    // `render` draws site scenes, which show whatever the seed happened to pick -- fine for
+    // checking a palette, useless for checking that a shape reads as a skull. This draws
+    // every species in the catalogue, which is the only way to know that 117 hand-written
+    // parameter sets all produce something worth digging up. The first run of the
+    // equivalent test found nine that did not.
+    let shapesDir = arguments.count > 1 ? arguments[1] : "build/shapes"
+    try FileManager.default.createDirectory(
+        at: URL(fileURLWithPath: shapesDir), withIntermediateDirectories: true
+    )
+    let shapeScale = Int(arguments.count > 2 ? arguments[2] : "4") ?? 4
+    let shapeCatalog = ContentCatalog.shared
+    var rendered = 0
+    for fossil in shapeCatalog.fossils {
+        var grid = SlabGrid()
+        for i in 0..<SlabGrid.cellCount { grid.cells[i].depth = 0 }
+        let centred = ShapeTransform(
+            scale: fossil.shape.spanCells / 2,
+            rotation: 0,
+            center: Vec2(Float(SlabGrid.width) / 2, Float(SlabGrid.height) / 2)
+        )
+        let cells = ShapeRasterizer.rasterize(
+            fossil.shape.expand(), transform: centred,
+            flag: SlabGrid.Flag.bone, into: &grid
+        )
+        var renderer = SlabRenderer()
+        renderer.redrawEverything(grid)
+        try writeShapePPM(
+            renderer.pixels,
+            to: "\(shapesDir)/\(fossil.shape.kind.rawValue)-\(fossil.id).ppm",
+            scale: shapeScale
+        )
+        rendered += 1
+        if cells < 60 { print("  WARNING \(fossil.id) is only \(cells) cells") }
+    }
+    print("wrote \(rendered) shapes to \(shapesDir)")
 
 case "render":
     // Renders slabs to PNG, headlessly.
