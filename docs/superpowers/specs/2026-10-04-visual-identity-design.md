@@ -73,7 +73,7 @@ contrast rule had only ever been checked against the cream page.
 
 | Token | Hex | On `nightPage` |
 |---|---|---|
-| `stampNight` | `#E0705C` | 4.75:1 |
+| `stampNight` | `#E0705C` | 4.76:1 |
 | `gemNight` | `#56B8C8` | 6.51:1 |
 | `safeNight` | `#7FBF6A` | 6.85:1 |
 
@@ -81,7 +81,8 @@ contrast rule had only ever been checked against the cream page.
 redesign replaces. That palette was never wrong; it was a dark-mode palette, and
 it is correct again at night.
 
-**Nothing above `earth5` carries text, and `earth2` carries none at all.**
+**On the day page, nothing above `earth5` carries text, and `earth2` carries none at all.**
+(At night the ramp inverts and `earth1` is the text colour.)
 `earth5`-on-`earth2` is 4.25:1 and `stamp`-on-`earth2` is 4.09:1, both under AA.
 §4 already makes cards ruled boxes rather than filled panels, so `earth2` is a
 fill for troughs and inactive tracks. Text sits on `earth1` or `earth0`.
