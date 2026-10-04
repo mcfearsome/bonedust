@@ -284,10 +284,10 @@ public struct SlabRenderer {
         }
         // The tell, from §3: the only legitimate way to read the fossil before
         // exposing it, and learning to see it is the difference between a careful
-        // player and a fast one. Depth-1 sandstone sitting on bone goes toward bone,
-        // as a pattern rather than a tint, so it survives any future posterize and
-        // reads as a shape instead of a faint shift in colour. Both constants stay
-        // live so the debug overlay can A/B them. See spec §7a.
+        // player and a fast one. Depth-1 sandstone sitting on bone goes toward bone.
+        // It ships as a tint, which keeps the specimen's internal structure readable
+        // (a fin's rays); the stipple is the alternative, one slider away. Both
+        // constants stay live so the debug overlay can A/B them. See spec §7a.
         if depth == 1, cell.flags & SlabGrid.Flag.bone != 0 {
             if style.tuning.boneTellTint > 0 {
                 layer = layer.lerp(to: palette.bone, style.tuning.boneTellTint)
