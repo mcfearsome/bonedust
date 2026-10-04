@@ -1266,30 +1266,39 @@ final class CelShadingTests: XCTestCase {
     ///
     /// The edge colour comes from `SlabRenderer.inked`, the function `colour()` calls,
     /// so a change to its strength is measured here rather than copied.
+    ///
+    /// Measured as the pixel reaches the screen. `colour()` scales every cell by the site's
+    /// `lightLevel` after the edge is drawn, so on night_dig the bone, the edge and the matrix
+    /// are all at 0.55. Measured unscaled this read 4.76:1 there while the shipped pixels were
+    /// 2.78:1, under this bar, and the test stayed green: the same defect Task 2 had, which
+    /// `testEverySiteMatrixSeparatesFromTheMountAtItsOwnLightLevel` exists because of. The cel
+    /// pass then moves each cell a further 7% either way; this is the pairing it leaves alone.
     func testInkEdgeMakesBoneSeparateFromMatrixOnEverySite() {
         for site in ContentCatalog.shared.sites {
-            let matrix = site.palette.matrix
+            let level = site.modifiers.lightLevel
+            let matrix = site.palette.matrix.scaled(level)
             let bone = site.palette.bone
-            let bare = bone.contrastRatio(against: matrix)
-            let edged = SlabRenderer.inked(bone).contrastRatio(against: matrix)
-            // The old relief: a lit top edge and a shadowed bottom edge. Whichever of
-            // the two was stronger is the one to beat.
+            let bare = bone.scaled(level).contrastRatio(against: matrix)
+            let edged = SlabRenderer.inked(bone).scaled(level).contrastRatio(against: matrix)
+            // The old relief: a lit top edge and a shadowed bottom edge, drawn before the
+            // light level like the edge is. Whichever of the two was stronger is the one to beat.
             let rim = max(
-                bone.scaled(1.12).contrastRatio(against: matrix),
-                bone.scaled(0.86).contrastRatio(against: matrix)
+                bone.scaled(1.12).scaled(level).contrastRatio(against: matrix),
+                bone.scaled(0.86).scaled(level).contrastRatio(against: matrix)
             )
+            let shown = String(format: "%.2f", edged)
 
             XCTAssertGreaterThanOrEqual(
                 edged, 3.0,
-                "site '\(site.id)': the ink edge does not separate bone from matrix (\(edged))"
+                "site '\(site.id)' at lightLevel \(level): the ink edge does not separate bone from matrix (\(shown):1)"
             )
             XCTAssertGreaterThan(
                 edged, bare,
-                "site '\(site.id)': the ink edge is weaker than the bare fill it replaced"
+                "site '\(site.id)' at lightLevel \(level): the ink edge is weaker than the bare fill it replaced"
             )
             XCTAssertGreaterThan(
                 edged, rim,
-                "site '\(site.id)': the ink edge (\(edged)) is weaker than the relief it replaced (\(rim))"
+                "site '\(site.id)' at lightLevel \(level): the ink edge (\(shown):1) is weaker than the relief it replaced"
             )
         }
     }

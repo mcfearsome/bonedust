@@ -138,8 +138,13 @@ struct SlabRenderer {
     }
 
     /// A cell on an ink edge: its own colour, most of the way to ink.
+    ///
+    /// 0.80, not the 0.72 the spec first drew. The edge is drawn before the light level, so on
+    /// night_dig it reaches the screen at 0.55 beside a matrix at 0.55, and at 0.72 that pair is
+    /// 2.78:1, under the 3:1 `testInkEdgeMakesBoneSeparateFromMatrixOnEverySite` holds it to. At
+    /// 0.80 it is 3.14:1, and the day sites go from 4.1-5.5 to 5.4-7.1.
     static func inked(_ colour: RGB8) -> RGB8 {
-        colour.lerp(to: Earth.s8, 0.72)
+        colour.lerp(to: Earth.s8, 0.80)
     }
 
     private static func colour(

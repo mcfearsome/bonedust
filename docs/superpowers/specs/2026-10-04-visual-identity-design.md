@@ -263,11 +263,15 @@ The pass, in order:
    though in practice only bone takes one: gems are 2x2 and the run guard below
    skips anything under 3 cells. Teal on tan reads without an edge, so this is
    noted rather than fixed.
-   `Earth.s8` at 0.72. Two-sided rather than four keeps a thin specimen's
-   interior, and the edge is skipped where the run is under 3 cells so
-   green_river's paper-thin fish survive. Outlines are drawn from `flags`, not
-   from colour difference, which is why this belongs on the CPU: a fragment
-   shader cannot tell gem-on-matrix from a noise boundary.
+   `Earth.s8` at 0.80. This was drawn at 0.72, which clears 3:1 against every
+   matrix at full light but not on screen at night: the edge is drawn before
+   the light level, so on night_dig it lands at 0.55 beside a matrix at 0.55,
+   and 0.72 measures 2.78:1 there. 0.80 is 3.14:1 on night_dig and 5.4-7.1 on
+   the four day sites, up from 4.1-5.5. Two-sided rather than four keeps a thin
+   specimen's interior, and the edge is skipped where the run is under 3 cells
+   so green_river's paper-thin fish survive. Outlines are drawn from `flags`,
+   not from colour difference, which is why this belongs on the CPU: a
+   fragment shader cannot tell gem-on-matrix from a noise boundary.
 4. **The soft bone relief is removed.** The ink edge replaces it.
 
 **The dirty rect had to grow.** An earlier draft of this spec claimed the
