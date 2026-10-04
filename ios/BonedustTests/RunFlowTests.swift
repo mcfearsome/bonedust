@@ -20,32 +20,10 @@ final class RunCoordinatorTests: XCTestCase {
         if coordinator.screen == .supplyTent { await coordinator.leaveShop() }
     }
 
-    /// Sweeps until bone is actually showing, rather than for a fixed number of passes.
-    ///
-    /// Clearing a slab takes roughly 5,300 cells of brush travel, and every hand-picked
-    /// pass count in these tests has been wrong at least once — the last one delivered
-    /// about 2,000 and silently asserted on an untouched slab. Stopping on the condition
-    /// the test actually cares about means a change to `removalRate` cannot quietly turn
-    /// these back into assertions about nothing.
-    @discardableResult
-    private func digUntilBoneShows(_ engine: DigEngine, passLimit: Int = 200) -> Bool {
-        engine.brushBegan(at: Vec2(6, 6))
-        var pass = 0
-        while pass < passLimit, engine.exposedBoneCells == 0 {
-            let y = Float(6 + (pass * 5) % 116)
-            for x in stride(from: Float(6), through: 90, by: 1.5) {
-                engine.brushMoved(to: Vec2(x, y), deltaMillis: 16.67)
-            }
-            pass += 1
-        }
-        engine.brushEnded()
-        return engine.exposedBoneCells > 0
-    }
-
     /// Finishes whatever slab is on screen by running the daylight out.
     private func burnThroughSlab(_ coordinator: RunCoordinator) async {
         guard let engine = coordinator.digEngine else { return XCTFail("no dig on screen") }
-        XCTAssertTrue(digUntilBoneShows(engine), "the sweep never reached bone")
+        XCTAssertTrue(sweepUntilBoneShows(engine), "the sweep never reached bone")
         engine.tick(delta: Double(engine.totalDaylight) + 1)
         XCTAssertTrue(engine.isFinished)
         coordinator.slabFinished(engine)
@@ -118,7 +96,7 @@ final class RunCoordinatorTests: XCTestCase {
         await coordinator.startRun(siteID: "charmouth")
         guard let engine = coordinator.digEngine else { return XCTFail() }
 
-        XCTAssertTrue(digUntilBoneShows(engine), "the sweep never reached bone")
+        XCTAssertTrue(sweepUntilBoneShows(engine), "the sweep never reached bone")
         engine.tick(delta: 12)
         let exposedBefore = engine.exposedBoneCells
         let seedBefore = engine.layout.seed

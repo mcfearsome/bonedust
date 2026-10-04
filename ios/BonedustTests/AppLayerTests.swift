@@ -68,17 +68,7 @@ final class DigEngineTests: XCTestCase {
 
     func testPublishedReadoutsTrackTheSimulation() {
         let subject = engine()
-        // Sweeps the whole slab several times. A single pass removes roughly one layer at
-        // the brush centre, so the original one-line version never reached bone and
-        // asserted on an untouched slab.
-        subject.brushBegan(at: Vec2(20, 30))
-        for pass in 0..<30 {
-            let y = Float(6 + (pass * 4) % 116)
-            for x in stride(from: Float(6), through: 90, by: 1.5) {
-                subject.brushMoved(to: Vec2(x, y), deltaMillis: 16.67)
-            }
-        }
-        subject.brushEnded()
+        XCTAssertTrue(sweepUntilBoneShows(subject), "the sweep never reached bone")
         subject.publish()
         XCTAssertGreaterThan(subject.exposurePercent, 0)
         XCTAssertEqual(subject.intactPercent, 100, "a slow sweep should not crack anything")
@@ -98,13 +88,7 @@ final class DigEngineTests: XCTestCase {
         rush.rushMultiplier = 1.4
         rush.rushThreshold = 20
         let subject = DigEngine(seed: 9, site: site, extraModifiers: rush)
-        subject.brushBegan(at: Vec2(48, 64))
-        for pass in 0..<30 {
-            let y = Float(6 + (pass * 4) % 116)
-            for x in stride(from: Float(6), through: 90, by: 1.5) {
-                subject.brushMoved(to: Vec2(x, y), deltaMillis: 16.67)
-            }
-        }
+        XCTAssertTrue(sweepUntilIdentified(subject), "nothing worth valuing was exposed")
         subject.publish()
         let estimate = subject.estimatedValue
         let actual = subject.payout().total

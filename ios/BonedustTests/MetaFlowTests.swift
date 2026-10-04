@@ -18,15 +18,9 @@ final class MetaFlowTests: XCTestCase {
     /// Finishes the slab on screen, having exposed enough to identify the specimen.
     private func digAndBag(_ coordinator: RunCoordinator) async {
         guard let engine = coordinator.digEngine else { return XCTFail("no dig") }
-        engine.brushBegan(at: Vec2(48, 64))
-        // Sweep the whole slab so the fossil is identified and the record is real.
-        for pass in 0..<40 {
-            let y = Float(6 + (pass * 3) % 118)
-            for x in stride(from: Float(4), through: 92, by: 2) {
-                engine.brushMoved(to: Vec2(x, y), deltaMillis: 16.67)
-            }
-        }
-        engine.brushEnded()
+        // The specimen has to be identified or the collection record is not real, so this
+        // stops on that rather than on a pass count.
+        XCTAssertTrue(sweepUntilIdentified(engine), "the sweep never identified the fossil")
         engine.tick(delta: Double(engine.totalDaylight) + 1)
         coordinator.slabFinished(engine)
     }

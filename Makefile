@@ -8,7 +8,7 @@ SIM ?= platform=iOS Simulator,name=iPhone 17
 CORE := ios/BonedustCore
 
 .PHONY: all project test test-core test-app bench simulate constants golden content app \
-	server-test server-golden server-load server-setup render clean
+	server-test server-golden server-load server-setup render team-id clean
 
 all: test
 
@@ -87,3 +87,22 @@ constants:
 # back from `make project` and `make test-core`.
 clean:
 	git clean -xdf -- $(CORE)/.build ios/Bonedust.xcodeproj
+
+# The Team ID the installed signing certificates actually carry, read from each
+# certificate's OU. The parenthetical in a development cert's common name is the
+# *user* id and is not it -- getting those two confused is how
+# BonedustAppAttestAppID ends up wrong, which takes attestation down entirely.
+# Publishing under an organization means a different team from a personal one.
+team-id:
+	@tmp=$$(mktemp -d); \
+	security find-certificate -a -p -c "Apple Dis" > $$tmp/all.pem 2>/dev/null; \
+	security find-certificate -a -p -c "Apple Dev" >> $$tmp/all.pem 2>/dev/null; \
+	awk 'BEGIN{n=0} /BEGIN CERT/{n++} {print > (d "/c" n ".pem")}' d=$$tmp $$tmp/all.pem; \
+	for f in $$tmp/c*.pem; do \
+		openssl x509 -in $$f -noout -subject 2>/dev/null \
+			| sed -n 's/.*CN = \([^,]*\).*OU = \([A-Z0-9]*\), O = \([^,]*\).*/\2  \3  (\1)/p'; \
+	done | sort -u; \
+	rm -rf $$tmp
+	@echo
+	@echo "First column is the Team ID -- use it in BonedustAppAttestAppID and"
+	@echo "DEVELOPMENT_TEAM. Third column is the organization that owns it."

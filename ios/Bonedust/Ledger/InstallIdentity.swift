@@ -12,7 +12,17 @@ import Security
 /// There are no accounts and nothing here identifies a person.
 enum InstallIdentity {
 
-    private static let service = "dev.mcfearsome.bonedust"
+    /// Deliberately *not* the bundle identifier.
+    ///
+    /// It was `dev.mcfearsome.bonedust` until the app moved to `dev.codenerd.bonedust`,
+    /// and that rename would have orphaned every stored id — the exact loss the
+    /// UserDefaults mirror below exists to prevent, reintroduced by a line in a
+    /// build file. The Keychain service is a namespace we choose; the bundle id is a
+    /// publishing detail that can change again. They should not be the same string.
+    private static let service = "bonedust.install-identity"
+    /// Read once, if the current service has nothing, so the rename above costs no
+    /// installed player their contribution. Safe to delete after 1.0 ships.
+    private static let legacyServices = ["dev.mcfearsome.bonedust"]
     private static let account = "install-id"
 
     /// Where the current id actually came from. Exposed for diagnosis, because the
@@ -47,6 +57,15 @@ enum InstallIdentity {
             return existing
         }
 
+        for legacy in legacyServices {
+            if let inherited = read(service: legacy) {
+                lastSource = .keychain
+                _ = write(inherited)
+                defaults.set(inherited, forKey: fallbackKey)
+                return inherited
+            }
+        }
+
         if let mirrored = defaults.string(forKey: fallbackKey), UUID(uuidString: mirrored) != nil {
             lastSource = .defaultsFallback
             // Try to put it back where it belongs; harmless if this fails again.
@@ -60,8 +79,8 @@ enum InstallIdentity {
         return fresh
     }
 
-    private static func read() -> String? {
-        var query = baseQuery()
+    private static func read(service: String = InstallIdentity.service) -> String? {
+        var query = baseQuery(service: service)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
 
@@ -90,7 +109,7 @@ enum InstallIdentity {
         return status == errSecSuccess
     }
 
-    private static func baseQuery() -> [String: Any] {
+    private static func baseQuery(service: String = InstallIdentity.service) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,

@@ -1,7 +1,7 @@
 name: Bonedust
 
 options:
-  bundleIdPrefix: dev.mcfearsome
+  bundleIdPrefix: dev.codenerd
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
@@ -33,7 +33,7 @@ targets:
         product: BonedustCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: dev.mcfearsome.bonedust
+        PRODUCT_BUNDLE_IDENTIFIER: dev.codenerd.bonedust
         PRODUCT_NAME: Bonedust
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -60,11 +60,15 @@ targets:
         # The crew ledger. api.bonedust.app in release; the apex is left for a marketing
         # page. A debug build can be pointed at a local server by editing this.
         BonedustLedgerBaseURL: "https://api.bonedust.app"
-        # App Attest identifies the app as teamID.bundleID. Filled in once the team is
-        # known; until then the server skips the relying-party check.
-        # teamID.bundleID. The server hashes this to check the relying party, and
-        # refuses to boot in production without the matching APP_ATTEST_APP_ID set.
-        BonedustAppAttestAppID: "VHH2P6SR8R.dev.mcfearsome.bonedust"
+        # App Attest identifies the app as teamID.bundleID. The server hashes this to
+        # check the relying party, and refuses to boot in production without the matching
+        # APP_ATTEST_APP_ID set -- so this string and the server's env var move together,
+        # and a mismatch is a total attestation outage rather than a degraded one.
+        #
+        # VHH2P6SR8R is the personal team. Published under Code Nerd LLC this becomes the
+        # LLC's Team ID, which is a different value: an organization membership is its own
+        # team. `make team-id` prints what the installed certificates actually say.
+        BonedustAppAttestAppID: "VHH2P6SR8R.dev.codenerd.bonedust"
       debug:
         BonedustLedgerBaseURL: "https://api.bonedust.app"
 

@@ -15,5 +15,19 @@
 	-->
 	<key>com.apple.developer.devicecheck.appattest-environment</key>
 	<string>development</string>
+
+	<!--
+	  Game Center (§5), for the three leaderboards in `Leaderboard.all` and the
+	  achievement catalogue.
+
+	  GameCenterService treats all of it as a mirror, never a record: every call fails
+	  soft, nothing in the dig loop waits on it, and the authoritative numbers live in
+	  the save file and the crew ledger. A player who is not signed in, is offline, or
+	  is somewhere Game Center does not operate gets exactly the same game — which is
+	  why this entitlement being absent, or sign-in being declined, is not a degraded
+	  mode that needs handling anywhere.
+	-->
+	<key>com.apple.developer.game-center</key>
+	<true/>
 </dict>
 </plist>

@@ -23,6 +23,7 @@ shared/ledger.json    Crew debt total, milestone ladder, leaderboard definitions
 server/               Rails 8 API for the crew ledger. Deploys to api.bonedust.app.
 shared/golden/        Cross-language fixture: Swift emits it, Ruby must reproduce it.
 docs/CREW_LEDGER.md   Debt, milestone rewards, leaderboards, anti-cheat.
+docs/GAME_CENTER.md   Leaderboard and achievement ids to create in App Store Connect.
 DECISIONS.md          Every judgement call, with the reason.
 ```
 
