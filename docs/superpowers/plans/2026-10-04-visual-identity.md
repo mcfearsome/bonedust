@@ -19,6 +19,8 @@
 - All 94 existing `BonedustCore` tests and the existing `BonedustTests` suite must stay green.
 - Dynamic Type must keep working everywhere outside the slab. Every custom font goes through `Font.custom(_:size:relativeTo:)`, never `Font.custom(_:fixedSize:)`.
 - Colour literals are written as `RGB8(0xNN, 0xNN, 0xNN)` so they can be diffed against the spec's hex table by eye.
+- **Pick a simulator that exists.** `export SIM=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9]+' | tail -1)` before any `xcodebuild` command. iPhone 16 is not installed on this machine; iPhone 17 is.
+- **`BonedustTests` has two failures that predate this plan.** `testEstimatedValueExcludesTheRushBonus` and `testPublishedReadoutsTrackTheSimulation` are byte-identical to the merge-base and exercise only `DigEngine` and the economy — nothing this plan touches. **Do not fix them; they are out of scope.** Scope every `xcodebuild test` run with `-only-testing:` to the classes the task owns, so a red pre-existing test never masks a real one.
 - Two test homes, both XCTest: `ios/BonedustCore/Tests/BonedustCoreTests/` for anything pure, `ios/BonedustTests/AppLayerTests.swift` for anything needing UIKit or SwiftUI.
 
 ## Review Focus
@@ -332,7 +334,7 @@ final class DesignTokenTests: XCTestCase {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/DesignTokenTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/DesignTokenTests`
 Expected: FAIL to compile — `Ink.day`, `Ink.lerp`, and `Typography.resolvedDisplayPointSize` do not exist.
 
 - [ ] **Step 3: Write the implementation**
@@ -618,12 +620,12 @@ struct FieldLabel: View {
 
 - [ ] **Step 4: Run the tests**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/DesignTokenTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/DesignTokenTests`
 Expected: PASS, 6 tests. The Dynamic Type tests pass against the *system fallback* at this point, because no font file exists yet. That is the point — Task 4 proves the custom path.
 
 - [ ] **Step 5: Confirm the app still builds**
 
-Run: `xcodebuild build -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16'`
+Run: `xcodebuild build -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM"`
 Expected: SUCCESS. The deprecated block keeps all 51 call sites compiling. The app will look wrong — cream tokens behind a dark layout — until Task 9. That is expected.
 
 - [ ] **Step 6: Commit**
@@ -706,7 +708,7 @@ final class FontRegistrationTests: XCTestCase {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/FontRegistrationTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/FontRegistrationTests`
 Expected: FAIL — "RubikDirt-Regular is not registered."
 
 - [ ] **Step 3: Add the font files**
@@ -727,7 +729,7 @@ Then regenerate: `cd ios && xcodegen generate`
 
 - [ ] **Step 5: Run the tests**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests`
 Expected: PASS. `DesignTokenTests` now exercises the custom-font path rather than the fallback, and must still pass.
 
 - [ ] **Step 6: Update the README**
@@ -858,7 +860,7 @@ final class ThemeTests: XCTestCase {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/ThemeTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/ThemeTests`
 Expected: FAIL to compile — "cannot find 'Theme' in scope".
 
 - [ ] **Step 3: Write the implementation**
@@ -914,7 +916,7 @@ Note: `@Entry` requires iOS 17 with Xcode 16's macro, which this project has. If
 
 - [ ] **Step 4: Run the tests**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/ThemeTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/ThemeTests`
 Expected: PASS, 7 tests. night_dig is the thin one — expect roughly 3.12 against a 3.0 floor.
 
 - [ ] **Step 5: Commit**
@@ -1110,7 +1112,7 @@ override func didChangeSize(_ oldSize: CGSize) {
 
 - [ ] **Step 4: Build and look at it**
 
-Run: `xcodebuild build -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16'`
+Run: `xcodebuild build -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM"`
 Expected: SUCCESS.
 
 Then launch and confirm by eye:
@@ -1186,7 +1188,7 @@ final class FractureHatchTests: XCTestCase {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/FractureHatchTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/FractureHatchTests`
 Expected: FAIL to compile — "type 'SlabRenderer' has no member 'isHatched'".
 
 - [ ] **Step 3: Write the implementation**
@@ -1221,7 +1223,7 @@ if cell.flags & SlabGrid.Flag.cracked != 0 {
 
 - [ ] **Step 4: Run the tests**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/FractureHatchTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/FractureHatchTests`
 Expected: PASS, 3 tests.
 
 - [ ] **Step 5: Add the bloom to the scene**
@@ -1417,7 +1419,7 @@ final class CelShadingTests: XCTestCase {
 
 - [ ] **Step 3: Run them to verify they fail**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/CelShadingTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/CelShadingTests`
 Expected: FAIL to compile — `isStippled`, `celShade`, `inkEdge` do not exist.
 
 - [ ] **Step 4: Add the helpers**
@@ -1533,7 +1535,7 @@ if depth == 1, cell.flags & SlabGrid.Flag.bone != 0 {
 
 - [ ] **Step 7: Run the tests**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BonedustTests/CelShadingTests`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM" -only-testing:BonedustTests/CelShadingTests`
 Expected: PASS, 5 tests. The per-site edge test is the one carried over from Task 2 — green_river should land near 5.49:1 against a bare-fill 1.14:1.
 
 - [ ] **Step 8: Confirm the Core suite is unaffected**
@@ -1660,14 +1662,14 @@ Remove the entire `// MARK: - Deprecated static accessors` extension from `Desig
 - [ ] **Step 6: Build and verify the grep is clean**
 
 ```bash
-xcodebuild build -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild build -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM"
 grep -rn 'Ink\.\(ground\|ivory\|accent\|danger\)' ios/Bonedust/ && echo "STILL REFERENCED" || echo "clean"
 ```
 Expected: build SUCCESS, grep prints `clean`.
 
 - [ ] **Step 7: Run the whole suite**
 
-Run: `xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16'`
+Run: `xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM"`
 Expected: PASS.
 
 - [ ] **Step 8: Look at it at an accessibility text size**
@@ -1721,7 +1723,7 @@ Run the full sweep:
 
 ```bash
 cd ios/BonedustCore && swift test && cd ..
-xcodebuild test -scheme Bonedust -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild test -scheme Bonedust -destination "platform=iOS Simulator,name=$SIM"
 ```
 
 Then look at the app in daylight and in a dark room, on a night-dig site and a day site, at default and maximum text size, with Increase Contrast both off and on.
