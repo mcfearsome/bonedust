@@ -1259,14 +1259,16 @@ Spec §7 and §7a. The slab is already four discrete palette colours per layer; 
 In `SimTuning.swift`, in the `// MARK: Presentation` block, directly after `boneTellTint`:
 
 ```swift
-    /// The tell as a pattern rather than a tint: how far a stippled cell goes
-    /// toward bone. Ships at 0.60 with `boneTellTint` at 0, but both stay live so
-    /// the debug overlay's sliders can A/B them without a rebuild. Set this to 0
-    /// and `boneTellTint` to 0.20 for the pre-cel behaviour.
-    public var boneTellStipple: Float = 0.60
+    /// The tell as a pattern instead of a tint: how far a stippled cell goes
+    /// toward bone. Kept, with a `DebugOverlay` row, but **off by default** —
+    /// see spec §7a. The cel pass quantizes lighting rather than colour channels,
+    /// so a tint is no longer at risk from it, and the stipple costs the fossil's
+    /// fine detail: on green_river it replaces a readable fan of ribs with a dot
+    /// field. One slider drag away if a playtest disagrees.
+    public var boneTellStipple: Float = 0
 ```
 
-and change `boneTellTint`'s default from `0.20` to `0`.
+Leave `boneTellTint` at its shipping `0.20`.
 
 - [ ] **Step 2: Write the failing tests**
 
@@ -1496,8 +1498,8 @@ Expected: PASS. `SimTuning` gained a field; `bonedust-tool dump-constants` write
 - [ ] **Step 9: A/B the tell on device**
 
 Open the debug overlay and move the two sliders. Dig a `charmouth` slab to the point where sandstone covers the shell, then compare:
-- `boneTellStipple 0.60`, `boneTellTint 0` — the ship default
-- `boneTellStipple 0`, `boneTellTint 0.20` — today's behaviour
+- `boneTellTint 0.20`, `boneTellStipple 0` — the ship default
+- `boneTellStipple 0.60`, `boneTellTint 0` — the stipple, for comparison
 
 **This is a game-feel call, not a visual one.** The stipple is louder, and the renderer's own comment says reading the tell separates a careful player from a fast one. If the stipple gives it away, drop it toward 0.35 or restore the tint. Record which you picked and why.
 
