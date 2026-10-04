@@ -497,124 +497,28 @@ enum Typography {
 
     // MARK: Test seams
     //
-    // SwiftUI's `Font` is opaque, so a test cannot read a point size back out of it.
-    // These mirror what `display` and `number` ask for, against an explicit trait
-    // collection, which is what makes the Dynamic Type guarantee testable at all.
+    // `display` and `number` are thin wrappers over these, which take the
+    // availability flags as parameters. The tests call the SAME functions with
+    // availability injected, so they exercise the real code path -- including the
+    // custom-font branch, which is where a `fixedSize` regression would hide.
+    //
+    // An earlier draft had the seams rebuild the font independently. That version
+    // could not fail: changing `display()` to `Font.custom(_:fixedSize:)` left
+    // every Dynamic Type test green. Sharing only a base `UIFont` would not have
+    // fixed it either, because `number()` builds no `UIFont` at all on the custom
+    // path. Injecting availability is what makes one code path serve both callers.
 
-    static func resolvedDisplayPointSize(
-        _ size: CGFloat, for traits: UITraitCollection
-    ) -> CGFloat {
-        let base = displayAvailable
-            ? UIFont(name: displayFace, size: size)!
-            : UIFont.systemFont(ofSize: size, weight: .black, width: .expanded)
-        return UIFontMetrics(forTextStyle: .largeTitle)
-            .scaledFont(for: base, compatibleWith: traits).pointSize
-    }
+    static func displayFont(
+        _ size: CGFloat, relativeTo style: Font.TextStyle, customFaceAvailable: Bool
+    ) -> Font
 
-    static func resolvedNumberPointSize(
-        _ size: CGFloat, for traits: UITraitCollection
-    ) -> CGFloat {
-        let base = numberAvailable
-            ? UIFont(name: numberFace, size: size)!
-            : UIFont.monospacedSystemFont(ofSize: size, weight: .medium)
-        return UIFontMetrics(forTextStyle: .body)
-            .scaledFont(for: base, compatibleWith: traits).pointSize
-    }
-}
+    static func numberFont(
+        _ style: Font.TextStyle, weight: Font.Weight,
+        regularAvailable: Bool, boldAvailable: Bool
+    ) -> Font
 
-// MARK: - Bridging
-
-extension Color {
-    init(_ rgb: RGB8) {
-        self.init(
-            .sRGB,
-            red: Double(rgb.r) / 255,
-            green: Double(rgb.g) / 255,
-            blue: Double(rgb.b) / 255,
-            opacity: 1
-        )
-    }
-
-    /// Component-wise blend. Used only by `Ink.lerp`.
-    func mixed(with other: Color, _ fraction: Double) -> Color {
-        let a = UIColor(self)
-        let b = UIColor(other)
-        var ar: CGFloat = 0, ag: CGFloat = 0, ab: CGFloat = 0, aa: CGFloat = 0
-        var br: CGFloat = 0, bg: CGFloat = 0, bb: CGFloat = 0, ba: CGFloat = 0
-        a.getRed(&ar, green: &ag, blue: &ab, alpha: &aa)
-        b.getRed(&br, green: &bg, blue: &bb, alpha: &ba)
-        let t = CGFloat(min(max(fraction, 0), 1))
-        return Color(
-            .sRGB,
-            red: Double(ar + (br - ar) * t),
-            green: Double(ag + (bg - ag) * t),
-            blue: Double(ab + (bb - ab) * t),
-            opacity: Double(aa + (ba - aa) * t)
-        )
-    }
-}
-
-extension Font.TextStyle {
-    /// SwiftUI and UIKit name the same styles with different types.
-    var uiStyle: UIFont.TextStyle {
-        switch self {
-        case .largeTitle: return .largeTitle
-        case .title: return .title1
-        case .title2: return .title2
-        case .title3: return .title3
-        case .headline: return .headline
-        case .subheadline: return .subheadline
-        case .body: return .body
-        case .callout: return .callout
-        case .footnote: return .footnote
-        case .caption: return .caption1
-        case .caption2: return .caption2
-        @unknown default: return .body
-        }
-    }
-
-    /// The unscaled point size Apple specifies for each style at the default
-    /// content size. `Font.custom(_:size:relativeTo:)` scales from here.
-    var baseSize: CGFloat {
-        UIFont.preferredFont(
-            forTextStyle: uiStyle,
-            compatibleWith: UITraitCollection(preferredContentSizeCategory: .large)
-        ).pointSize
-    }
-}
-
-/// A dashed rule, the museum-label motif from §7.
-struct SpecimenRule: View {
-    var body: some View {
-        Rectangle()
-            .fill(Ink.day.hairline)
-            .frame(height: Measure.hairline)
-            .overlay(
-                GeometryReader { geometry in
-                    Path { path in
-                        path.move(to: CGPoint(x: 0, y: 0.5))
-                        path.addLine(to: CGPoint(x: geometry.size.width, y: 0.5))
-                    }
-                    .stroke(
-                        Ink.day.muted.opacity(0.55),
-                        style: StrokeStyle(lineWidth: 1, dash: [3, 3])
-                    )
-                }
-            )
-            .accessibilityHidden(true)
-    }
-}
-
-/// Small-caps field label.
-struct FieldLabel: View {
-    let text: String
-
-    var body: some View {
-        Text(text.uppercased())
-            .font(Typography.label())
-            .tracking(1.1)
-            .foregroundStyle(Ink.day.muted)
-    }
+    // Note: `Font.Weight` is NOT Comparable, so the bold test is set membership:
+    // `[.semibold, .bold, .heavy, .black].contains(weight)`.
 }
 ```
 
