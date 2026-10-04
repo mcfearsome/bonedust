@@ -260,6 +260,9 @@ The pass, in order:
 2. **Cell noise quantizes to 3 shade steps** (-7%, 0, +7%) instead of a
    continuous jitter.
 3. **A semantic ink edge** on bone and gem at depth 0, right and bottom only,
+   though in practice only bone takes one: gems are 2x2 and the run guard below
+   skips anything under 3 cells. Teal on tan reads without an edge, so this is
+   noted rather than fixed.
    `Earth.s8` at 0.72. Two-sided rather than four keeps a thin specimen's
    interior, and the edge is skipped where the run is under 3 cells so
    green_river's paper-thin fish survive. Outlines are drawn from `flags`, not
@@ -319,7 +322,7 @@ default moved.
 | `Bonedust/Dig/DigView.swift` | Consume `Theme` from the environment; restyle. |
 | `Bonedust/UI/SpeedMeter.swift` | Restyle to the environment theme. |
 | `Bonedust/App/RootView.swift` | Restyle to the environment theme; install `Theme`. |
-| `Bonedust/Resources/Fonts/` | Add `BebasNeue-Regular.ttf`, `CourierPrime-Regular.ttf`, `CourierPrime-Bold.ttf`; update README and the `UIAppFonts` entry in `project.yml`. |
+| `Bonedust/Resources/Fonts/` | Add `RubikDirt-Regular.ttf`, `CourierPrime-Regular.ttf`, `CourierPrime-Bold.ttf`; update README and the `UIAppFonts` entry in `project.yml`. |
 | `Resources/Assets.xcassets/LaunchBackground.colorset` | `earth1`. |
 | `Resources/Assets.xcassets/AppIcon.appiconset` | Regenerate against the new ground. |
 
