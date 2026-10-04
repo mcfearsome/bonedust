@@ -172,17 +172,37 @@ that reads as a rendering bug, and a bright phone at night is a real complaint.
 One `lightLevel` now drives both surfaces:
 
 - `lightLevel` keeps its existing 0...1 range; the simulation is unchanged.
-- Page lerps `earth1` toward `#2A2620`, reaching full darkness at `lightLevel`
-  0.35 and clamping below that. The page never reaches black.
-- Grid alpha rises as the page darkens so it does not vanish.
-- Text lerps `earth8` toward `earth1` — the ramp inverts.
+- The palette **switches**, it does not blend. Below a threshold the page is
+  `nightPage` and the ramp is inverted; above it, the day palette. No
+  intermediate palette ever reaches a screen.
+- Grid alpha is higher in the night palette so the grid does not vanish.
+
+**Why a switch and not a crossfade.** Blending two inverted palettes drives
+text and page toward each other, and in the middle they meet. Measured on this
+ramp, ink-on-page collapses from 13.7:1 at full day to **1.09:1 at the midpoint**,
+and stays under AA from roughly t=0.23 to t=0.80:
+
+| blend | ink | page | contrast |
+|---|---|---|---|
+| 0.00 | `#1C1A17` | `#EDE4CF` | 13.72:1 |
+| 0.35 | `#656157` | `#A9A292` | 2.43:1 |
+| 0.50 | `#847F73` | `#8C8578` | **1.09:1** |
+| 0.69 | `#ACA596` | `#666156` | 2.52:1 |
+| 1.00 | `#EDE4CF` | `#2A2620` | 11.89:1 |
+
+`night_dig` is the only dim site and it runs at `lightLevel` 0.55, which lands
+at t=0.69 — **2.52:1, unreadable**. A continuous blend would have shipped the
+game's one night level with illegible text. `lightLevel` is also static per site,
+set once when the scene is configured, so there is no transition to smooth and
+nothing is lost by switching outright.
 
 This also yields a genuine dark mode as a side effect.
 
 **Structural consequence.** `Ink` can no longer be static constants. It becomes
-a struct with instance properties, with `Ink.day` and `Ink.night` presets and a
-`lerp(_:)`. A small `Theme` observable derives the current `Ink` from
-`lightLevel` and is injected through the SwiftUI environment.
+a struct with instance properties and `Ink.day` / `Ink.night` presets. A small
+`Theme` observable selects between them from `lightLevel` and is injected through
+the SwiftUI environment. `Ink.lerp` exists for a future animated crossfade and is
+tested, but nothing drives the live palette through it — see the table above.
 
 Scope control: only `DigView` and `DigScene` consume the dynamic theme in this
 pass. `RootView`, `SpeedMeter`, and `DebugOverlay` read `Ink.day` directly.
