@@ -1814,3 +1814,65 @@ final class DigViewThemeWiringTests: XCTestCase {
         }
     }
 }
+
+/// The launch screen and the app icon. Neither is drawn by the app's own code: the launch
+/// screen is on screen before any of it runs and the icon is on the home screen, so both can
+/// only be checked where they are declared, in the built bundle.
+final class LaunchScreenAndIconTests: XCTestCase {
+
+    private let bundle = Bundle(for: DigScene.self)
+
+    /// Left dark, the launch colour flashed umber before the cream page on every cold start.
+    /// It has to be the day page, and the same in both appearances: the page is cream whatever
+    /// the system is set to, so a dark variant would be the same flash the other way round.
+    func testTheLaunchScreenIsTheDayPageInEveryAppearance() throws {
+        let launch = try XCTUnwrap(
+            bundle.object(forInfoDictionaryKey: "UILaunchScreen") as? [String: Any],
+            "the bundle has no UILaunchScreen"
+        )
+        let name = try XCTUnwrap(launch["UIColorName"] as? String, "UILaunchScreen names no colour")
+        XCTAssertEqual(name, "LaunchBackground")
+        for (appearance, style) in [("light", UIUserInterfaceStyle.light), ("dark", .dark)] {
+            let colour = try XCTUnwrap(
+                UIColor(
+                    named: name, in: bundle,
+                    compatibleWith: UITraitCollection(userInterfaceStyle: style)
+                ),
+                "\(name) is not in the asset catalog"
+            )
+            XCTAssertEqual(
+                rgb255(Color(colour)), rgb255(Ink.day.page),
+                "\(appearance): the launch colour is not the page the first frame is drawn on"
+            )
+        }
+    }
+
+    /// The app had no icon until this: an empty slot compiles to no `CFBundleIcons` at all. This
+    /// pins that one is declared and that it is the wordmark, by its colours: the page at the
+    /// corner, ink in BONE and stamp red in DUST.
+    func testTheBundleDeclaresAnAppIconThatIsTheWordmarkOnThePage() throws {
+        let icons = try XCTUnwrap(
+            bundle.object(forInfoDictionaryKey: "CFBundleIcons") as? [String: Any],
+            "the build declares no CFBundleIcons, so the app has no icon"
+        )
+        let primary = try XCTUnwrap(icons["CFBundlePrimaryIcon"] as? [String: Any])
+        XCTAssertEqual(primary["CFBundleIconName"] as? String, "AppIcon")
+        let files = try XCTUnwrap(primary["CFBundleIconFiles"] as? [String], "no icon files are declared")
+        let icon = try XCTUnwrap(
+            files.lazy.compactMap { UIImage(named: $0, in: self.bundle, compatibleWith: nil) }.first,
+            "none of \(files) is in the bundle"
+        )
+        let pixels = try readPixels(try XCTUnwrap(icon.cgImage), scale: 1)
+
+        XCTAssertLessThanOrEqual(
+            distance(pixels.rgb(1, 1), rgb255(Ink.day.page)), 6, "the icon's corner is not the page"
+        )
+        func count(near colour: [Int]) -> Int {
+            (0..<pixels.height).reduce(0) { total, y in
+                total + (0..<pixels.width).filter { distance(pixels.rgb($0, y), colour) <= 40 }.count
+            }
+        }
+        XCTAssertGreaterThan(count(near: rgb255(Ink.day.ink)), 200, "no BONE in ink")
+        XCTAssertGreaterThan(count(near: rgb255(Ink.day.stamp)), 200, "no DUST in stamp red")
+    }
+}
