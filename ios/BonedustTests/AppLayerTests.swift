@@ -1199,8 +1199,11 @@ final class CelShadingTests: XCTestCase {
         XCTAssertEqual(dots, 16, "one cell in four: 16 dots in an 8x8 patch")
     }
 
-    /// The whole point of §7a: the tell must survive a posterize, because it is a
-    /// pattern and not a colour. A tint at 6 levels does not.
+    /// Why the stipple is kept in reserve (§7a): it is a pattern, so a per-channel posterize
+    /// would not erase it, while the same posterize at 6 levels erases a 20% tint. The shipped
+    /// cel pass quantizes the lighting and leaves every palette value exact, so nothing
+    /// posterizes the tint today and the tint is the default; this pins the property that
+    /// makes the stipple a safe fallback if that ever changes.
     func testStippledTellSurvivesAPosterizeThatErasesTheTint() {
         let sandstone = SlabPalette.standard.sandstone
         let bone = SlabPalette.standard.bone
@@ -1374,12 +1377,13 @@ final class CelShadingTests: XCTestCase {
         }
     }
 
-    /// The tell, as a pattern. Sandstone over bone takes the stipple on its dot grid and
-    /// nowhere else, and both constants stay live so the debug overlay can A/B them:
-    /// either one at zero gives the pure case.
-    func testTheTellIsAStippleAndBothConstantsStayLive() {
-        XCTAssertEqual(SimTuning.standard.boneTellStipple, 0.60, "ships at stipple 0.60")
-        XCTAssertEqual(SimTuning.standard.boneTellTint, 0, "and with the tint off")
+    /// The tell ships as a tint, and the stipple, built and tested, stays one slider away.
+    /// Spec §7a: on green_river the tint keeps a fin's rays readable and the stipple loses
+    /// them. Both constants stay live and either one at zero gives the pure case, so this
+    /// renders both directions: the tint as shipped, then the stipple from the sliders alone.
+    func testTheTellShipsAsATintAndTheStippleStaysOneSliderAway() {
+        XCTAssertEqual(SimTuning.standard.boneTellTint, 0.20, "ships as the tint")
+        XCTAssertEqual(SimTuning.standard.boneTellStipple, 0, "with the stipple off")
 
         let palette = SlabPalette.standard
         var grid = SlabGrid()
@@ -1388,25 +1392,29 @@ final class CelShadingTests: XCTestCase {
         fill(&grid, x: 20..<40, y: 20..<40,
              with: SlabGrid.Cell(depth: 1, flags: SlabGrid.Flag.bone, wear: 0, noise: 0))
 
+        // As shipped: a flat tint over the bone and nothing outside it.
         var renderer = SlabRenderer(palette: palette)
         renderer.redrawEverything(grid)
-        let dot = palette.sandstone.lerp(to: palette.bone, SimTuning.standard.boneTellStipple)
+        let tint = palette.sandstone.lerp(to: palette.bone, SimTuning.standard.boneTellTint)
+        for y in 18..<42 {
+            for x in 18..<42 {
+                let inside = (20..<40).contains(x) && (20..<40).contains(y)
+                XCTAssertEqual(
+                    renderer.pixel(x, y), inside ? tint : palette.sandstone, "cell (\(x), \(y))"
+                )
+            }
+        }
+
+        // One drag the other way: dots on their grid, and no tint under them.
+        renderer.tuning.boneTellTint = 0
+        renderer.tuning.boneTellStipple = 0.60
+        renderer.redrawEverything(grid)
+        let dot = palette.sandstone.lerp(to: palette.bone, 0.60)
         for y in 18..<42 {
             for x in 18..<42 {
                 let inside = (20..<40).contains(x) && (20..<40).contains(y)
                 let expected = inside && SlabRenderer.isStippled(x: x, y: y) ? dot : palette.sandstone
-                XCTAssertEqual(renderer.pixel(x, y), expected, "cell (\(x), \(y))")
-            }
-        }
-
-        // Today's behaviour, from the sliders alone: no dots, a flat tint over the bone.
-        renderer.tuning.boneTellStipple = 0
-        renderer.tuning.boneTellTint = 0.20
-        renderer.redrawEverything(grid)
-        let tint = palette.sandstone.lerp(to: palette.bone, 0.20)
-        for y in 20..<40 {
-            for x in 20..<40 {
-                XCTAssertEqual(renderer.pixel(x, y), tint, "tint only, cell (\(x), \(y))")
+                XCTAssertEqual(renderer.pixel(x, y), expected, "stipple only, cell (\(x), \(y))")
             }
         }
     }
