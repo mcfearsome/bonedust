@@ -1,4 +1,5 @@
 import BonedustCore
+import SpriteKit
 import SwiftUI
 import XCTest
 @testable import Bonedust
@@ -484,6 +485,372 @@ final class ThemeTests: XCTestCase {
             UInt8((red * 255).rounded()),
             UInt8((green * 255).rounded()),
             UInt8((blue * 255).rounded())
+        )
+    }
+}
+
+/// The scene's page furniture.
+///
+/// Most of this is visual, so these tests render the real scene offscreen through
+/// `SKView.texture(from:)` and read pixels back, instead of asserting on node
+/// properties alone: a node can have exactly the right `zPosition` and still be
+/// invisible, which is how the mount first came out.
+@MainActor
+final class DigSceneBackdropTests: XCTestCase {
+
+    private let sceneSize = CGSize(width: 361, height: 481)
+
+    /// `SKScene.view` is weak, so the view has to outlive the test body.
+    private func present(
+        size: CGSize? = nil, engine: DigEngine? = nil, theme: Theme? = nil
+    ) -> (scene: DigScene, view: SKView) {
+        let size = size ?? sceneSize
+        let view = SKView(frame: CGRect(origin: .zero, size: size))
+        let scene = DigScene(size: size)
+        scene.engine = engine
+        scene.theme = theme
+        view.presentScene(scene)
+        return (scene, view)
+    }
+
+    /// `DigScene.engine` is weak: the caller keeps the engine alive.
+    private func engine(_ siteID: String) -> DigEngine {
+        let site = ContentCatalog.shared.site(siteID) ?? ContentCatalog.shared.sites[0]
+        return DigEngine(seed: 4242, site: site)
+    }
+
+    private struct Pixels {
+        let width: Int
+        let height: Int
+        let bytes: [UInt8]
+
+        func rgb(_ x: Int, _ y: Int) -> [Int] {
+            let i = (y * width + x) * 4
+            return [Int(bytes[i]), Int(bytes[i + 1]), Int(bytes[i + 2])]
+        }
+    }
+
+    /// The scene as SpriteKit draws it. Row 0 is the top row of the screen.
+    private func render(_ scene: DigScene, in view: SKView) throws -> Pixels {
+        let texture = try XCTUnwrap(
+            view.texture(from: scene), "SpriteKit would not render the scene"
+        )
+        let image = texture.cgImage()
+        let width = image.width
+        let height = image.height
+        var bytes = [UInt8](repeating: 0, count: width * height * 4)
+        let space = try XCTUnwrap(CGColorSpace(name: CGColorSpace.sRGB))
+        let drawn = bytes.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(
+                data: buffer.baseAddress, width: width, height: height,
+                bitsPerComponent: 8, bytesPerRow: width * 4, space: space,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else { return false }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        XCTAssertTrue(drawn, "could not read the rendered scene back")
+        return Pixels(width: width, height: height, bytes: bytes)
+    }
+
+    private func rgb(_ colour: UIColor) -> [Int] {
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        colour.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        return [red, green, blue].map { Int(($0 * 255).rounded()) }
+    }
+
+    private func rgb(_ colour: Color) -> [Int] { rgb(UIColor(colour)) }
+
+    /// Metal and an sRGB readback move a channel by a level or two, so a pixel is
+    /// compared with a small tolerance rather than exactly.
+    private func assertPixel(
+        _ actual: [Int], is expected: [Int], _ what: String, tolerance: Int = 3,
+        file: StaticString = #filePath, line: UInt = #line
+    ) {
+        let close = zip(actual, expected).allSatisfy { abs($0 - $1) <= tolerance }
+        XCTAssertTrue(
+            close, "\(what): drew \(actual), expected \(expected)", file: file, line: line
+        )
+    }
+
+    private func distance(_ a: [Int], _ b: [Int]) -> Int {
+        zip(a, b).map { abs($0 - $1) }.reduce(0, +)
+    }
+
+    // MARK: Layers
+
+    func testTheBackdropSitsBehindTheSlabInTheBriefsDepthOrder() {
+        let (scene, _) = present()
+        scene.buildBackdrop(contrastRaised: false)
+        XCTAssertEqual(scene.gridNode?.zPosition, -3)
+        XCTAssertEqual(scene.paperNode?.zPosition, -2)
+        XCTAssertEqual(scene.mountNode?.zPosition, -1)
+        XCTAssertEqual(scene.slabNode?.zPosition, 0)
+    }
+
+    /// The brief drops the two low-contrast layers under Increase Contrast and keeps
+    /// the mount: Increase Contrast makes it more necessary, not less.
+    func testIncreaseContrastDropsTheGridAndPaperButNeverTheMount() {
+        let (scene, _) = present()
+
+        scene.buildBackdrop(contrastRaised: true)
+        XCTAssertNil(scene.gridNode)
+        XCTAssertNil(scene.paperNode)
+        XCTAssertNotNil(scene.mountNode, "the mount is what separates a cleared slab from the page")
+        XCTAssertEqual(scene.children.count, 2, "mount and slab only; the old grid and paper must leave the scene")
+
+        scene.buildBackdrop(contrastRaised: false)
+        XCTAssertNotNil(scene.gridNode)
+        XCTAssertNotNil(scene.paperNode)
+        XCTAssertNotNil(scene.mountNode)
+        XCTAssertEqual(scene.children.count, 4, "grid, paper, mount and slab")
+    }
+
+    /// The default for `contrastRaised` is the live system setting. The suite cannot
+    /// flip that setting, so this asserts whichever state the run is in. To see the
+    /// other branch, run it with `xcrun simctl ui booted increase_contrast enabled`.
+    func testTheDefaultBackdropFollowsTheSystemSetting() {
+        let (scene, _) = present()
+        scene.buildBackdrop()
+        let raised = UIAccessibility.isDarkerSystemColorsEnabled
+        XCTAssertEqual(scene.gridNode == nil, raised, "Increase Contrast is \(raised ? "on" : "off")")
+        XCTAssertEqual(scene.paperNode == nil, raised, "Increase Contrast is \(raised ? "on" : "off")")
+        XCTAssertNotNil(scene.mountNode)
+    }
+
+    /// A rebuild replaces the layers. A leak here would stack a screen-sized
+    /// texture per resize.
+    func testResizingRebuildsTheBackdropInsteadOfStackingIt() {
+        let (scene, _) = present()
+        for width in [390, 768, 1024] {
+            scene.size = CGSize(width: width, height: width * 4 / 3)
+        }
+        let expected = UIAccessibility.isDarkerSystemColorsEnabled ? 2 : 4
+        XCTAssertEqual(scene.children.count, expected)
+        if let grid = scene.gridNode {
+            XCTAssertEqual(grid.size, scene.size, "the grid is rebuilt at the new size, never stretched")
+        }
+    }
+
+    // MARK: Mount
+
+    /// The scene is exactly the slab's card, and an `SKView` draws nothing past its
+    /// edge. A mount that "extends past" a full-size slab is clipped away, so the
+    /// slab is inset and the mount fills what it leaves.
+    func testTheMountIsAVisibleBandMountMarginWideOnEveryEdge() throws {
+        let (scene, _) = present()
+        for size in [sceneSize, CGSize(width: 768, height: 1024)] {
+            scene.size = size
+            let slab = try XCTUnwrap(scene.slabNode).frame
+            let mount = try XCTUnwrap(scene.mountNode).frame
+            let margin = Measure.mountMargin
+
+            XCTAssertTrue(
+                CGRect(origin: .zero, size: size).contains(mount),
+                "mount \(mount) is not inside the \(size) scene, so the view would clip it"
+            )
+            XCTAssertEqual(slab.minX - mount.minX, margin, accuracy: 0.001)
+            XCTAssertEqual(mount.maxX - slab.maxX, margin, accuracy: 0.001)
+            XCTAssertEqual(slab.minY - mount.minY, margin, accuracy: 0.001)
+            XCTAssertEqual(mount.maxY - slab.maxY, margin, accuracy: 0.001)
+        }
+    }
+
+    /// Brushes the slab until it is almost entirely cleared, so what is on screen is
+    /// the pale `matrix` layer. Every site's topsoil is dark, close to the mount's own
+    /// colour, so a fresh slab proves nothing about the band.
+    private func clear(_ engine: DigEngine) {
+        _ = engine.brushBegan(at: Vec2(1, 1))
+        for _ in 0..<80 {
+            var y: Float = 1
+            var direction: Float = 1
+            while y < 127 {
+                var x: Float = direction > 0 ? 1 : 95
+                while x > 0 && x < 96 {
+                    _ = engine.brushMoved(to: Vec2(x, y), deltaMillis: 16)
+                    x += direction * 1.5
+                }
+                y += 3
+                direction = -direction
+            }
+            engine.publish()
+            if engine.exposurePercent >= 95 { break }
+        }
+        engine.brushEnded()
+    }
+
+    /// The case the mount exists for, as it reaches a screen: a cleared slab is pale,
+    /// and green_river's matrix sits at 1.09:1 against the cream page. The slab is
+    /// uploaded, so it is opaque. If the mount were hidden or clipped, the pixel 3pt
+    /// in from each edge would be pale slab, not mount. Day and night, because the
+    /// mount is a different colour in each.
+    func testTheMountShowsAsABandAroundAClearedSlabOnScreen() throws {
+        for (siteID, ink) in [("green_river", Ink.day), ("night_dig", Ink.night)] {
+            let subject = engine(siteID)
+            clear(subject)
+            XCTAssertGreaterThanOrEqual(subject.exposurePercent, 95, "\(siteID) did not clear")
+            let (scene, view) = present(engine: subject, theme: Theme())
+            scene.update(1)
+            let pixels = try render(scene, in: view)
+            let scale = pixels.width / Int(sceneSize.width)
+            let middle = (x: pixels.width / 2, y: pixels.height / 2)
+            let band = 3 * scale
+            let mount = rgb(ink.mount)
+
+            assertPixel(pixels.rgb(band, middle.y), is: mount, "\(siteID), left band")
+            assertPixel(pixels.rgb(pixels.width - 1 - band, middle.y), is: mount, "\(siteID), right band")
+            assertPixel(pixels.rgb(middle.x, band), is: mount, "\(siteID), top band")
+            assertPixel(pixels.rgb(middle.x, pixels.height - 1 - band), is: mount, "\(siteID), bottom band")
+
+            let inside = pixels.rgb(9 * scale, middle.y)
+            XCTAssertGreaterThan(
+                distance(inside, mount), 100,
+                "\(siteID): 9pt in is \(inside), which is the mount again; the cleared slab is not drawn over it"
+            )
+        }
+    }
+
+    // MARK: Page and theme
+
+    func testThePageBehindTheSlabIsCreamNotDarkUmber() throws {
+        let (scene, view) = present()
+        scene.buildBackdrop(contrastRaised: true)
+        scene.mountNode?.isHidden = true
+        scene.slabNode?.isHidden = true
+        let pixels = try render(scene, in: view)
+        assertPixel(
+            pixels.rgb(pixels.width / 2, pixels.height / 2), is: rgb(Ink.day.page),
+            "the page", tolerance: 2
+        )
+        // The raw literal this replaced.
+        XCTAssertGreaterThan(distance(pixels.rgb(0, 0), [0x22, 0x18, 0x13]), 100)
+    }
+
+    func testApplyThemeRepaintsThePageTheMountAndTheGrid() throws {
+        let (scene, _) = present()
+        scene.buildBackdrop(contrastRaised: false)
+        for ink in [Ink.night, Ink.day] {
+            scene.applyTheme(ink: ink)
+            XCTAssertEqual(rgb(scene.backgroundColor), rgb(ink.page))
+            XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(ink.mount))
+            XCTAssertEqual(rgb(try XCTUnwrap(scene.gridNode).color), rgb(ink.hairline))
+        }
+    }
+
+    /// The backdrop is rebuilt on every resize. If the rebuild read the day palette
+    /// instead of the one last applied, a night dig would flip its mount back to
+    /// day colours the first time the view changed size.
+    func testAResizeKeepsThePaletteTheSceneWasPaintedIn() throws {
+        let (scene, _) = present()
+        scene.buildBackdrop(contrastRaised: false)
+        scene.applyTheme(ink: .night)
+        scene.size = CGSize(width: 768, height: 1024)
+        XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.night.page))
+        XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.night.mount))
+        if let grid = scene.gridNode {
+            XCTAssertEqual(rgb(grid.color), rgb(Ink.night.hairline))
+        }
+    }
+
+    /// `lightLevel` is static per site: set once in `configureRenderer()`, with
+    /// nothing observing it. Iterates the catalog so a second dim site is covered.
+    func testConfigureRendererSetsTheThemeFromTheSitesLightLevelAndRepaints() throws {
+        for site in ContentCatalog.shared.sites {
+            let subject = DigEngine(seed: 1, site: site)
+            let theme = Theme()
+            let (scene, _) = present(engine: subject, theme: theme)
+            XCTAssertEqual(theme.lightLevel, site.modifiers.lightLevel, "site '\(site.id)'")
+            XCTAssertEqual(
+                rgb(scene.backgroundColor), rgb(theme.ink.page),
+                "site '\(site.id)': the page is not in the palette the theme chose"
+            )
+            XCTAssertEqual(
+                rgb(try XCTUnwrap(scene.mountNode).color), rgb(theme.ink.mount),
+                "site '\(site.id)': the mount is not in the palette the theme chose"
+            )
+        }
+    }
+
+    /// The debug overlay calls `configureRenderer()` again, and a different site can
+    /// follow a night one, so the page must follow the engine, not only the first call.
+    func testTheNightSiteDarkensThePageAndTheNextDaySiteBringsItBack() throws {
+        XCTAssertNotNil(ContentCatalog.shared.site("night_dig"), "night_dig left the catalog; update this test")
+        let night = engine("night_dig")
+        let day = engine("charmouth")
+        let theme = Theme()
+        let (scene, _) = present(engine: night, theme: theme)
+        XCTAssertEqual(theme.ink, Ink.night)
+        XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.night.page))
+
+        scene.engine = day
+        scene.configureRenderer()
+        XCTAssertEqual(theme.ink, Ink.day)
+        XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.day.page))
+        XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.day.mount))
+    }
+
+    func testWithoutAThemeTheSceneStaysOnTheDayPalette() throws {
+        let night = engine("night_dig")
+        let (scene, _) = present(engine: night, theme: nil)
+        scene.configureRenderer()
+        XCTAssertEqual(rgb(scene.backgroundColor), rgb(Ink.day.page))
+        XCTAssertEqual(rgb(try XCTUnwrap(scene.mountNode).color), rgb(Ink.day.mount))
+    }
+
+    // MARK: Grid
+
+    /// The grid is an image drawn top-down, which is `SlabGrid`'s convention, while
+    /// SpriteKit's own y runs up. This pins which way round it lands: a dot in the
+    /// top-left corner of the screen, then an 8pt lattice counting down and across.
+    ///
+    /// A marker placed high in SpriteKit's y-up space calibrates the readback first,
+    /// so the test cannot pass by two flips cancelling. The height is chosen so a
+    /// bottom-anchored lattice would land on different rows.
+    func testTheGridIsAnEightPointLatticeAnchoredAtTheTopLeft() throws {
+        let size = CGSize(width: 361, height: 485)
+        let (scene, view) = present(size: size)
+        scene.buildBackdrop(contrastRaised: false)
+        scene.mountNode?.isHidden = true
+        scene.slabNode?.isHidden = true
+        scene.paperNode?.isHidden = true
+
+        let marker = SKSpriteNode(color: .red, size: CGSize(width: 20, height: 20))
+        marker.position = CGPoint(x: 100, y: size.height - 30)
+        marker.zPosition = 5
+        scene.addChild(marker)
+        let marked = try render(scene, in: view)
+        marker.removeFromParent()
+        let pixels = try render(scene, in: view)
+
+        let scale = pixels.width / Int(size.width)
+        let markerRow = (0..<marked.height).first {
+            let pixel = marked.rgb(100 * scale, $0)
+            return pixel[0] > 200 && pixel[1] < 60
+        }
+        XCTAssertLessThan(
+            markerRow ?? .max, marked.height / 5,
+            "a node near the top of SpriteKit's y-up space did not read back near row 0"
+        )
+
+        let page = pixels.rgb(4 * scale, 4 * scale)
+        // The dots are the hairline colour at 0.35 alpha over the page. Drawn white and
+        // left untinted they would still count as lit below, but in the wrong colour,
+        // and the theme would never reach them.
+        let expectedDot = zip(rgb(Ink.day.hairline), page).map {
+            Int((0.35 * Double($0) + 0.65 * Double($1)).rounded())
+        }
+        assertPixel(pixels.rgb(scale / 2, scale / 2), is: expectedDot, "the first dot", tolerance: 4)
+        func isDot(_ x: Int, _ y: Int) -> Bool { distance(pixels.rgb(x, y), page) > 12 }
+        let rowStarts = (0..<pixels.height).filter { isDot(0, $0) && ($0 == 0 || !isDot(0, $0 - 1)) }
+        let columnStarts = (0..<pixels.width).filter { isDot($0, 0) && ($0 == 0 || !isDot($0 - 1, 0)) }
+
+        XCTAssertEqual(
+            rowStarts, stride(from: 0, to: Int(size.height), by: 8).map { $0 * scale },
+            "dot rows are not an 8pt lattice counting down from the top"
+        )
+        XCTAssertEqual(
+            columnStarts, stride(from: 0, to: Int(size.width), by: 8).map { $0 * scale },
+            "dot columns are not an 8pt lattice counting across from the left"
         )
     }
 }
