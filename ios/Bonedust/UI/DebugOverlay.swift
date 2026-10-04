@@ -10,6 +10,8 @@ import SwiftUI
 struct DebugOverlay: View {
 
     let engine: DigEngine
+    /// Optional so previews and tests need not build an audio stack.
+    var breath: BreathDetector?
     @Binding var orientationProbe: Bool
     let onChange: () -> Void
 
@@ -18,10 +20,12 @@ struct DebugOverlay: View {
 
     init(
         engine: DigEngine,
+        breath: BreathDetector? = nil,
         orientationProbe: Binding<Bool> = .constant(false),
         onChange: @escaping () -> Void
     ) {
         self.engine = engine
+        self.breath = breath
         _orientationProbe = orientationProbe
         self.onChange = onChange
         _tuning = State(initialValue: engine.sim.tuning)

@@ -50,13 +50,23 @@ final class EconomyBalanceTests: XCTestCase {
                              "not reading the slab should cost money")
     }
 
+    /// The depth-1 tell only pays off if seeing bone early lets you protect it.
+    ///
+    /// Measured across the whole fossil roster rather than one site, because a single
+    /// site's species mix moved the number by more than the effect being measured: on
+    /// Charmouth alone the two policies came out 0.9393 against 0.9399, which is noise
+    /// wearing the shape of a result.
     func testLookaheadIsWorthMoney() {
-        // The depth-1 tell only pays off if seeing bone early lets you protect it.
         var blind = PlayerPolicy.average
         blind.lookaheadSamples = 0
-        let seeing = slabs(.average)
-        let notSeeing = slabs(blind)
-        XCTAssertGreaterThan(seeing.intact, notSeeing.intact,
+        var seeing = 0.0
+        var notSeeing = 0.0
+        let sites = ["charmouth", "wheeler", "green_river", "hell_creek"]
+        for site in sites {
+            seeing += Double(slabs(.average, site: site).intact) / Double(sites.count)
+            notSeeing += Double(slabs(blind, site: site).intact) / Double(sites.count)
+        }
+        XCTAssertGreaterThan(seeing, notSeeing,
                              "reading the slab ahead did not protect any bone")
     }
 

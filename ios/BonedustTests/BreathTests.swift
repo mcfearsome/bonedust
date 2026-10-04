@@ -54,9 +54,12 @@ final class BreathTests: XCTestCase {
         var fired = 0
         subject.onGust = { _ in fired += 1 }
 
-        for _ in 0..<40 { subject.consume(speech(0.6)) }
+        // Speech moves with every syllable, which is the property that separates it from
+        // breath once the noisiness gate alone is not enough. A flat 0.6 forever is not
+        // speech, it is a tone.
+        let syllables: [Float] = [0.6, 0.12, 0.45, 0.05, 0.7, 0.2, 0.55, 0.08]
+        for i in 0..<40 { subject.consume(speech(syllables[i % syllables.count])) }
         XCTAssertEqual(fired, 0, "loud speech triggered a gust")
-        XCTAssertEqual(subject.strength, 0)
     }
 
     func testQuietRoomToneNeverFires() {

@@ -337,6 +337,1416 @@
           "bend": 0.3
         }
       }
+    },
+    {
+      "id": "gryphaea",
+      "name": "Gryphaea",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 45,
+      "note": "Devil's toenail. Thick, curled, almost unbreakable.",
+      "crackMultiplier": 0.8,
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 50,
+        "params": {
+          "thickness": 0.4,
+          "sweep": 2.2
+        }
+      }
+    },
+    {
+      "id": "nautilus",
+      "name": "Nautilus",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 105,
+      "note": "Wider whorls than an ammonite, and fewer of them.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 62,
+        "params": {
+          "turns": 1.8,
+          "growth": 0.14,
+          "thickness": 0.18
+        }
+      }
+    },
+    {
+      "id": "plesiosaur_tooth",
+      "name": "Plesiosaur tooth",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 120,
+      "crackMultiplier": 1.3,
+      "note": "Striated, slightly curved, and sharper than it has any right to be.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 46,
+        "params": {
+          "taperFrom": 0.085,
+          "taperTo": 0.012,
+          "bend": 0.22
+        }
+      }
+    },
+    {
+      "id": "dapedium",
+      "name": "Dapedium",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 130,
+      "note": "A dinner plate with fins. Scales like chainmail.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 66,
+        "params": {
+          "depth": 0.62,
+          "tail": 0.26
+        }
+      }
+    },
+    {
+      "id": "elrathia",
+      "name": "Elrathia",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 60,
+      "note": "The trilobite everyone owns. Still a trilobite.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 44,
+        "params": {
+          "segments": 11,
+          "width": 0.34,
+          "taper": 0.3
+        }
+      }
+    },
+    {
+      "id": "eocrinoid",
+      "name": "Eocrinoid",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 85,
+      "crackMultiplier": 1.25,
+      "note": "A cup on a stalk. The stalk is the part that goes.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 58,
+        "params": {
+          "rays": 9,
+          "spread": 0.72,
+          "thickness": 0.05
+        }
+      }
+    },
+    {
+      "id": "naraoia",
+      "name": "Naraoia",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 95,
+      "note": "Two shields and no shell between them. Rare and soft.",
+      "crackMultiplier": 1.35,
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 38,
+        "params": {
+          "segments": 4,
+          "width": 0.48,
+          "taper": 0.12
+        }
+      }
+    },
+    {
+      "id": "priscacara",
+      "name": "Priscacara",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 150,
+      "note": "Deep-bodied perch. Spines along the back, every one countable.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 70,
+        "params": {
+          "depth": 0.55,
+          "tail": 0.3
+        }
+      }
+    },
+    {
+      "id": "mioplosus",
+      "name": "Mioplosus",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 165,
+      "crackMultiplier": 1.2,
+      "note": "A predator, sometimes fossilised mid-meal.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 84,
+        "params": {
+          "depth": 0.3,
+          "tail": 0.34
+        }
+      }
+    },
+    {
+      "id": "sycamore_leaf",
+      "name": "Sycamore leaf",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 70,
+      "crackMultiplier": 1.4,
+      "note": "Veins like a river delta. They are also where it tears.",
+      "shape": {
+        "kind": "leaf",
+        "spanCells": 64,
+        "params": {
+          "width": 0.74,
+          "veins": 7,
+          "thickness": 0.045
+        }
+      }
+    },
+    {
+      "id": "crayfish",
+      "name": "Crayfish",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 125,
+      "crackMultiplier": 1.25,
+      "note": "Claws out, as if it saw the lake turning.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 56,
+        "params": {
+          "segments": 8,
+          "width": 0.3,
+          "taper": 0.42
+        }
+      }
+    },
+    {
+      "id": "edmontosaurus_tooth",
+      "name": "Edmontosaurus tooth",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 140,
+      "note": "One of a thousand in a jaw built for grinding.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 40,
+        "params": {
+          "taperFrom": 0.1,
+          "taperTo": 0.03,
+          "bend": 0.08
+        }
+      }
+    },
+    {
+      "id": "ankylosaur_scute",
+      "name": "Ankylosaur scute",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 175,
+      "crackMultiplier": 0.85,
+      "note": "Armour. It survived worse than your brush.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 52,
+        "params": {
+          "thickness": 0.34,
+          "sweep": 1.5
+        }
+      }
+    },
+    {
+      "id": "hadrosaur_rib",
+      "name": "Hadrosaur rib",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 160,
+      "crackMultiplier": 1.2,
+      "note": "Long, curved, and thin in the middle where it always breaks.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 92,
+        "params": {
+          "taperFrom": 0.07,
+          "taperTo": 0.03,
+          "bend": 0.3
+        }
+      }
+    },
+    {
+      "id": "champsosaur_vertebra",
+      "name": "Champsosaur vertebrae",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 150,
+      "note": "A string of them, from something that outlived the asteroid.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 74,
+        "params": {
+          "count": 7,
+          "thickness": 0.15,
+          "jitter": 0.18
+        }
+      }
+    },
+    {
+      "id": "promicroceras",
+      "name": "Promicroceras",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 65,
+      "note": "Small, tightly coiled, and everywhere once you see one.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 44,
+        "params": {
+          "turns": 3.2,
+          "growth": 0.06,
+          "thickness": 0.12
+        }
+      }
+    },
+    {
+      "id": "asteroceras",
+      "name": "Asteroceras",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 115,
+      "note": "Ribbed like a cartwheel. The pride of a Dorset shelf.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 68,
+        "params": {
+          "turns": 2.4,
+          "growth": 0.11,
+          "thickness": 0.16
+        }
+      }
+    },
+    {
+      "id": "arnioceras",
+      "name": "Arnioceras",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 80,
+      "note": "Fine ribs, closely set. They chip if you hurry.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 54,
+        "params": {
+          "turns": 2.8,
+          "growth": 0.08,
+          "thickness": 0.11
+        }
+      },
+      "crackMultiplier": 1.1
+    },
+    {
+      "id": "microderoceras",
+      "name": "Microderoceras",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 105,
+      "note": "Spined whorls. The spines are the first thing to go.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 60,
+        "params": {
+          "turns": 2.5,
+          "growth": 0.1,
+          "thickness": 0.15
+        }
+      },
+      "crackMultiplier": 1.15
+    },
+    {
+      "id": "dactylioceras",
+      "name": "Dactylioceras",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 75,
+      "note": "Forked ribs, rope-like. Common and handsome.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 50,
+        "params": {
+          "turns": 3.0,
+          "growth": 0.07,
+          "thickness": 0.13
+        }
+      }
+    },
+    {
+      "id": "gastropod_shell",
+      "name": "Gastropod",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 50,
+      "note": "A sea snail, thick-walled and patient.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 38,
+        "params": {
+          "turns": 2.2,
+          "growth": 0.13,
+          "thickness": 0.2
+        }
+      },
+      "crackMultiplier": 0.9
+    },
+    {
+      "id": "bivalve",
+      "name": "Bivalve",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 40,
+      "note": "Two halves, usually one left. Still counts.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 46,
+        "params": {
+          "thickness": 0.38,
+          "sweep": 2.0
+        }
+      },
+      "crackMultiplier": 0.85
+    },
+    {
+      "id": "plesiosaur_vertebra",
+      "name": "Plesiosaur vertebrae",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 165,
+      "note": "Spool-shaped, deeply dished at both ends.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 72,
+        "params": {
+          "count": 5,
+          "thickness": 0.2,
+          "jitter": 0.16
+        }
+      }
+    },
+    {
+      "id": "plesiosaur_paddle",
+      "name": "Plesiosaur paddle",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 195,
+      "note": "Finger bones fanned out like a dealt hand.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 62,
+        "params": {
+          "rays": 5,
+          "spread": 0.42,
+          "thickness": 0.07
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "ichthyo_jaw",
+      "name": "Ichthyosaur jaw",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 185,
+      "note": "Teeth in a line down a snout built for speed.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 96,
+        "params": {
+          "taperFrom": 0.09,
+          "taperTo": 0.02,
+          "bend": 0.12
+        }
+      },
+      "crackMultiplier": 1.25
+    },
+    {
+      "id": "ichthyo_skull",
+      "name": "Ichthyosaur skull",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 245,
+      "note": "The eye socket is the size of your palm. Mind the ring of bone around it.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 88,
+        "params": {
+          "depth": 0.44,
+          "tail": 0.1
+        }
+      },
+      "crackMultiplier": 1.3,
+      "setID": "ichthyosaur"
+    },
+    {
+      "id": "pentacrinites",
+      "name": "Pentacrinites",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 130,
+      "note": "A crinoid still attached to its driftwood. Arms like frost.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 76,
+        "params": {
+          "rays": 11,
+          "spread": 0.85,
+          "thickness": 0.04
+        }
+      },
+      "crackMultiplier": 1.45
+    },
+    {
+      "id": "coprolite",
+      "name": "Coprolite",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 35,
+      "note": "Somebody's bad afternoon, preserved for two hundred million years.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 44,
+        "params": {
+          "thickness": 0.44,
+          "sweep": 1.3
+        }
+      },
+      "crackMultiplier": 0.75
+    },
+    {
+      "id": "fish_scales",
+      "name": "Fish scales",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 60,
+      "note": "Scattered diamonds of enamel. Easy to lose track of.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 58,
+        "params": {
+          "count": 9,
+          "thickness": 0.1,
+          "jitter": 0.3
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "belemnite_cluster",
+      "name": "Belemnite cluster",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 95,
+      "note": "A death assemblage. Several at once, all pointing the same way.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 70,
+        "params": {
+          "count": 4,
+          "thickness": 0.14,
+          "jitter": 0.4
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "ammonite_pyrite",
+      "name": "Pyritised ammonite",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 150,
+      "note": "Fool's gold, and brittle with it.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 46,
+        "params": {
+          "turns": 2.6,
+          "growth": 0.09,
+          "thickness": 0.15
+        }
+      },
+      "crackMultiplier": 1.35
+    },
+    {
+      "id": "driftwood",
+      "name": "Fossil driftwood",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 45,
+      "note": "Bored through by shipworm before it sank.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 84,
+        "params": {
+          "taperFrom": 0.12,
+          "taperTo": 0.06,
+          "bend": 0.18
+        }
+      },
+      "crackMultiplier": 0.8
+    },
+    {
+      "id": "nautiloid_straight",
+      "name": "Orthocone",
+      "period": "Jurassic",
+      "formation": "Blue Lias",
+      "baseValue": 110,
+      "note": "A nautilus that never bothered coiling.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 88,
+        "params": {
+          "taperFrom": 0.1,
+          "taperTo": 0.04,
+          "bend": 0.02
+        }
+      },
+      "crackMultiplier": 1.1
+    },
+    {
+      "id": "asaphiscus",
+      "name": "Asaphiscus",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 70,
+      "note": "Broad-brimmed and placid. A good first trilobite.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 42,
+        "params": {
+          "segments": 9,
+          "width": 0.42,
+          "taper": 0.26
+        }
+      }
+    },
+    {
+      "id": "modocia",
+      "name": "Modocia",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 65,
+      "note": "Small, neat, and easy to snap across the middle.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 38,
+        "params": {
+          "segments": 10,
+          "width": 0.36,
+          "taper": 0.3
+        }
+      },
+      "crackMultiplier": 1.1
+    },
+    {
+      "id": "peronopsis",
+      "name": "Peronopsis",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 55,
+      "note": "Two plates and a hinge. Barely a fingernail.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 24,
+        "params": {
+          "segments": 3,
+          "width": 0.5,
+          "taper": 0.1
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "bathyuriscus",
+      "name": "Bathyuriscus",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 85,
+      "note": "Long tail shield, fine segments. Count them if you dare.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 46,
+        "params": {
+          "segments": 12,
+          "width": 0.34,
+          "taper": 0.33
+        }
+      },
+      "crackMultiplier": 1.15
+    },
+    {
+      "id": "olenoides",
+      "name": "Olenoides",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 140,
+      "note": "Spines off every segment, and every one of them wants to break.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 56,
+        "params": {
+          "segments": 13,
+          "width": 0.4,
+          "taper": 0.28
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "ptychagnostus",
+      "name": "Ptychagnostus",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 60,
+      "note": "A thumbnail with ambitions.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 22,
+        "params": {
+          "segments": 3,
+          "width": 0.48,
+          "taper": 0.12
+        }
+      },
+      "crackMultiplier": 1.25
+    },
+    {
+      "id": "lingulella",
+      "name": "Lingulella",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 35,
+      "note": "A brachiopod that still has living relatives. Unimpressed by extinction.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 38,
+        "params": {
+          "thickness": 0.34,
+          "sweep": 1.6
+        }
+      },
+      "crackMultiplier": 1.1
+    },
+    {
+      "id": "wiwaxia",
+      "name": "Wiwaxia",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 175,
+      "note": "Scales and spines, and nobody agrees what it was.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 40,
+        "params": {
+          "rays": 9,
+          "spread": 0.9,
+          "thickness": 0.08
+        }
+      },
+      "crackMultiplier": 1.5
+    },
+    {
+      "id": "marrella",
+      "name": "Marrella",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 165,
+      "note": "Lace-winged and impossible. The soft tissue is the whole value.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 34,
+        "params": {
+          "rays": 7,
+          "spread": 0.75,
+          "thickness": 0.06
+        }
+      },
+      "crackMultiplier": 1.55
+    },
+    {
+      "id": "hyolithes_cluster",
+      "name": "Hyolith cluster",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 80,
+      "note": "Little cones, strewn like spilled cutlery.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 48,
+        "params": {
+          "count": 5,
+          "thickness": 0.12,
+          "jitter": 0.35
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "sponge_spicule",
+      "name": "Sponge",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 90,
+      "note": "A glass basket. Treat it as one.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 52,
+        "params": {
+          "rays": 13,
+          "spread": 1.0,
+          "thickness": 0.035
+        }
+      },
+      "crackMultiplier": 1.6
+    },
+    {
+      "id": "algae_mat",
+      "name": "Algal mat",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 30,
+      "note": "The bottom of the food chain, immortalised.",
+      "shape": {
+        "kind": "leaf",
+        "spanCells": 60,
+        "params": {
+          "width": 0.9,
+          "veins": 4,
+          "thickness": 0.05
+        }
+      },
+      "crackMultiplier": 1.25
+    },
+    {
+      "id": "eldonia",
+      "name": "Eldonia",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 155,
+      "note": "A disc with a gut coiled inside it. A jellyfish, more or less.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 44,
+        "params": {
+          "turns": 1.4,
+          "growth": 0.22,
+          "thickness": 0.22
+        }
+      },
+      "crackMultiplier": 1.45
+    },
+    {
+      "id": "anomalocaris_claw",
+      "name": "Anomalocaris claw",
+      "period": "Cambrian",
+      "formation": "Wheeler Shale",
+      "baseValue": 240,
+      "note": "The apex predator of its world, and it fits in your hand.",
+      "shape": {
+        "kind": "segmentedBody",
+        "spanCells": 58,
+        "params": {
+          "segments": 7,
+          "width": 0.26,
+          "taper": 0.5
+        }
+      },
+      "crackMultiplier": 1.35
+    },
+    {
+      "id": "knightia_shoal",
+      "name": "Knightia shoal",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 145,
+      "note": "A dozen at once, caught in the same bad minute.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 80,
+        "params": {
+          "count": 6,
+          "thickness": 0.14,
+          "jitter": 0.45
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "diplomystus_large",
+      "name": "Large Diplomystus",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 210,
+      "note": "Upturned mouth, built to feed from below.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 94,
+        "params": {
+          "depth": 0.34,
+          "tail": 0.32
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "phareodus",
+      "name": "Phareodus",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 230,
+      "note": "Teeth and a sail of a dorsal fin. A real predator.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 88,
+        "params": {
+          "depth": 0.4,
+          "tail": 0.3
+        }
+      },
+      "crackMultiplier": 1.25
+    },
+    {
+      "id": "amphiplaga",
+      "name": "Amphiplaga",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 160,
+      "note": "A trout-perch, and rarer than it looks.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 64,
+        "params": {
+          "depth": 0.36,
+          "tail": 0.28
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "notogoneus",
+      "name": "Notogoneus",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 255,
+      "note": "Long and bottom-feeding. Mostly found in pieces.",
+      "shape": {
+        "kind": "fish",
+        "spanCells": 108,
+        "params": {
+          "depth": 0.26,
+          "tail": 0.3
+        }
+      },
+      "crackMultiplier": 1.35
+    },
+    {
+      "id": "gar_scale",
+      "name": "Gar scales",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 120,
+      "note": "Enamelled diamonds, hard as tooth.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 56,
+        "params": {
+          "count": 8,
+          "thickness": 0.12,
+          "jitter": 0.28
+        }
+      },
+      "crackMultiplier": 1.15
+    },
+    {
+      "id": "stingray",
+      "name": "Stingray",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 340,
+      "note": "Heraldica. The whole disc, and the tail if you are lucky.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 74,
+        "params": {
+          "rays": 6,
+          "spread": 0.85,
+          "thickness": 0.07
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "fossil_insect",
+      "name": "Fossil insect",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 180,
+      "note": "Wings like cellophane. One careless pass and it is dust.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 28,
+        "params": {
+          "rays": 5,
+          "spread": 0.6,
+          "thickness": 0.04
+        }
+      },
+      "crackMultiplier": 1.6
+    },
+    {
+      "id": "fossil_feather",
+      "name": "Feather",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 290,
+      "note": "Barbs still separate. The most fragile thing in the ground.",
+      "shape": {
+        "kind": "leaf",
+        "spanCells": 58,
+        "params": {
+          "width": 0.4,
+          "veins": 15,
+          "thickness": 0.03
+        }
+      },
+      "crackMultiplier": 1.7
+    },
+    {
+      "id": "willow_leaf",
+      "name": "Willow leaf",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 55,
+      "note": "Long and narrow, veins running the length of it.",
+      "shape": {
+        "kind": "leaf",
+        "spanCells": 62,
+        "params": {
+          "width": 0.3,
+          "veins": 9,
+          "thickness": 0.04
+        }
+      },
+      "crackMultiplier": 1.4
+    },
+    {
+      "id": "maple_leaf",
+      "name": "Maple leaf",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 75,
+      "note": "Lobed and symmetrical. Autumn, fifty million years ago.",
+      "shape": {
+        "kind": "leaf",
+        "spanCells": 58,
+        "params": {
+          "width": 0.95,
+          "veins": 7,
+          "thickness": 0.045
+        }
+      },
+      "crackMultiplier": 1.4
+    },
+    {
+      "id": "fern_frond",
+      "name": "Fern frond",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 85,
+      "note": "Pinnae down both sides. Every one of them separate.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 70,
+        "params": {
+          "rays": 15,
+          "spread": 0.7,
+          "thickness": 0.035
+        }
+      },
+      "crackMultiplier": 1.5
+    },
+    {
+      "id": "fossil_flower",
+      "name": "Fossil flower",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 310,
+      "note": "Petals. Actual petals. Nobody will believe you.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 42,
+        "params": {
+          "rays": 8,
+          "spread": 1.2,
+          "thickness": 0.07
+        }
+      },
+      "crackMultiplier": 1.65
+    },
+    {
+      "id": "turtle_shell",
+      "name": "Turtle carapace",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 270,
+      "note": "Plates fused into a dome. Solid, for once.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 86,
+        "params": {
+          "thickness": 0.4,
+          "sweep": 2.4
+        }
+      },
+      "crackMultiplier": 1.0
+    },
+    {
+      "id": "crocodilian_tooth",
+      "name": "Crocodilian tooth",
+      "period": "Eocene",
+      "formation": "Green River",
+      "baseValue": 140,
+      "note": "Conical, striated, and shed by the hundred.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 38,
+        "params": {
+          "taperFrom": 0.1,
+          "taperTo": 0.02,
+          "bend": 0.15
+        }
+      },
+      "crackMultiplier": 1.1
+    },
+    {
+      "id": "trex_claw",
+      "name": "Tyrannosaur claw",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 320,
+      "note": "Blunt for a theropod. It did not need to be sharp.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 62,
+        "params": {
+          "thickness": 0.22,
+          "sweep": 1.7
+        }
+      },
+      "crackMultiplier": 1.15
+    },
+    {
+      "id": "trex_skull_frag",
+      "name": "Tyrannosaur skull fragment",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 380,
+      "note": "Thick, pitted bone. Part of something enormous.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 74,
+        "params": {
+          "thickness": 0.3,
+          "sweep": 1.2
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "trike_frill",
+      "name": "Triceratops frill",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 420,
+      "note": "A shield of bone with a scalloped edge.",
+      "shape": {
+        "kind": "fan",
+        "spanCells": 76,
+        "params": {
+          "rays": 5,
+          "spread": 0.7,
+          "thickness": 0.1
+        }
+      },
+      "crackMultiplier": 1.1
+    },
+    {
+      "id": "trike_tooth",
+      "name": "Triceratops tooth",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 150,
+      "note": "A shearing tooth from a battery of hundreds.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 34,
+        "params": {
+          "taperFrom": 0.09,
+          "taperTo": 0.03,
+          "bend": 0.06
+        }
+      }
+    },
+    {
+      "id": "hadrosaur_tooth_battery",
+      "name": "Hadrosaur tooth battery",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 290,
+      "note": "Teeth stacked like coins in a roll. Lose one and the row is wrong.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 78,
+        "params": {
+          "count": 10,
+          "thickness": 0.13,
+          "jitter": 0.1
+        }
+      },
+      "crackMultiplier": 1.2
+    },
+    {
+      "id": "ankylosaur_spike",
+      "name": "Ankylosaur spike",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 300,
+      "note": "Armour that fought back.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 66,
+        "params": {
+          "taperFrom": 0.14,
+          "taperTo": 0.03,
+          "bend": 0.2
+        }
+      },
+      "crackMultiplier": 1.05
+    },
+    {
+      "id": "pachycephalosaur_dome",
+      "name": "Pachycephalosaur dome",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 355,
+      "note": "Ten inches of solid skull. Built for arguments.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 58,
+        "params": {
+          "thickness": 0.46,
+          "sweep": 1.4
+        }
+      },
+      "crackMultiplier": 0.85
+    },
+    {
+      "id": "raptor_tooth",
+      "name": "Dromaeosaur tooth",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 195,
+      "note": "Serrated on the back edge. Check it with a thumbnail, gently.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 42,
+        "params": {
+          "taperFrom": 0.12,
+          "taperTo": 0.03,
+          "bend": 0.22
+        }
+      },
+      "crackMultiplier": 1.25
+    },
+    {
+      "id": "mosasaur_tooth",
+      "name": "Mosasaur tooth",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 225,
+      "note": "From the inland sea that cut the continent in half.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 44,
+        "params": {
+          "taperFrom": 0.11,
+          "taperTo": 0.025,
+          "bend": 0.14
+        }
+      },
+      "crackMultiplier": 1.1
+    },
+    {
+      "id": "champsosaur_jaw",
+      "name": "Champsosaur jaw",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 245,
+      "note": "Needle teeth in a gharial's snout.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 92,
+        "params": {
+          "taperFrom": 0.06,
+          "taperTo": 0.02,
+          "bend": 0.1
+        }
+      },
+      "crackMultiplier": 1.3
+    },
+    {
+      "id": "turtle_scute",
+      "name": "Turtle scute",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 130,
+      "note": "One plate of a shell that saw the asteroid.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 48,
+        "params": {
+          "thickness": 0.3,
+          "sweep": 1.9
+        }
+      },
+      "crackMultiplier": 0.9
+    },
+    {
+      "id": "croc_osteoderm",
+      "name": "Crocodilian osteoderm",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 145,
+      "note": "Pitted armour from a back that lay in the shallows.",
+      "shape": {
+        "kind": "crescent",
+        "spanCells": 44,
+        "params": {
+          "thickness": 0.32,
+          "sweep": 1.5
+        }
+      },
+      "crackMultiplier": 0.9
+    },
+    {
+      "id": "mammal_jaw",
+      "name": "Mammal jaw",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 410,
+      "note": "Smaller than your thumb, and worth more than the tyrannosaur.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 52,
+        "params": {
+          "taperFrom": 0.095,
+          "taperTo": 0.035,
+          "bend": 0.1
+        }
+      },
+      "crackMultiplier": 1.5
+    },
+    {
+      "id": "dino_egg_shell",
+      "name": "Eggshell fragments",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 230,
+      "note": "Curved shards with a pore pattern. Jigsaw with no picture.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 62,
+        "params": {
+          "count": 8,
+          "thickness": 0.09,
+          "jitter": 0.4
+        }
+      },
+      "crackMultiplier": 1.55
+    },
+    {
+      "id": "petrified_wood",
+      "name": "Petrified wood",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 110,
+      "note": "Agatised rings. Harder than the rock around it.",
+      "shape": {
+        "kind": "taper",
+        "spanCells": 90,
+        "params": {
+          "taperFrom": 0.16,
+          "taperTo": 0.1,
+          "bend": 0.06
+        }
+      },
+      "crackMultiplier": 0.7
+    },
+    {
+      "id": "ammonite_sphenodiscus",
+      "name": "Sphenodiscus",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 205,
+      "note": "A late ammonite, from the last of them.",
+      "shape": {
+        "kind": "spiral",
+        "spanCells": 64,
+        "params": {
+          "turns": 2.0,
+          "growth": 0.12,
+          "thickness": 0.13
+        }
+      },
+      "crackMultiplier": 1.15
+    },
+    {
+      "id": "fossil_magnolia",
+      "name": "Magnolia leaf",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 95,
+      "note": "Flowering plants, newly arrived and already everywhere.",
+      "shape": {
+        "kind": "leaf",
+        "spanCells": 66,
+        "params": {
+          "width": 0.8,
+          "veins": 8,
+          "thickness": 0.05
+        }
+      },
+      "crackMultiplier": 1.4
+    },
+    {
+      "id": "theropod_vertebra",
+      "name": "Theropod vertebrae",
+      "period": "Late Cretaceous",
+      "formation": "Hell Creek",
+      "baseValue": 335,
+      "note": "Hollow-chambered and lighter than it should be.",
+      "shape": {
+        "kind": "discs",
+        "spanCells": 80,
+        "params": {
+          "count": 4,
+          "thickness": 0.24,
+          "jitter": 0.14
+        }
+      },
+      "crackMultiplier": 1.1
     }
   ],
   "sites": [
@@ -347,12 +1757,34 @@
       "twist": "Blue Lias, three honest layers. Nothing is out to get you here.",
       "unlock": "start",
       "fossilWeights": {
-        "ammonite": 30,
-        "belemnite": 24,
-        "crinoid": 16,
-        "ichthyo_vertebrae": 12,
-        "ichthyo_rib": 10,
-        "ichthyo_paddle": 8
+        "coprolite": 14,
+        "bivalve": 14,
+        "gryphaea": 14,
+        "driftwood": 13,
+        "gastropod_shell": 13,
+        "belemnite": 13,
+        "fish_scales": 12,
+        "promicroceras": 12,
+        "crinoid": 12,
+        "dactylioceras": 11,
+        "arnioceras": 11,
+        "ammonite": 11,
+        "belemnite_cluster": 10,
+        "nautilus": 10,
+        "microderoceras": 10,
+        "nautiloid_straight": 9,
+        "asteroceras": 9,
+        "plesiosaur_tooth": 9,
+        "ichthyo_rib": 8,
+        "dapedium": 8,
+        "pentacrinites": 8,
+        "ichthyo_vertebrae": 7,
+        "ammonite_pyrite": 7,
+        "ichthyo_paddle": 7,
+        "plesiosaur_vertebra": 6,
+        "ichthyo_jaw": 6,
+        "plesiosaur_paddle": 6,
+        "ichthyo_skull": 5
       }
     },
     {
@@ -390,10 +1822,27 @@
         ]
       },
       "fossilWeights": {
-        "trilobite": 30,
-        "brachiopod": 26,
-        "agnostid": 24,
-        "hyolith": 20
+        "algae_mat": 14,
+        "lingulella": 14,
+        "brachiopod": 14,
+        "hyolith": 13,
+        "peronopsis": 13,
+        "elrathia": 13,
+        "ptychagnostus": 12,
+        "agnostid": 12,
+        "modocia": 12,
+        "asaphiscus": 11,
+        "trilobite": 11,
+        "hyolithes_cluster": 11,
+        "eocrinoid": 10,
+        "bathyuriscus": 10,
+        "sponge_spicule": 10,
+        "naraoia": 9,
+        "olenoides": 9,
+        "eldonia": 9,
+        "marrella": 8,
+        "wiwaxia": 8,
+        "anomalocaris_claw": 8
       }
     },
     {
@@ -431,10 +1880,29 @@
         ]
       },
       "fossilWeights": {
-        "knightia": 30,
-        "fossil_leaf": 24,
-        "diplomystus": 24,
-        "palm_frond": 22
+        "willow_leaf": 14,
+        "fossil_leaf": 14,
+        "sycamore_leaf": 14,
+        "maple_leaf": 13,
+        "fern_frond": 13,
+        "palm_frond": 13,
+        "knightia": 12,
+        "gar_scale": 12,
+        "crayfish": 12,
+        "diplomystus": 11,
+        "crocodilian_tooth": 11,
+        "knightia_shoal": 11,
+        "priscacara": 10,
+        "amphiplaga": 10,
+        "mioplosus": 10,
+        "fossil_insect": 9,
+        "diplomystus_large": 9,
+        "phareodus": 9,
+        "notogoneus": 8,
+        "turtle_shell": 8,
+        "fossil_feather": 8,
+        "fossil_flower": 7,
+        "stingray": 7
       }
     },
     {
@@ -471,11 +1939,33 @@
         ]
       },
       "fossilWeights": {
-        "raptor_claw": 26,
-        "trex_tooth": 22,
-        "trex_rib": 18,
-        "trex_vertebra": 18,
-        "trike_horn": 16
+        "fossil_magnolia": 14,
+        "petrified_wood": 14,
+        "turtle_scute": 14,
+        "edmontosaurus_tooth": 13,
+        "croc_osteoderm": 13,
+        "champsosaur_vertebra": 13,
+        "trike_tooth": 12,
+        "hadrosaur_rib": 12,
+        "raptor_claw": 12,
+        "ankylosaur_scute": 11,
+        "trex_rib": 11,
+        "raptor_tooth": 11,
+        "trex_tooth": 10,
+        "ammonite_sphenodiscus": 10,
+        "trex_vertebra": 10,
+        "mosasaur_tooth": 9,
+        "dino_egg_shell": 9,
+        "champsosaur_jaw": 9,
+        "trike_horn": 8,
+        "hadrosaur_tooth_battery": 8,
+        "ankylosaur_spike": 8,
+        "trex_claw": 7,
+        "theropod_vertebra": 7,
+        "pachycephalosaur_dome": 7,
+        "trex_skull_frag": 6,
+        "mammal_jaw": 6,
+        "trike_frill": 6
       }
     },
     {
@@ -492,18 +1982,105 @@
         "lightLevel": 0.55
       },
       "fossilWeights": {
-        "ammonite": 10,
-        "belemnite": 8,
-        "ichthyo_vertebrae": 8,
-        "trilobite": 10,
-        "brachiopod": 8,
-        "knightia": 10,
-        "fossil_leaf": 8,
-        "diplomystus": 8,
-        "raptor_claw": 10,
-        "trex_tooth": 8,
-        "trex_vertebra": 6,
-        "trike_horn": 6
+        "ammonite": 1,
+        "belemnite": 1,
+        "ichthyo_vertebrae": 1,
+        "ichthyo_rib": 1,
+        "ichthyo_paddle": 1,
+        "crinoid": 1,
+        "trilobite": 1,
+        "brachiopod": 1,
+        "agnostid": 1,
+        "hyolith": 1,
+        "knightia": 1,
+        "fossil_leaf": 1,
+        "diplomystus": 1,
+        "palm_frond": 1,
+        "raptor_claw": 1,
+        "trex_tooth": 1,
+        "trex_rib": 1,
+        "trex_vertebra": 1,
+        "trike_horn": 1,
+        "gryphaea": 1,
+        "nautilus": 1,
+        "plesiosaur_tooth": 1,
+        "dapedium": 1,
+        "elrathia": 1,
+        "eocrinoid": 1,
+        "naraoia": 1,
+        "priscacara": 1,
+        "mioplosus": 1,
+        "sycamore_leaf": 1,
+        "crayfish": 1,
+        "edmontosaurus_tooth": 1,
+        "ankylosaur_scute": 1,
+        "hadrosaur_rib": 1,
+        "champsosaur_vertebra": 1,
+        "promicroceras": 1,
+        "asteroceras": 1,
+        "arnioceras": 1,
+        "microderoceras": 1,
+        "dactylioceras": 1,
+        "gastropod_shell": 1,
+        "bivalve": 1,
+        "plesiosaur_vertebra": 1,
+        "plesiosaur_paddle": 1,
+        "ichthyo_jaw": 1,
+        "ichthyo_skull": 1,
+        "pentacrinites": 1,
+        "coprolite": 1,
+        "fish_scales": 1,
+        "belemnite_cluster": 1,
+        "ammonite_pyrite": 1,
+        "driftwood": 1,
+        "nautiloid_straight": 1,
+        "asaphiscus": 1,
+        "modocia": 1,
+        "peronopsis": 1,
+        "bathyuriscus": 1,
+        "olenoides": 1,
+        "ptychagnostus": 1,
+        "lingulella": 1,
+        "wiwaxia": 1,
+        "marrella": 1,
+        "hyolithes_cluster": 1,
+        "sponge_spicule": 1,
+        "algae_mat": 1,
+        "eldonia": 1,
+        "anomalocaris_claw": 1,
+        "knightia_shoal": 1,
+        "diplomystus_large": 1,
+        "phareodus": 1,
+        "amphiplaga": 1,
+        "notogoneus": 1,
+        "gar_scale": 1,
+        "stingray": 1,
+        "fossil_insect": 1,
+        "fossil_feather": 1,
+        "willow_leaf": 1,
+        "maple_leaf": 1,
+        "fern_frond": 1,
+        "fossil_flower": 1,
+        "turtle_shell": 1,
+        "crocodilian_tooth": 1,
+        "trex_claw": 1,
+        "trex_skull_frag": 1,
+        "trike_frill": 1,
+        "trike_tooth": 1,
+        "hadrosaur_tooth_battery": 1,
+        "ankylosaur_spike": 1,
+        "pachycephalosaur_dome": 1,
+        "raptor_tooth": 1,
+        "mosasaur_tooth": 1,
+        "champsosaur_jaw": 1,
+        "turtle_scute": 1,
+        "croc_osteoderm": 1,
+        "mammal_jaw": 1,
+        "dino_egg_shell": 1,
+        "petrified_wood": 1,
+        "ammonite_sphenodiscus": 1,
+        "fossil_magnolia": 1,
+        "theropod_vertebra": 1
       }
     }
   ],

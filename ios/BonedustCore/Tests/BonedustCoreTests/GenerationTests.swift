@@ -143,8 +143,19 @@ final class GenerationTests: XCTestCase {
             let id = SlabGenerator.generate(seed: seed, site: site).layout.fossilID
             counts[id, default: 0] += 1
         }
-        XCTAssertEqual(counts.max { $0.value < $1.value }?.key, "ammonite")
+        // Checks the *weights*, not a named winner. Charmouth used to be 54% two species
+        // -- the starting site showing the same two fossils over and over -- and flattening
+        // it meant the most common fossil is now one of ten near-equals.
         XCTAssertEqual(Set(counts.keys), Set(site.fossilWeights.keys), "a fossil never appeared")
+        let total = site.fossilWeights.values.reduce(0, +)
+        for (id, weight) in site.fossilWeights {
+            let expected = Double(weight) / Double(total) * 2_000
+            let actual = Double(counts[id] ?? 0)
+            XCTAssertEqual(
+                actual, expected, accuracy: expected * 0.35,
+                "\(id) came up \(Int(actual)) times against an expected \(Int(expected))"
+            )
+        }
     }
 
     func testNoiseFieldIsFilledAndBounded() {

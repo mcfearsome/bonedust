@@ -98,10 +98,20 @@ final class HumanCeilingTests: XCTestCase {
 
         // A perfect machine sweep should comfortably clear a slab, or a person has no
         // chance at all. Payout scales as exposure^1.5, so 0.6 pays 46% of full.
+        // 0.75, not 0.85. The daylight went from 60s to 40s because an average dig was
+        // finishing in 27 seconds and the clock meant nothing -- and at 40s a sweep held at
+        // exactly the safe speed reaches about 0.83, needing 56s for 0.90.
+        //
+        // That gap is the game, not a regression. Speed only cracks bone that is already
+        // exposed, so going quickly over bare rock is free; a player who wants full
+        // exposure has to take that freedom and then slow down when bone appears. What this
+        // guards is that playing it entirely safe is still *viable* -- 0.83 exposure pays
+        // 76% of a fossil, which is a cost, not a wall -- and it fails if that stops being
+        // true.
         XCTAssertGreaterThan(
-            worst, 0.85,
-            "a flawless single-brush sweep cannot clear a slab in one daylight, so the "
-                + "installments are unreachable by hand however well the player digs"
+            worst, 0.75,
+            "a flawless single-brush sweep no longer gets far enough in one daylight to be "
+                + "worth playing safely at all"
         )
     }
 }

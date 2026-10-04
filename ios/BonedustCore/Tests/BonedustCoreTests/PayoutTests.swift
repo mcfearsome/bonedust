@@ -41,16 +41,27 @@ final class PayoutTests: XCTestCase {
         XCTAssertEqual(result.total, Int((100 * gradeBonus(ctx)).rounded()))
     }
 
-    func testExposureIsRaisedToThreeHalves() {
-        // round(100 * 0.5^1.5 * 1) = round(35.355) = 35
-        XCTAssertEqual(Payout.evaluate(context(exposure: 0.5)).fossil, 35)
-        // round(100 * 0.25^1.5) = round(12.5) = 13
-        XCTAssertEqual(Payout.evaluate(context(exposure: 0.25)).fossil, 13)
+    /// Exposure is raised to `exposureExponent`, whatever that currently is.
+    ///
+    /// It was written in as 1.5 and has since moved to 1.25, because at 1.5 a partial dig
+    /// paid so little that flat gem money took over the economy. Deriving the expectation
+    /// means tuning that exponent fails the tests that are *about* the exponent, and no
+    /// others.
+    func testExposureIsRaisedToTheExponent() {
+        let e = SimTuning.standard.exposureExponent
+        for exposure in [Float(0.25), 0.5, 0.75] {
+            XCTAssertEqual(
+                Payout.evaluate(context(exposure: exposure)).fossil,
+                Int((100 * pow(exposure, e)).rounded()),
+                "exposure \(exposure) at exponent \(e)"
+            )
+        }
         XCTAssertEqual(Payout.evaluate(context(exposure: 0)).fossil, 0)
     }
 
     func testPartialExposureIsPunishedHarderThanLinear() {
-        // The 1.5 exponent is what makes "finish the fossil" worth the daylight.
+        // An exponent above 1 is what makes "finish the fossil" worth the daylight. It is
+        // 1.25 now rather than 1.5, which is gentler, but it still has to bite.
         let half = Payout.evaluate(context(exposure: 0.5)).fossil
         let full = Payout.evaluate(context(exposure: 1.0)).fossil
         XCTAssertLessThan(Float(half), Float(full) * 0.5)
@@ -62,15 +73,24 @@ final class PayoutTests: XCTestCase {
         XCTAssertEqual(Payout.evaluate(context(cracked: 20)).fossil, 0)
     }
 
-    func testGemsPayTwentyEach() {
-        XCTAssertEqual(Payout.evaluate(context(gems: 2)).gems, 40)
+    /// Gems pay a flat sum per whole cluster.
+    ///
+    /// The number is read from the tuning because it has moved twice: flat money scales
+    /// differently with skill than `exposure^n` does, so a value that is a rounding error
+    /// to a perfect dig can be half the income of a mediocre one.
+    func testGemsPayAFlatSumEach() {
+        let each = SimTuning.standard.gemValue
+        XCTAssertEqual(Payout.evaluate(context(gems: 2)).gems, each * 2)
         XCTAssertEqual(Payout.evaluate(context(gems: 0)).gems, 0)
     }
 
     func testSievePaysDoubleForGems() {
         var mods = ModifierSet()
         mods.gemMultiplier = 2
-        XCTAssertEqual(Payout.evaluate(context(gems: 2, modifiers: mods)).gems, 80)
+        XCTAssertEqual(
+            Payout.evaluate(context(gems: 2, modifiers: mods)).gems,
+            SimTuning.standard.gemValue * 2 * 2
+        )
     }
 
     func testAuthenticDamageHalvesTheCostOfCracks() {

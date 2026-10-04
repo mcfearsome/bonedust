@@ -86,7 +86,7 @@ struct DigView: View {
             if case .finished = phase { finish() }
         }
         .sheet(isPresented: $showDebug) {
-            DebugOverlay(engine: engine, orientationProbe: $orientationProbe) {
+            DebugOverlay(engine: engine, breath: breath, orientationProbe: $orientationProbe) {
                 scene.orientationProbe = orientationProbe
                 scene.configureRenderer()
             }

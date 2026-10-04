@@ -68,7 +68,18 @@ public struct SimTuning: Sendable, Codable, Equatable {
 
     // MARK: Payout
 
-    public var exposureExponent: Float = 1.5
+    /// Was 1.5, which punished a partial dig hard enough that gems took over.
+    ///
+    /// Fossil money goes as `exposure^exponent` while gems pay a flat sum, so the two
+    /// scale differently with skill: at the simulated player's 0.96 exposure gems are 8% of
+    /// a slab, but at a real 0.7 they are a third to a half. Reported as "gems are the only
+    /// way to get enough money to actually make the payment, its impossible just on fossil
+    /// values" -- and the sweep could not see it, because its player never has a partial
+    /// dig.
+    ///
+    /// At 1.25 a 70% dig pays 64% rather than 59%, and an 80% dig 76% rather than 72%.
+    /// Finishing is still worth more than not; it is no longer the only thing that pays.
+    public var exposureExponent: Float = 1.25
     /// Each cracked cell costs this many cells' worth of `intact`.
     ///
     /// Raised from the prototype's 3.0 after the M3 economy sweep. At 3.0 the payout
@@ -78,13 +89,22 @@ public struct SimTuning: Sendable, Codable, Equatable {
     /// it worthless, the fine brush pays for itself, and §4's second pillar is a real
     /// decision rather than a described one. See DECISIONS.md.
     public var intactCrackWeight: Float = 5.0
-    public var gemValue: Int = 20
+    /// Was 20, with up to four a slab -- $80 against a fossil paying $50 on a partial
+    /// dig, so the right move was to ignore the fossil. A gem should be a reason to go
+    /// carefully around something, not the reason to dig.
+    public var gemValue: Int = 8
     /// Exposure at which the specimen stops reading "Unidentified".
     public var identifyExposure: Float = 0.25
 
     // MARK: Daylight
 
-    public var daylightSeconds: Float = 60
+    /// Was 60, which was more than twice what a dig needs.
+    ///
+    /// Measured: an average dig finishes in about 27 seconds, so half the clock was dead
+    /// time and nothing about the timer meant anything -- reported as "time is of no
+    /// concern, there is no tension". 40 leaves a careful dig at about 34 seconds, which is
+    /// tight, and still lets a fast one finish early enough to earn the grade.
+    public var daylightSeconds: Float = 40
 
     // MARK: Generation
 
@@ -154,9 +174,12 @@ public struct SimTuning: Sendable, Codable, Equatable {
     ///
     /// Seven at radius 5 is about 550 cells a gust, which is a real help on the overburden
     /// and nowhere near a substitute for the brush.
-    public var gustPatchesAtFullStrength: Int = 7
+    /// 16 was most of a dig; 7 at radius 5 was about 4% of one layer, which is not weak
+    /// so much as invisible -- reported as "the gust didn't work at all". 11 at radius 6
+    /// lifts roughly a tenth of the slab's surface, which is a thing you can see happen.
+    public var gustPatchesAtFullStrength: Int = 11
     /// Radius of one patch, in cells.
-    public var gustRadius: Float = 5
+    public var gustRadius: Float = 6
     /// The depth a gust will not take a cell below.
     ///
     /// 1, not 0. Breath moves loose overburden; it never uncovers the fossil for you, so
@@ -170,7 +193,7 @@ public struct SimTuning: Sendable, Codable, Equatable {
     /// use it the whole decision.
     public var gustCrackRate: Float = 0.5
     /// Seconds before another gust can land.
-    public var gustCooldownSeconds: Float = 4
+    public var gustCooldownSeconds: Float = 3
 
     /// Side of a gem cluster, in cells.
     ///

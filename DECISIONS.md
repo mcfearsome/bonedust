@@ -742,3 +742,72 @@ installments against that would make the ramp unwinnable for anyone who does. It
 cheapest-first rather than optimally, because the point is a plausible baseline: a sweep that
 modelled perfect purchasing would flatter the curve exactly as its free tool-switching once
 did.
+
+## Gems were the whole economy, and no measurement could see it
+
+"Gems are the only way to get enough money to actually make the payment, its impossible
+just on fossil values." Every measurement taken before that said gems were 7–8% of a slab.
+Both were true, and the gap between them is the lesson.
+
+Fossil money goes as `exposure^n` and gems pay a **flat** sum. They scale differently with
+skill, so the same content reads completely differently depending on how well the dig went:
+
+| exposure | fossil | gems | gems' share |
+|---|---|---|---|
+| 50% | $30 | $24 | 44% |
+| 70% | $46 | $24 | 34% |
+| 96% (the simulated player) | — | — | **8%** |
+
+`EconomySimulator` reaches 0.96 on every slab, so it could never report this. Every number
+it produced was correct about a player who does not have partial digs.
+
+Three changes, at both ends:
+
+- `exposureExponent` 1.5 → **1.25**. A 70% dig now pays 64% of a fossil rather than 59%.
+  Finishing is still worth more than not; it is no longer the only thing that pays.
+- `gemValue` 20 → **8**. A gem should be a reason to go carefully around something, not the
+  reason to dig.
+- Installments down about 18%, to [350, 400, 525, 650, 950, …], so five days of competent
+  digging covers a week on fossil money alone.
+
+Gems are now 23–26% of a competent dig. `TensionTests` checks that from 70% exposure up and
+deliberately not below: a poor dig leaning on gems is fine — they are the consolation for a
+slab that went badly. A *competent* dig paid mostly in gems means the fossil is optional,
+which is the whole game being optional.
+
+Four payout tests had the old constants written into them and now derive from `SimTuning`,
+so tuning an exponent fails the tests about that exponent and nothing else.
+
+## Ninety-nine species
+
+Charmouth — the starting site, where everyone spends their first hours — was 54% ammonite
+and belemnite across six species. The roster is now 99, formation-accurate, 21 to 28 per
+site, with a top share of 5%.
+
+`ShapeSanityTests` earned its place on the first run. Eighty hand-written parameter sets
+across eight generators produced nine unplayable fossils, none of which threw or showed up
+in a content check that counts entries:
+
+```
+Coprolite             30 cells   — too small to find
+Plesiosaur paddle  4,668 cells   — a third of the slab
+Triceratops frill  8,464 cells   — two thirds of it
+```
+
+It now walks every species a site can draw and fails if the mean falls outside 60 cells to a
+third of the grid. Smallest is now 63, largest 3,726.
+
+## Breath, and the shout that would have cost a specimen
+
+Blowing *across* a microphone is broadband hiss; blowing *into* one is low-frequency rumble,
+which crosses zero rarely and looked exactly like speech to a noisiness gate. That is the
+likeliest reason for "the gust didn't work at all", along with it being tuned down to about
+4% of one layer — not weak so much as invisible.
+
+Widening the gate to catch rumble immediately let loud speech through, which in a game where
+a gust shatters exposed bone is a specimen lost to someone in the next room. The
+discriminator that works is **steadiness**: breath holds a level, speech moves with every
+syllable, so consecutive 0.1 s buffers differ far more for talking than for blowing.
+
+The debug sheet now shows live loudness, noisiness and gust count. Guessing at microphone
+behaviour from a machine with no microphone is how the first version shipped not working.

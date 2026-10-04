@@ -28,6 +28,14 @@ final class BreathDetector {
     private(set) var isListening = false
     /// Set when the microphone was refused, so the caller stops asking.
     private(set) var permissionDenied = false
+    /// The most recent measurement, for the debug overlay.
+    ///
+    /// Guessing at microphone behaviour from a machine with no microphone is how the first
+    /// version shipped not working. This makes the two numbers the gate reads visible on
+    /// the device itself.
+    private(set) var lastLoudness: Float = 0
+    private(set) var lastNoisiness: Float = 0
+    private(set) var gustCount = 0
 
     /// Fires on the main actor when a sustained breath has built up, with its strength.
     var onGust: ((Float) -> Void)?
@@ -44,6 +52,24 @@ final class BreathDetector {
     private let loudnessCeiling: Float = 0.33
     /// Zero crossings per sample below which a sound is pitched, and so not breath.
     private let noisinessFloor: Float = 0.22
+    /// Loudness that counts as breath whatever the waveform looks like.
+    ///
+    /// Blowing *across* a microphone is broadband hiss and crosses zero constantly; blowing
+    /// *into* one is mostly low-frequency rumble, which crosses zero rarely and looked
+    /// exactly like speech to the noisiness gate alone. Reported as "the gust didn't work
+    /// at all", and the gate was the likeliest reason.
+    ///
+    /// This is well above conversation at arm's length, and it still has to be *sustained*
+    /// across several buffers, which is what keeps a shout or a door slam out.
+    private let loudRegardless: Float = 0.22
+    /// How much the level may wobble between buffers and still count as held breath.
+    ///
+    /// This is what keeps the loudness bypass from firing on a shout. Breath holds a level;
+    /// speech moves with every syllable, so consecutive 0.1 s buffers of talking differ far
+    /// more than consecutive buffers of blowing. Without it, widening the gate to catch
+    /// low-frequency rumble let a raised voice through -- which in a game where a gust
+    /// shatters an exposed fossil is a specimen lost to someone in the next room.
+    private let steadinessTolerance: Float = 0.35
     /// Consecutive qualifying buffers before a gust fires. At 0.1 s each that is about a
     /// third of a second — long enough that a door slam or one consonant cannot trigger it.
     private let sustainedBuffers = 3
@@ -171,8 +197,20 @@ final class BreathDetector {
     /// Separated from the audio callback so it is a pure function of its input and can be
     /// tested without a microphone, which is the only way any of this gets tested at all.
     func consume(_ measurement: Measurement) {
+        defer { lastLoudness = measurement.loudness }
+        lastNoisiness = measurement.noisiness
+        // Steady: this buffer is close in level to the one before it.
+        let previous = lastLoudness
+        let spread = max(measurement.loudness, previous)
+        let isSteady = previous <= 0
+            || spread <= 0
+            || abs(measurement.loudness - previous) / spread <= steadinessTolerance
+
         let isBreath = measurement.loudness >= loudnessFloor
-            && measurement.noisiness >= noisinessFloor
+            && (measurement.noisiness >= noisinessFloor
+                // Blowing *into* a microphone is low-frequency rumble rather than hiss, so
+                // it fails the noisiness test; held steady and loud, it is still breath.
+                || (measurement.loudness >= loudRegardless && isSteady))
 
         guard isBreath else {
             // Decays rather than snapping to zero, so the reading does not flicker while
@@ -194,6 +232,7 @@ final class BreathDetector {
         qualifyingBuffers = 0
         let fired = peakStrength
         peakStrength = 0
+        gustCount += 1
         onGust?(fired)
     }
 }
