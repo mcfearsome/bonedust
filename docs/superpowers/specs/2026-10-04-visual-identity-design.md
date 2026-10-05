@@ -246,6 +246,12 @@ tested, but nothing drives the live palette through it — see the table above.
 the night page and a half-themed app is worse than either whole one.
 `DebugOverlay` references no design token and is out of scope.
 
+**One exception, since M6.** `main` grew ten screens after this was written (Camp, Collection,
+CrewLedger, Outfit, RunEnd, Sell, SlabResults, SpecimenCard, SupplyTent, Title). They read the flat
+`Ink.*` names through the migration shim in `DesignTokens`, which resolve to the day palette, so they
+are cream but do not follow the night one. Moving each to `theme.ink` is a follow-up; until then the
+root puts the day page and light scheme back whenever a dig ends.
+
 ### 7. Cel shading
 
 The slab is already four discrete palette colours per layer. What stops it
