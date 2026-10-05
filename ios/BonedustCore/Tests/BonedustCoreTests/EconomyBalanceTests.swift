@@ -94,11 +94,18 @@ final class EconomyBalanceTests: XCTestCase {
         XCTAssertGreaterThan(wheeler.exposure, charmouth.exposure)
     }
 
-    func testAFullRunProducesFiveSlabsAndSettles() {
+    /// A week is no longer a fixed five days: `RunLength` scales it with the tier and an
+    /// S-grade slab earns another. Asserting five was asserting that neither of those
+    /// features works.
+    func testAFullRunDigsEveryDayAndSettles() {
         let run = EconomySimulator.playRun(seed: 99, siteID: "charmouth", tier: 1)
-        XCTAssertEqual(run.slabs.count, 5)
+        XCTAssertEqual(run.slabs.count, run.totalDays)
         XCTAssertTrue(run.isOver)
-        XCTAssertEqual(Set(run.slabs.map(\.day)), Set(1...5))
+        XCTAssertEqual(Set(run.slabs.map(\.day)), Set(1...run.totalDays))
+        XCTAssertEqual(
+            run.totalDays, RunLength.days(tier: 1) + run.earnedDays,
+            "a run should be its tier's length plus whatever it earned"
+        )
         XCTAssertEqual(run.totalEarned, run.slabs.reduce(0) { $0 + $1.payout.total })
     }
 

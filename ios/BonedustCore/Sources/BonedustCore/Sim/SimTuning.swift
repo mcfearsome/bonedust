@@ -144,8 +144,14 @@ public struct SimTuning: Sendable, Codable, Equatable {
     /// the only term that moves -- a competent dig lands near 0.97 exposure and 0.99 intact
     /// whatever else happened, so those two cannot separate good play from great.
     public var gradeExposureWeight: Float = 0.4
-    public var gradeIntactWeight: Float = 0.4
-    public var gradeSpeedWeight: Float = 0.2
+    /// Raised from 0.4, and the speed weight cut to pay for it.
+    ///
+    /// At 0.2 speed, a reckless dig finished twenty seconds early, took an S for it, and the
+    /// 25% grade bonus cancelled the 13% it had lost in intactness -- careful play paid $177
+    /// and reckless $178. The grade was quietly arguing against the one thing the game is
+    /// about.
+    public var gradeIntactWeight: Float = 0.48
+    public var gradeSpeedWeight: Float = 0.12
 
     public var gradeThresholdS: Float = 0.95
     public var gradeThresholdA: Float = 0.85

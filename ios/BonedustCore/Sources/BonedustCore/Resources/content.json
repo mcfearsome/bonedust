@@ -28,10 +28,10 @@
       "note": "Thin as a pencil. Treat it like one.",
       "shape": {
         "kind": "taper",
-        "spanCells": 72,
+        "spanCells": 112,
         "params": {
-          "taperFrom": 0.055,
-          "taperTo": 0.008,
+          "taperFrom": 0.106,
+          "taperTo": 0.0154,
           "bend": 0.06
         }
       }
@@ -100,10 +100,10 @@
       "note": "A stack of tiny discs. Blow on it wrong and it is gravel.",
       "shape": {
         "kind": "discs",
-        "spanCells": 88,
+        "spanCells": 94,
         "params": {
           "count": 14,
-          "thickness": 0.14,
+          "thickness": 0.1464,
           "jitter": 0.1,
           "chain": 1.0
         }
@@ -137,10 +137,10 @@
       "note": "Small. Rarely alone.",
       "shape": {
         "kind": "fan",
-        "spanCells": 26,
+        "spanCells": 34,
         "params": {
           "ribs": 7,
-          "thickness": 0.09
+          "thickness": 0.1134
         }
       }
     },
@@ -155,11 +155,11 @@
       "note": "Blind, tiny, everywhere.",
       "shape": {
         "kind": "segmentedBody",
-        "spanCells": 24,
+        "spanCells": 34,
         "params": {
           "ribs": 4,
-          "thickness": 0.1,
-          "aspect": 0.5
+          "thickness": 0.1404,
+          "aspect": 0.702
         }
       }
     },
@@ -174,10 +174,10 @@
       "note": "A cone nobody agrees about.",
       "shape": {
         "kind": "taper",
-        "spanCells": 30,
+        "spanCells": 62,
         "params": {
-          "taperFrom": 0.12,
-          "taperTo": 0.02
+          "taperFrom": 0.25,
+          "taperTo": 0.0417
         }
       }
     },
@@ -261,11 +261,10 @@
       "note": "A crescent with an opinion.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 56,
+        "spanCells": 68,
         "params": {
-          "bend": 1.7,
-          "taperFrom": 0.17,
-          "taperTo": 0.02
+          "thickness": 0.2,
+          "sweep": 2.0
         }
       }
     },
@@ -351,10 +350,10 @@
       "crackMultiplier": 0.8,
       "shape": {
         "kind": "crescent",
-        "spanCells": 50,
+        "spanCells": 62,
         "params": {
-          "thickness": 0.4,
-          "sweep": 2.2
+          "thickness": 0.34,
+          "sweep": 2.3
         }
       }
     },
@@ -385,11 +384,11 @@
       "note": "Striated, slightly curved, and sharper than it has any right to be.",
       "shape": {
         "kind": "toothRow",
-        "spanCells": 68,
+        "spanCells": 74,
         "params": {
           "ribs": 5,
-          "thickness": 0.045,
-          "aspect": 0.46,
+          "thickness": 0.0481,
+          "aspect": 0.4917,
           "bend": 0.14
         }
       }
@@ -403,11 +402,11 @@
       "note": "A dinner plate with fins. Scales like chainmail.",
       "shape": {
         "kind": "skeleton",
-        "spanCells": 62,
+        "spanCells": 66,
         "params": {
           "ribs": 9,
-          "thickness": 0.04,
-          "aspect": 0.36,
+          "thickness": 0.0423,
+          "aspect": 0.381,
           "bend": 0.13
         }
       }
@@ -457,11 +456,11 @@
       "crackMultiplier": 1.35,
       "shape": {
         "kind": "skeleton",
-        "spanCells": 44,
+        "spanCells": 63,
         "params": {
           "ribs": 6,
-          "thickness": 0.038,
-          "aspect": 0.3,
+          "thickness": 0.0527,
+          "aspect": 0.4164,
           "bend": 0.1
         }
       }
@@ -527,11 +526,11 @@
       "note": "Claws out, as if it saw the lake turning.",
       "shape": {
         "kind": "ribcage",
-        "spanCells": 62,
+        "spanCells": 64,
         "params": {
           "ribs": 8,
-          "thickness": 0.045,
-          "aspect": 0.46,
+          "thickness": 0.0463,
+          "aspect": 0.4731,
           "bend": 1
         }
       }
@@ -545,11 +544,11 @@
       "note": "One of a thousand in a jaw built for grinding.",
       "shape": {
         "kind": "toothRow",
-        "spanCells": 70,
+        "spanCells": 74,
         "params": {
           "ribs": 8,
-          "thickness": 0.045,
-          "aspect": 0.34,
+          "thickness": 0.046,
+          "aspect": 0.3477,
           "bend": 0.04
         }
       }
@@ -564,10 +563,10 @@
       "note": "Armour. It survived worse than your brush.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 52,
+        "spanCells": 64,
         "params": {
-          "thickness": 0.34,
-          "sweep": 1.5
+          "thickness": 0.3,
+          "sweep": 1.7
         }
       }
     },
@@ -599,12 +598,12 @@
       "note": "A string of them, from something that outlived the asteroid.",
       "shape": {
         "kind": "tail",
-        "spanCells": 88,
+        "spanCells": 90,
         "params": {
           "count": 7,
           "bend": 0.3,
-          "thickness": 0.085,
-          "aspect": 0.36
+          "thickness": 0.0854,
+          "aspect": 0.3616
         }
       }
     },
@@ -722,10 +721,10 @@
       "note": "Two halves, usually one left. Still counts.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 46,
+        "spanCells": 58,
         "params": {
-          "thickness": 0.38,
-          "sweep": 2.0
+          "thickness": 0.32,
+          "sweep": 2.1
         }
       },
       "crackMultiplier": 0.85
@@ -773,12 +772,12 @@
       "note": "Teeth in a line down a snout built for speed.",
       "shape": {
         "kind": "skull",
-        "spanCells": 84,
+        "spanCells": 87,
         "params": {
-          "aspect": 0.2,
+          "aspect": 0.2062,
           "bend": 0.1,
           "ribs": 14,
-          "thickness": 0.036
+          "thickness": 0.0371
         }
       },
       "crackMultiplier": 1.25
@@ -830,10 +829,10 @@
       "note": "Somebody's bad afternoon, preserved for two hundred million years.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 44,
+        "spanCells": 52,
         "params": {
-          "thickness": 0.44,
-          "sweep": 1.3
+          "thickness": 0.38,
+          "sweep": 1.2
         }
       },
       "crackMultiplier": 0.75
@@ -846,13 +845,12 @@
       "baseValue": 60,
       "note": "Scattered diamonds of enamel. Easy to lose track of.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 58,
+        "kind": "cluster",
+        "spanCells": 88,
         "params": {
-          "count": 9,
-          "thickness": 0.1,
-          "jitter": 0.3,
-          "process": 0.0
+          "count": 18,
+          "aspect": 0.2,
+          "thickness": 0.075
         }
       },
       "crackMultiplier": 1.3
@@ -865,13 +863,12 @@
       "baseValue": 95,
       "note": "A death assemblage. Several at once, all pointing the same way.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 70,
+        "kind": "cluster",
+        "spanCells": 92,
         "params": {
-          "count": 4,
-          "thickness": 0.14,
-          "jitter": 0.4,
-          "process": 0.0
+          "count": 6,
+          "aspect": 0.62,
+          "thickness": 0.055
         }
       },
       "crackMultiplier": 1.2
@@ -922,10 +919,10 @@
       "note": "A nautilus that never bothered coiling.",
       "shape": {
         "kind": "taper",
-        "spanCells": 88,
+        "spanCells": 92,
         "params": {
-          "taperFrom": 0.1,
-          "taperTo": 0.04,
+          "taperFrom": 0.1016,
+          "taperTo": 0.0407,
           "bend": 0.02,
           "knobEnds": 1.4
         }
@@ -958,7 +955,7 @@
       "note": "Small, neat, and easy to snap across the middle.",
       "shape": {
         "kind": "segmentedBody",
-        "spanCells": 38,
+        "spanCells": 42,
         "params": {
           "segments": 10,
           "width": 0.36,
@@ -976,7 +973,7 @@
       "note": "Two plates and a hinge. Barely a fingernail.",
       "shape": {
         "kind": "segmentedBody",
-        "spanCells": 24,
+        "spanCells": 41,
         "params": {
           "segments": 3,
           "width": 0.5,
@@ -1030,7 +1027,7 @@
       "note": "A thumbnail with ambitions.",
       "shape": {
         "kind": "segmentedBody",
-        "spanCells": 22,
+        "spanCells": 42,
         "params": {
           "segments": 3,
           "width": 0.48,
@@ -1048,10 +1045,10 @@
       "note": "A brachiopod that still has living relatives. Unimpressed by extinction.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 38,
+        "spanCells": 50,
         "params": {
-          "thickness": 0.34,
-          "sweep": 1.6
+          "thickness": 0.3,
+          "sweep": 1.5
         }
       },
       "crackMultiplier": 1.1
@@ -1083,11 +1080,11 @@
       "note": "Lace-winged and impossible. The soft tissue is the whole value.",
       "shape": {
         "kind": "fan",
-        "spanCells": 34,
+        "spanCells": 40,
         "params": {
           "rays": 7,
           "spread": 0.75,
-          "thickness": 0.06
+          "thickness": 0.0666
         }
       },
       "crackMultiplier": 1.55
@@ -1100,13 +1097,12 @@
       "baseValue": 80,
       "note": "Little cones, strewn like spilled cutlery.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 48,
+        "kind": "cluster",
+        "spanCells": 82,
         "params": {
-          "count": 5,
-          "thickness": 0.12,
-          "jitter": 0.35,
-          "process": 0.0
+          "count": 11,
+          "aspect": 0.3,
+          "thickness": 0.05
         }
       },
       "crackMultiplier": 1.2
@@ -1192,10 +1188,10 @@
       "note": "A dozen at once, caught in the same bad minute.",
       "shape": {
         "kind": "discs",
-        "spanCells": 80,
+        "spanCells": 85,
         "params": {
           "count": 6,
-          "thickness": 0.14,
+          "thickness": 0.1495,
           "jitter": 0.45
         }
       },
@@ -1277,13 +1273,12 @@
       "baseValue": 120,
       "note": "Enamelled diamonds, hard as tooth.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 56,
+        "kind": "cluster",
+        "spanCells": 88,
         "params": {
-          "count": 8,
-          "thickness": 0.12,
-          "jitter": 0.28,
-          "process": 0.0
+          "count": 16,
+          "aspect": 0.22,
+          "thickness": 0.08
         }
       },
       "crackMultiplier": 1.15
@@ -1315,11 +1310,11 @@
       "note": "Wings like cellophane. One careless pass and it is dust.",
       "shape": {
         "kind": "fan",
-        "spanCells": 28,
+        "spanCells": 42,
         "params": {
           "rays": 5,
           "spread": 0.6,
-          "thickness": 0.04
+          "thickness": 0.0577
         }
       },
       "crackMultiplier": 1.6
@@ -1423,10 +1418,10 @@
       "note": "Plates fused into a dome. Solid, for once.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 86,
+        "spanCells": 82,
         "params": {
-          "thickness": 0.4,
-          "sweep": 2.4
+          "thickness": 0.36,
+          "sweep": 2.5
         }
       },
       "crackMultiplier": 1.0
@@ -1440,11 +1435,11 @@
       "note": "Conical, striated, and shed by the hundred.",
       "shape": {
         "kind": "toothRow",
-        "spanCells": 72,
+        "spanCells": 74,
         "params": {
           "ribs": 7,
-          "thickness": 0.042,
-          "aspect": 0.4,
+          "thickness": 0.0434,
+          "aspect": 0.4136,
           "bend": 0.06
         }
       },
@@ -1459,10 +1454,10 @@
       "note": "Blunt for a theropod. It did not need to be sharp.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 62,
+        "spanCells": 72,
         "params": {
-          "thickness": 0.22,
-          "sweep": 1.7
+          "thickness": 0.24,
+          "sweep": 1.9
         }
       },
       "crackMultiplier": 1.15
@@ -1513,11 +1508,11 @@
       "note": "A shearing tooth from a battery of hundreds.",
       "shape": {
         "kind": "toothRow",
-        "spanCells": 64,
+        "spanCells": 73,
         "params": {
           "ribs": 6,
-          "thickness": 0.045,
-          "aspect": 0.36,
+          "thickness": 0.0505,
+          "aspect": 0.4041,
           "bend": 0.05
         }
       }
@@ -1550,10 +1545,10 @@
       "note": "Armour that fought back.",
       "shape": {
         "kind": "taper",
-        "spanCells": 66,
+        "spanCells": 78,
         "params": {
-          "taperFrom": 0.14,
-          "taperTo": 0.03,
+          "taperFrom": 0.1645,
+          "taperTo": 0.0353,
           "bend": 0.2
         }
       },
@@ -1568,10 +1563,10 @@
       "note": "Ten inches of solid skull. Built for arguments.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 58,
+        "spanCells": 66,
         "params": {
-          "thickness": 0.46,
-          "sweep": 1.4
+          "thickness": 0.42,
+          "sweep": 1.5
         }
       },
       "crackMultiplier": 0.85
@@ -1585,11 +1580,11 @@
       "note": "Serrated on the back edge. Check it with a thumbnail, gently.",
       "shape": {
         "kind": "toothRow",
-        "spanCells": 62,
+        "spanCells": 73,
         "params": {
           "ribs": 6,
-          "thickness": 0.04,
-          "aspect": 0.4,
+          "thickness": 0.0469,
+          "aspect": 0.4693,
           "bend": 0.12
         }
       },
@@ -1623,12 +1618,12 @@
       "note": "Needle teeth in a gharial's snout.",
       "shape": {
         "kind": "skull",
-        "spanCells": 92,
+        "spanCells": 95,
         "params": {
-          "aspect": 0.16,
+          "aspect": 0.165,
           "bend": 0.06,
           "ribs": 16,
-          "thickness": 0.03
+          "thickness": 0.0309
         }
       },
       "crackMultiplier": 1.3
@@ -1642,9 +1637,9 @@
       "note": "One plate of a shell that saw the asteroid.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 48,
+        "spanCells": 58,
         "params": {
-          "thickness": 0.3,
+          "thickness": 0.32,
           "sweep": 1.9
         }
       },
@@ -1659,10 +1654,10 @@
       "note": "Pitted armour from a back that lay in the shallows.",
       "shape": {
         "kind": "crescent",
-        "spanCells": 44,
+        "spanCells": 56,
         "params": {
-          "thickness": 0.32,
-          "sweep": 1.5
+          "thickness": 0.3,
+          "sweep": 1.6
         }
       },
       "crackMultiplier": 0.9
@@ -1676,12 +1671,12 @@
       "note": "Smaller than your thumb, and worth more than the tyrannosaur.",
       "shape": {
         "kind": "skull",
-        "spanCells": 56,
+        "spanCells": 71,
         "params": {
-          "aspect": 0.26,
+          "aspect": 0.3244,
           "bend": 0.05,
           "ribs": 7,
-          "thickness": 0.045
+          "thickness": 0.0562
         }
       },
       "crackMultiplier": 1.5
@@ -1694,13 +1689,12 @@
       "baseValue": 230,
       "note": "Curved shards with a pore pattern. Jigsaw with no picture.",
       "shape": {
-        "kind": "discs",
-        "spanCells": 62,
+        "kind": "cluster",
+        "spanCells": 92,
         "params": {
-          "count": 8,
-          "thickness": 0.09,
-          "jitter": 0.4,
-          "process": 0.0
+          "count": 12,
+          "aspect": 0.3,
+          "thickness": 0.075
         }
       },
       "crackMultiplier": 1.55
@@ -1769,12 +1763,12 @@
       "note": "Hollow-chambered and lighter than it should be.",
       "shape": {
         "kind": "tail",
-        "spanCells": 82,
+        "spanCells": 84,
         "params": {
           "count": 5,
           "bend": 0.26,
-          "thickness": 0.1,
-          "aspect": 0.4
+          "thickness": 0.1018,
+          "aspect": 0.4071
         }
       },
       "crackMultiplier": 1.1
@@ -2069,11 +2063,11 @@
       "note": "Hollow bones, and a wishbone you can see. Breathe on it wrong and it is gone.",
       "shape": {
         "kind": "skeleton",
-        "spanCells": 66,
+        "spanCells": 71,
         "params": {
           "ribs": 8,
-          "thickness": 0.034,
-          "aspect": 0.34,
+          "thickness": 0.0366,
+          "aspect": 0.3663,
           "bend": 0.13
         }
       },

@@ -28,7 +28,7 @@ extension SlabPalette {
 extension ShapeParams {
     public enum CodingKeys: String, CodingKey {
         case turns, growth, thickness, taperFrom, taperTo, bend, count, jitter, ribs, aspect
-        case knobEnds, chain, root, process
+        case knobEnds, chain, root, process, sweep
     }
 }
 
@@ -110,6 +110,7 @@ extension ShapeParams {
         chain = try c.value(.chain, base.chain)
         root = try c.value(.root, base.root)
         process = try c.value(.process, base.process)
+        sweep = try c.value(.sweep, base.sweep)
         taperTo = try c.value(.taperTo, base.taperTo)
         bend = try c.value(.bend, base.bend)
         count = try c.value(.count, base.count)

@@ -65,6 +65,13 @@ public struct ShapeParams: Sendable, Codable, Equatable {
     /// Scattered discs read as spilled dots. A vertebra has a neural spine, and giving each
     /// disc one turns a scatter of coins into a scatter of recognisable *bones*.
     public var process: Float = 0
+    /// Crescent: how far round the arc goes, in radians.
+    ///
+    /// This existed in the content for twelve fossils and in no `CodingKey`, so it was read
+    /// as nothing and every crescent drew with the same default sweep and the same default
+    /// width. They all rasterised to exactly 371 cells, which is the tell -- a claw, an
+    /// oyster, a turtle scute and a skull dome cannot plausibly be the same size.
+    public var sweep: Float = 1.6
 
     public init() {}
 }
@@ -90,6 +97,7 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
         case vertebra        // one vertebra: centrum, arch, spine, processes
         case toothRow        // a jaw fragment with teeth still in it
         case skeleton        // part of an articulated animal
+        case cluster         // several small pieces of the same thing, strewn
     }
 
     public var kind: Kind
@@ -122,6 +130,7 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
         case .vertebra: return Self.vertebra(params)
         case .toothRow: return Self.toothRow(params)
         case .skeleton: return Self.skeleton(params)
+        case .cluster: return Self.cluster(params)
         }
     }
 
@@ -454,6 +463,44 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
         return out
     }
 
+    /// Several small pieces of the same animal, strewn across the slab.
+    ///
+    /// `discs` already scattered things, but it scatters *ellipses*, so a hyolith cluster
+    /// and a handful of fish scales both came out as five featureless eggs — "what the hell
+    /// is this garbage", and fairly. The pieces here are tapered slivers at varied angles,
+    /// which reads as a dozen small shelled animals rather than spilled yolks.
+    ///
+    /// `count` is how many, `aspect` how long each one is, `thickness` how heavy.
+    private static func cluster(_ p: ShapeParams) -> [ShapePrimitive] {
+        let n = max(3, p.count)
+        let length = max(0.1, p.aspect)
+        let heft = max(0.015, p.thickness)
+        var out: [ShapePrimitive] = []
+        out.reserveCapacity(n * 2)
+
+        for i in 0..<n {
+            // Golden-angle placement, so the scatter looks strewn rather than gridded and
+            // needs no PRNG — generation draw order has to stay exactly as documented.
+            let t = Float(i) * 2.399_963
+            let radius = 0.82 * (Float(i) + 0.5).squareRoot() / Float(n).squareRoot()
+            let centre = Vec2(cos(t) * radius, sin(t * 1.31) * radius * 0.9)
+            // Each piece points its own way, which is what stops a cluster reading as a
+            // pattern.
+            let angle = t * 0.77
+            let along = Vec2(cos(angle), sin(angle)) * (length * 0.5)
+            out.append(.stroke(vertices: [
+                (centre - along, heft * 1.15),
+                (centre, heft),
+                (centre + along, heft * 0.25),
+            ]))
+            // A blunt end, so each sliver reads as a shell rather than a splinter.
+            out.append(.ellipse(
+                center: centre - along, radii: Vec2(heft * 1.4, heft * 1.15), rotation: 0
+            ))
+        }
+        return out
+    }
+
     // MARK: - Generators
 
     /// Logarithmic spiral ribbon. Half-width grows with radius so successive whorls
@@ -532,14 +579,20 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
     /// Circular arc with a taper: a claw. `bend` is the sweep in radians.
     private static func crescent(_ p: ShapeParams) -> [ShapePrimitive] {
         let steps = 36
-        let sweep = max(0.4, p.bend)
+        // Reads `sweep` and `thickness`, which is what every crescent in the content has
+        // always said. It used to read `bend`, `taperFrom` and `taperTo` -- none of which
+        // any of them set -- so all twelve drew as the same default arc.
+        let sweep = max(0.4, p.sweep)
         var vertices: [(point: Vec2, halfWidth: Float)] = []
         vertices.reserveCapacity(steps + 1)
         for i in 0...steps {
             let u = Float(i) / Float(steps)
             let a = -sweep / 2 + sweep * u
             let point = Vec2(sin(a) * 1.15, cos(a) * 1.15 - 0.72)
-            let halfWidth = p.taperFrom + (p.taperTo - p.taperFrom) * pow(u, 0.8)
+            // Thickest in the middle of the arc and tapering to both ends, which is the
+            // shape of a claw, a scute and a valve alike.
+            let belly = sin(Float.pi * u)
+            let halfWidth = p.thickness * (0.35 + 0.65 * belly)
             vertices.append((point, max(0.012, halfWidth)))
         }
         return [.stroke(vertices: vertices)]

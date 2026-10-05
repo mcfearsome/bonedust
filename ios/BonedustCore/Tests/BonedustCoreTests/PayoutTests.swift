@@ -36,8 +36,16 @@ final class PayoutTests: XCTestCase {
     func testPerfectSlabPaysBase() {
         let ctx = context()
         let result = Payout.evaluate(ctx)
-        XCTAssertEqual(result.grade, SlabGrade.Letter.b,
-                       "fully exposed, unbroken, no daylight left is the ordinary case")
+        // The letter is derived, not named. Grade weights have moved once already --
+        // intactness up and speed down, because a reckless dig was finishing early and
+        // taking an S for it -- and naming a letter here makes that a payout-test failure.
+        XCTAssertEqual(
+            result.grade,
+            SlabGrade.of(
+                exposure: ctx.exposure, intact: 1,
+                daylightRemaining: ctx.daylightRemaining, totalDaylight: ctx.totalDaylight
+            ).letter
+        )
         XCTAssertEqual(result.total, Int((100 * gradeBonus(ctx)).rounded()))
     }
 

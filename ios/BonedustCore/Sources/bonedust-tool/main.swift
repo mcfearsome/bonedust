@@ -261,6 +261,31 @@ case "golden":
         Data("wrote \(derivations.count) derivations to \(path)\n".utf8)
     )
 
+case "sizes":
+    // Bone cells per species, smallest first. A fossil that rasterises to a few dozen
+    // cells is five specks on an empty slab however correct its silhouette is.
+    let sizeCatalog = ContentCatalog.shared
+    var sizes: [(String, String, Int)] = []
+    for fossil in sizeCatalog.fossils {
+        var grid = SlabGrid()
+        for i in 0..<SlabGrid.cellCount { grid.cells[i].depth = 0 }
+        let cells = ShapeRasterizer.rasterize(
+            fossil.shape.expand(),
+            transform: ShapeTransform(
+                scale: fossil.shape.spanCells / 2, rotation: 0,
+                center: Vec2(Float(SlabGrid.width) / 2, Float(SlabGrid.height) / 2)
+            ),
+            flag: SlabGrid.Flag.bone, into: &grid
+        )
+        sizes.append((fossil.id, fossil.shape.kind.rawValue, cells))
+    }
+    sizes.sort { $0.2 < $1.2 }
+    let total = SlabGrid.width * SlabGrid.height
+    for (id, kind, cells) in sizes where cells < 700 {
+        print("  \(cells)\t\(cells * 100 / total)%\t\(kind)\t\(id)")
+    }
+    print("  --- \(sizes.filter { $0.2 < 700 }.count) of \(sizes.count) under 700 cells")
+
 case "sheet":
     // Every species tiled into one image, so the whole catalogue can be judged at a
     // glance rather than one PNG at a time.

@@ -466,6 +466,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.14,
@@ -497,12 +498,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
-          "taperFrom" : 0.055,
-          "taperTo" : 0.008,
+          "sweep" : 1.6,
+          "taperFrom" : 0.106,
+          "taperTo" : 0.0154,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 72
+        "spanCells" : 112
       }
     },
     {
@@ -529,6 +531,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.16,
@@ -561,6 +564,7 @@
           "process" : 0,
           "ribs" : 8,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.055,
@@ -593,6 +597,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.062,
@@ -624,12 +629,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.14,
+          "thickness" : 0.1464,
           "turns" : 2.6
         },
-        "spanCells" : 88
+        "spanCells" : 94
       }
     },
     {
@@ -655,6 +661,7 @@
           "process" : 0,
           "ribs" : 8,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.075,
@@ -686,12 +693,13 @@
           "process" : 0,
           "ribs" : 7,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.09,
+          "thickness" : 0.1134,
           "turns" : 2.6
         },
-        "spanCells" : 26
+        "spanCells" : 34
       }
     },
     {
@@ -707,7 +715,7 @@
       "shape" : {
         "kind" : "segmentedBody",
         "params" : {
-          "aspect" : 0.5,
+          "aspect" : 0.702,
           "bend" : 0.22,
           "chain" : 0,
           "count" : 7,
@@ -717,12 +725,13 @@
           "process" : 0,
           "ribs" : 4,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.1,
+          "thickness" : 0.1404,
           "turns" : 2.6
         },
-        "spanCells" : 24
+        "spanCells" : 34
       }
     },
     {
@@ -748,12 +757,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
-          "taperFrom" : 0.12,
-          "taperTo" : 0.02,
+          "sweep" : 1.6,
+          "taperFrom" : 0.25,
+          "taperTo" : 0.0417,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 30
+        "spanCells" : 62
       }
     },
     {
@@ -779,6 +789,7 @@
           "process" : 0,
           "ribs" : 11,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.07,
@@ -810,6 +821,7 @@
           "process" : 0,
           "ribs" : 7,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.06,
@@ -841,6 +853,7 @@
           "process" : 0,
           "ribs" : 14,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.075,
@@ -872,6 +885,7 @@
           "process" : 0,
           "ribs" : 13,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
@@ -894,7 +908,7 @@
         "kind" : "crescent",
         "params" : {
           "aspect" : 0.34,
-          "bend" : 1.7,
+          "bend" : 0.22,
           "chain" : 0,
           "count" : 7,
           "growth" : 0.085,
@@ -903,12 +917,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
-          "taperFrom" : 0.17,
-          "taperTo" : 0.02,
-          "thickness" : 0.1,
+          "sweep" : 2,
+          "taperFrom" : 0.16,
+          "taperTo" : 0.015,
+          "thickness" : 0.2,
           "turns" : 2.6
         },
-        "spanCells" : 56
+        "spanCells" : 68
       }
     },
     {
@@ -935,6 +950,7 @@
           "process" : 0,
           "ribs" : 5,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.055,
@@ -967,6 +983,7 @@
           "process" : 0,
           "ribs" : 7,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.062,
@@ -999,6 +1016,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.2,
@@ -1030,6 +1048,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.21,
           "taperTo" : 0.025,
           "thickness" : 0.1,
@@ -1061,12 +1080,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 2.3,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.4,
+          "thickness" : 0.34,
           "turns" : 2.6
         },
-        "spanCells" : 50
+        "spanCells" : 62
       }
     },
     {
@@ -1092,6 +1112,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.18,
@@ -1113,7 +1134,7 @@
       "shape" : {
         "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.46,
+          "aspect" : 0.4917,
           "bend" : 0.14,
           "chain" : 0,
           "count" : 7,
@@ -1123,12 +1144,13 @@
           "process" : 0,
           "ribs" : 5,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.045,
+          "thickness" : 0.0481,
           "turns" : 2.6
         },
-        "spanCells" : 68
+        "spanCells" : 74
       }
     },
     {
@@ -1144,7 +1166,7 @@
       "shape" : {
         "kind" : "skeleton",
         "params" : {
-          "aspect" : 0.36,
+          "aspect" : 0.381,
           "bend" : 0.13,
           "chain" : 0,
           "count" : 7,
@@ -1154,12 +1176,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.04,
+          "thickness" : 0.0423,
           "turns" : 2.6
         },
-        "spanCells" : 62
+        "spanCells" : 66
       }
     },
     {
@@ -1185,6 +1208,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -1216,6 +1240,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.07,
@@ -1237,7 +1262,7 @@
       "shape" : {
         "kind" : "skeleton",
         "params" : {
-          "aspect" : 0.3,
+          "aspect" : 0.4164,
           "bend" : 0.1,
           "chain" : 0,
           "count" : 7,
@@ -1247,12 +1272,13 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.038,
+          "thickness" : 0.0527,
           "turns" : 2.6
         },
-        "spanCells" : 44
+        "spanCells" : 63
       }
     },
     {
@@ -1278,6 +1304,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -1309,6 +1336,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -1340,6 +1368,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.045,
@@ -1361,7 +1390,7 @@
       "shape" : {
         "kind" : "ribcage",
         "params" : {
-          "aspect" : 0.46,
+          "aspect" : 0.4731,
           "bend" : 1,
           "chain" : 0,
           "count" : 7,
@@ -1371,12 +1400,13 @@
           "process" : 0,
           "ribs" : 8,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.045,
+          "thickness" : 0.0463,
           "turns" : 2.6
         },
-        "spanCells" : 62
+        "spanCells" : 64
       }
     },
     {
@@ -1392,7 +1422,7 @@
       "shape" : {
         "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.34,
+          "aspect" : 0.3477,
           "bend" : 0.04,
           "chain" : 0,
           "count" : 7,
@@ -1402,12 +1432,13 @@
           "process" : 0,
           "ribs" : 8,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.045,
+          "thickness" : 0.046,
           "turns" : 2.6
         },
-        "spanCells" : 70
+        "spanCells" : 74
       }
     },
     {
@@ -1433,12 +1464,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.7,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.34,
+          "thickness" : 0.3,
           "turns" : 2.6
         },
-        "spanCells" : 52
+        "spanCells" : 64
       }
     },
     {
@@ -1464,6 +1496,7 @@
           "process" : 0,
           "ribs" : 8,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.058,
@@ -1485,7 +1518,7 @@
       "shape" : {
         "kind" : "tail",
         "params" : {
-          "aspect" : 0.36,
+          "aspect" : 0.3616,
           "bend" : 0.3,
           "chain" : 0,
           "count" : 7,
@@ -1495,12 +1528,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.085,
+          "thickness" : 0.0854,
           "turns" : 2.6
         },
-        "spanCells" : 88
+        "spanCells" : 90
       }
     },
     {
@@ -1526,6 +1560,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.12,
@@ -1557,6 +1592,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.16,
@@ -1588,6 +1624,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.11,
@@ -1619,6 +1656,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.15,
@@ -1650,6 +1688,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.13,
@@ -1681,6 +1720,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.2,
@@ -1712,12 +1752,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 2.1,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.38,
+          "thickness" : 0.32,
           "turns" : 2.6
         },
-        "spanCells" : 46
+        "spanCells" : 58
       }
     },
     {
@@ -1743,6 +1784,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.17,
@@ -1774,6 +1816,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.07,
@@ -1795,7 +1838,7 @@
       "shape" : {
         "kind" : "skull",
         "params" : {
-          "aspect" : 0.2,
+          "aspect" : 0.2062,
           "bend" : 0.1,
           "chain" : 0,
           "count" : 7,
@@ -1805,12 +1848,13 @@
           "process" : 0,
           "ribs" : 14,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.036,
+          "thickness" : 0.0371,
           "turns" : 2.6
         },
-        "spanCells" : 84
+        "spanCells" : 87
       }
     },
     {
@@ -1837,6 +1881,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.045,
@@ -1868,6 +1913,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.04,
@@ -1899,12 +1945,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.2,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.44,
+          "thickness" : 0.38,
           "turns" : 2.6
         },
-        "spanCells" : 44
+        "spanCells" : 52
       }
     },
     {
@@ -1918,24 +1965,25 @@
       "note" : "Scattered diamonds of enamel. Easy to lose track of.",
       "period" : "Jurassic",
       "shape" : {
-        "kind" : "discs",
+        "kind" : "cluster",
         "params" : {
-          "aspect" : 0.34,
+          "aspect" : 0.2,
           "bend" : 0.22,
           "chain" : 0,
-          "count" : 9,
+          "count" : 18,
           "growth" : 0.085,
-          "jitter" : 0.3,
+          "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.1,
+          "thickness" : 0.075,
           "turns" : 2.6
         },
-        "spanCells" : 58
+        "spanCells" : 88
       }
     },
     {
@@ -1949,24 +1997,25 @@
       "note" : "A death assemblage. Several at once, all pointing the same way.",
       "period" : "Jurassic",
       "shape" : {
-        "kind" : "discs",
+        "kind" : "cluster",
         "params" : {
-          "aspect" : 0.34,
+          "aspect" : 0.62,
           "bend" : 0.22,
           "chain" : 0,
-          "count" : 4,
+          "count" : 6,
           "growth" : 0.085,
-          "jitter" : 0.4,
+          "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.14,
+          "thickness" : 0.055,
           "turns" : 2.6
         },
-        "spanCells" : 70
+        "spanCells" : 92
       }
     },
     {
@@ -1992,6 +2041,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.15,
@@ -2023,6 +2073,7 @@
           "process" : 0,
           "ribs" : 5,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.07,
@@ -2054,12 +2105,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
-          "taperFrom" : 0.1,
-          "taperTo" : 0.04,
+          "sweep" : 1.6,
+          "taperFrom" : 0.1016,
+          "taperTo" : 0.0407,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 88
+        "spanCells" : 92
       }
     },
     {
@@ -2085,6 +2137,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2116,12 +2169,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 38
+        "spanCells" : 42
       }
     },
     {
@@ -2147,12 +2201,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 24
+        "spanCells" : 41
       }
     },
     {
@@ -2178,6 +2233,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2209,6 +2265,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2240,12 +2297,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 22
+        "spanCells" : 42
       }
     },
     {
@@ -2271,12 +2329,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.5,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.34,
+          "thickness" : 0.3,
           "turns" : 2.6
         },
-        "spanCells" : 38
+        "spanCells" : 50
       }
     },
     {
@@ -2302,6 +2361,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.08,
@@ -2333,12 +2393,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.06,
+          "thickness" : 0.0666,
           "turns" : 2.6
         },
-        "spanCells" : 34
+        "spanCells" : 40
       }
     },
     {
@@ -2352,24 +2413,25 @@
       "note" : "Little cones, strewn like spilled cutlery.",
       "period" : "Cambrian",
       "shape" : {
-        "kind" : "discs",
+        "kind" : "cluster",
         "params" : {
-          "aspect" : 0.34,
+          "aspect" : 0.3,
           "bend" : 0.22,
           "chain" : 0,
-          "count" : 5,
+          "count" : 11,
           "growth" : 0.085,
-          "jitter" : 0.35,
+          "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.12,
+          "thickness" : 0.05,
           "turns" : 2.6
         },
-        "spanCells" : 48
+        "spanCells" : 82
       }
     },
     {
@@ -2395,6 +2457,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.035,
@@ -2426,6 +2489,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
@@ -2457,6 +2521,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.22,
@@ -2488,6 +2553,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2519,12 +2585,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.14,
+          "thickness" : 0.1495,
           "turns" : 2.6
         },
-        "spanCells" : 80
+        "spanCells" : 85
       }
     },
     {
@@ -2550,6 +2617,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2581,6 +2649,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2612,6 +2681,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2643,6 +2713,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2662,24 +2733,25 @@
       "note" : "Enamelled diamonds, hard as tooth.",
       "period" : "Eocene",
       "shape" : {
-        "kind" : "discs",
+        "kind" : "cluster",
         "params" : {
-          "aspect" : 0.34,
+          "aspect" : 0.22,
           "bend" : 0.22,
           "chain" : 0,
-          "count" : 8,
+          "count" : 16,
           "growth" : 0.085,
-          "jitter" : 0.28,
+          "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.12,
+          "thickness" : 0.08,
           "turns" : 2.6
         },
-        "spanCells" : 56
+        "spanCells" : 88
       }
     },
     {
@@ -2705,6 +2777,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.07,
@@ -2736,12 +2809,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.04,
+          "thickness" : 0.0577,
           "turns" : 2.6
         },
-        "spanCells" : 28
+        "spanCells" : 42
       }
     },
     {
@@ -2767,6 +2841,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.03,
@@ -2798,6 +2873,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.04,
@@ -2829,6 +2905,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.045,
@@ -2860,6 +2937,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.035,
@@ -2891,6 +2969,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.07,
@@ -2922,12 +3001,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 2.5,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.4,
+          "thickness" : 0.36,
           "turns" : 2.6
         },
-        "spanCells" : 86
+        "spanCells" : 82
       }
     },
     {
@@ -2943,7 +3023,7 @@
       "shape" : {
         "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.4,
+          "aspect" : 0.4136,
           "bend" : 0.06,
           "chain" : 0,
           "count" : 7,
@@ -2953,12 +3033,13 @@
           "process" : 0,
           "ribs" : 7,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.042,
+          "thickness" : 0.0434,
           "turns" : 2.6
         },
-        "spanCells" : 72
+        "spanCells" : 74
       }
     },
     {
@@ -2984,12 +3065,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.9,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.22,
+          "thickness" : 0.24,
           "turns" : 2.6
         },
-        "spanCells" : 62
+        "spanCells" : 72
       }
     },
     {
@@ -3015,6 +3097,7 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.06,
@@ -3046,6 +3129,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -3067,7 +3151,7 @@
       "shape" : {
         "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.36,
+          "aspect" : 0.4041,
           "bend" : 0.05,
           "chain" : 0,
           "count" : 7,
@@ -3077,12 +3161,13 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.045,
+          "thickness" : 0.0505,
           "turns" : 2.6
         },
-        "spanCells" : 64
+        "spanCells" : 73
       }
     },
     {
@@ -3108,6 +3193,7 @@
           "process" : 0,
           "ribs" : 10,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.04,
@@ -3139,12 +3225,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
-          "taperFrom" : 0.14,
-          "taperTo" : 0.03,
+          "sweep" : 1.6,
+          "taperFrom" : 0.1645,
+          "taperTo" : 0.0353,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 66
+        "spanCells" : 78
       }
     },
     {
@@ -3170,12 +3257,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.5,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.46,
+          "thickness" : 0.42,
           "turns" : 2.6
         },
-        "spanCells" : 58
+        "spanCells" : 66
       }
     },
     {
@@ -3191,7 +3279,7 @@
       "shape" : {
         "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.4,
+          "aspect" : 0.4693,
           "bend" : 0.12,
           "chain" : 0,
           "count" : 7,
@@ -3201,12 +3289,13 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.04,
+          "thickness" : 0.0469,
           "turns" : 2.6
         },
-        "spanCells" : 62
+        "spanCells" : 73
       }
     },
     {
@@ -3232,6 +3321,7 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
@@ -3253,7 +3343,7 @@
       "shape" : {
         "kind" : "skull",
         "params" : {
-          "aspect" : 0.16,
+          "aspect" : 0.165,
           "bend" : 0.06,
           "chain" : 0,
           "count" : 7,
@@ -3263,12 +3353,13 @@
           "process" : 0,
           "ribs" : 16,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.03,
+          "thickness" : 0.0309,
           "turns" : 2.6
         },
-        "spanCells" : 92
+        "spanCells" : 95
       }
     },
     {
@@ -3294,12 +3385,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.9,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.3,
+          "thickness" : 0.32,
           "turns" : 2.6
         },
-        "spanCells" : 48
+        "spanCells" : 58
       }
     },
     {
@@ -3325,12 +3417,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.32,
+          "thickness" : 0.3,
           "turns" : 2.6
         },
-        "spanCells" : 44
+        "spanCells" : 56
       }
     },
     {
@@ -3346,7 +3439,7 @@
       "shape" : {
         "kind" : "skull",
         "params" : {
-          "aspect" : 0.26,
+          "aspect" : 0.3244,
           "bend" : 0.05,
           "chain" : 0,
           "count" : 7,
@@ -3356,12 +3449,13 @@
           "process" : 0,
           "ribs" : 7,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.045,
+          "thickness" : 0.0562,
           "turns" : 2.6
         },
-        "spanCells" : 56
+        "spanCells" : 71
       }
     },
     {
@@ -3375,24 +3469,25 @@
       "note" : "Curved shards with a pore pattern. Jigsaw with no picture.",
       "period" : "Late Cretaceous",
       "shape" : {
-        "kind" : "discs",
+        "kind" : "cluster",
         "params" : {
-          "aspect" : 0.34,
+          "aspect" : 0.3,
           "bend" : 0.22,
           "chain" : 0,
-          "count" : 8,
+          "count" : 12,
           "growth" : 0.085,
-          "jitter" : 0.4,
+          "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.09,
+          "thickness" : 0.075,
           "turns" : 2.6
         },
-        "spanCells" : 62
+        "spanCells" : 92
       }
     },
     {
@@ -3418,6 +3513,7 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.075,
@@ -3449,6 +3545,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.13,
@@ -3480,6 +3577,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
@@ -3501,7 +3599,7 @@
       "shape" : {
         "kind" : "tail",
         "params" : {
-          "aspect" : 0.4,
+          "aspect" : 0.4071,
           "bend" : 0.26,
           "chain" : 0,
           "count" : 5,
@@ -3511,12 +3609,13 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.1,
+          "thickness" : 0.1018,
           "turns" : 2.6
         },
-        "spanCells" : 82
+        "spanCells" : 84
       }
     },
     {
@@ -3542,6 +3641,7 @@
           "process" : 0,
           "ribs" : 10,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
@@ -3573,6 +3673,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.09,
@@ -3604,6 +3705,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.11,
@@ -3635,6 +3737,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.075,
@@ -3666,6 +3769,7 @@
           "process" : 0,
           "ribs" : 5,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.06,
@@ -3697,6 +3801,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.07,
@@ -3728,6 +3833,7 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.062,
@@ -3759,6 +3865,7 @@
           "process" : 0,
           "ribs" : 7,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.075,
@@ -3790,6 +3897,7 @@
           "process" : 0,
           "ribs" : 13,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.042,
@@ -3821,6 +3929,7 @@
           "process" : 0,
           "ribs" : 15,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.036,
@@ -3852,6 +3961,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.075,
@@ -3883,6 +3993,7 @@
           "process" : 0,
           "ribs" : 8,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.065,
@@ -3914,6 +4025,7 @@
           "process" : 0,
           "ribs" : 12,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.038,
@@ -3945,6 +4057,7 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.06,
@@ -3976,6 +4089,7 @@
           "process" : 0,
           "ribs" : 8,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
@@ -3997,7 +4111,7 @@
       "shape" : {
         "kind" : "skeleton",
         "params" : {
-          "aspect" : 0.34,
+          "aspect" : 0.3663,
           "bend" : 0.13,
           "chain" : 0,
           "count" : 7,
@@ -4007,12 +4121,13 @@
           "process" : 0,
           "ribs" : 8,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.034,
+          "thickness" : 0.0366,
           "turns" : 2.6
         },
-        "spanCells" : 66
+        "spanCells" : 71
       }
     },
     {
@@ -4038,6 +4153,7 @@
           "process" : 0,
           "ribs" : 6,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.045,
@@ -4069,6 +4185,7 @@
           "process" : 0,
           "ribs" : 11,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.036,
@@ -4100,6 +4217,7 @@
           "process" : 0,
           "ribs" : 10,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
@@ -4131,6 +4249,7 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.04,
@@ -4162,6 +4281,7 @@
           "process" : 0,
           "ribs" : 11,
           "root" : 0,
+          "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.045,
@@ -4979,8 +5099,8 @@
     "gradeBonusB" : 0.05,
     "gradeBonusS" : 0.25,
     "gradeExposureWeight" : 0.4,
-    "gradeIntactWeight" : 0.4,
-    "gradeSpeedWeight" : 0.2,
+    "gradeIntactWeight" : 0.48,
+    "gradeSpeedWeight" : 0.12,
     "gradeThresholdA" : 0.85,
     "gradeThresholdB" : 0.7,
     "gradeThresholdC" : 0.5,

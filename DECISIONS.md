@@ -1028,3 +1028,51 @@ multiplier has to be added to it or legitimate play is rejected as a forgery. Th
 bonus nearly shipped that way, the first-find bonus nearly shipped that way, and the fence's
 2.1× would have made the third. Three for three is not bad luck — the payout formula and the
 ceiling are two implementations of one rule and nothing enforces that a change reaches both.
+
+## Five specks on a cleared slab
+
+A hyolith cluster at 100% exposed, rendering as five white dots. "What the hell is this
+garbage" — and fairly, because it was 118 cells on a 12,288-cell grid.
+
+**`ShapeSanityTests` had a floor of 60 cells**, which is half a percent of the slab. That
+was never a standard; it only ever caught shapes that had failed to rasterise at all. It is
+450 now, and `bonedust-tool sizes` prints bone cells per species so the bottom of the roster
+is visible rather than inferred.
+
+Forty-three species were under that. They were grown by a measure-adjust loop rather than by
+hand: cells go as `weight × span²`, so splitting the needed factor three ways grows a shape
+without stretching it.
+
+### Every crescent was the same fossil
+
+They all rasterised to **exactly 371 cells** — a claw, an oyster, a turtle scute and a skull
+dome, identical. The content gives crescents `thickness` and `sweep`; the generator read
+`taperFrom`, `taperTo` and `bend`. `sweep` was not even a `CodingKey`, so it decoded to
+nothing.
+
+Twelve fossils had been drawing with default width and default sweep since they were
+written, and nothing caught it because they were all *plausible* sizes. The identical cell
+count is what gave it away — the same tell as `siteCrackMultiplier` being dead code and the
+skeleton render coming back byte-identical. **When numbers that should differ are exactly
+equal, the code did not run.**
+
+### A cluster of eggs is not a cluster of anything
+
+`discs` scatters ellipses, so a hyolith cluster and a handful of fish scales both came out
+as featureless blobs. `cluster` scatters tapered slivers at varied angles with a blunt end
+each, which reads as a dozen small shelled animals. Placement is golden-angle rather than
+random, because generation draw order has to stay exactly as documented for the server.
+
+### The grade was arguing against the game
+
+Raising the floor made fossils bigger, and that exposed something worse: careful play paid
+$177 and reckless play $178. A rushed dig finished twenty seconds early, took an S for it,
+and the 25% grade bonus cancelled the 13% it had lost in intactness.
+
+Intactness is now weighted 0.48 against speed's 0.12. Careful pays $182 against reckless's
+$179 — narrow, which is right, but the right way round. §3 is "brushing faster clears more
+rock but cracks exposed bone", and a grade that pays for speed is an argument against it.
+
+Two tests had the old shape written in: a run is no longer five slabs, because `RunLength`
+scales a week with the tier and an S-grade slab earns another, so asserting five was
+asserting that neither feature works.

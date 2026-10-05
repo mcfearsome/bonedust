@@ -35,9 +35,14 @@ final class ShapeSanityTests: XCTestCase {
             if mean > largest.cells { largest = (id, mean) }
 
             let name = catalog.fossil(id)?.name ?? id
+            // 450, not 60. A hyolith cluster passed the old floor at 118 cells and played
+            // as five white specks on a cleared slab -- "what the hell is this garbage",
+            // and fairly. 60 cells is half a percent of the grid, which was never a
+            // standard; it only ever caught shapes that had failed to rasterise at all.
             XCTAssertGreaterThan(
-                mean, 60,
-                "\(name) averages \(mean) cells, too small to find let alone expose"
+                mean, 450,
+                "\(name) averages \(mean) cells, \(mean * 100 / (SlabGrid.width * SlabGrid.height))% "
+                    + "of the slab -- too little to be worth forty seconds"
             )
             XCTAssertLessThan(
                 mean, SlabGrid.width * SlabGrid.height / 3,
