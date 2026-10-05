@@ -952,6 +952,51 @@ final class DigSceneBackdropTests: XCTestCase {
         }
     }
 
+    // MARK: Orientation
+
+    /// The grid's first row is the top of the slab, and a finger near the top of the screen digs
+    /// there. SpriteKit draws the first row of a texture's data at the *bottom* of the sprite, so
+    /// a straight upload shows the slab upside-down: drag at the top and the strip you cleared
+    /// appears at the bottom. Nothing orientation-blind could notice it, and a dig that is
+    /// symmetric about the middle, like a sweep of evenly spaced rows, looks right either way.
+    /// This clears a patch in one corner of the grid and reads which corner of the screen it is
+    /// drawn in.
+    func testACornerClearedInTheGridIsDrawnInThatCornerOfTheSlab() throws {
+        let subject = engine("charmouth")
+        _ = subject.brushBegan(at: Vec2(3, 3))
+        for _ in 0..<14 {
+            for y in stride(from: Float(3), through: 21, by: 3) {
+                for x in stride(from: Float(3), through: 21, by: 1.5) {
+                    _ = subject.brushMoved(to: Vec2(x, y), deltaMillis: 45)
+                }
+            }
+        }
+        subject.brushEnded()
+        let (scene, view) = present(engine: subject, theme: Theme())
+        scene.update(1)
+        let pixels = try render(scene, in: view)
+        let scale = pixels.width / Int(sceneSize.width)
+
+        /// How bright the middle of a cell is on the screen, which is the slab inset by the mount.
+        func brightness(_ cellX: Int, _ cellY: Int) -> Int {
+            let inset = Measure.mountMargin
+            let x = inset + (CGFloat(cellX) + 0.5) / CGFloat(SlabGrid.width) * (sceneSize.width - 2 * inset)
+            let y = inset + (CGFloat(cellY) + 0.5) / CGFloat(SlabGrid.height) * (sceneSize.height - 2 * inset)
+            return pixels.rgb(Int(x * CGFloat(scale)), Int(y * CGFloat(scale))).reduce(0, +)
+        }
+        let lit = [
+            ("top left", brightness(10, 10)), ("top right", brightness(85, 10)),
+            ("bottom left", brightness(10, 117)), ("bottom right", brightness(85, 117)),
+        ]
+        let brightest = try XCTUnwrap(lit.max { $0.1 < $1.1 })
+        XCTAssertEqual(
+            brightest.0, "top left",
+            "the patch cleared at the top left of the grid is drawn at the \(brightest.0): \(lit)"
+        )
+        let others = lit.dropFirst().map(\.1).max() ?? 0
+        XCTAssertGreaterThan(lit[0].1 - others, 120, "the cleared corner is not clearly lighter than the rest: \(lit)")
+    }
+
     // MARK: Theme
     //
     // These read the mount, because it is the one colour the scene owns that reaches a

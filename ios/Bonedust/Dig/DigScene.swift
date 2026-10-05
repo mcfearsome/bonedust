@@ -225,7 +225,18 @@ final class DigScene: SKScene {
             guard let pointer else { return }
             pixels.withUnsafeBytes { source in
                 guard let base = source.baseAddress else { return }
-                memcpy(pointer, base, min(length, source.count))
+                // Rows go up in reverse. The first row of a texture's data is the bottom of
+                // the sprite and the grid's first row is the top of the slab, so a straight
+                // copy shows the slab upside-down: touched at the top, dug at the bottom.
+                let rowBytes = SlabRenderer.width * SlabRenderer.bytesPerPixel
+                let rows = min(SlabRenderer.height, length / rowBytes)
+                for row in 0..<rows {
+                    memcpy(
+                        pointer + row * rowBytes,
+                        base + (SlabRenderer.height - 1 - row) * rowBytes,
+                        rowBytes
+                    )
+                }
             }
         }
     }
