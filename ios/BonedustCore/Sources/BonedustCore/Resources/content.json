@@ -3101,5 +3101,43 @@
         "payoutMultiplier": 1.08
       }
     }
+  ],
+  "buyers": [
+    {
+      "id": "wheeler",
+      "name": "Wheeler",
+      "priceMultiplier": 1.0,
+      "heat": 0,
+      "reputation": 0,
+      "paysDebt": true,
+      "blurb": "Takes it off your hands and marks the ledger. Asks nothing, ever."
+    },
+    {
+      "id": "dealer",
+      "name": "The Munich dealer",
+      "priceMultiplier": 1.55,
+      "heat": 9,
+      "reputation": 0,
+      "paysDebt": true,
+      "blurb": "Pays properly. The paperwork is always being seen to."
+    },
+    {
+      "id": "fence",
+      "name": "A man at the docks",
+      "priceMultiplier": 2.1,
+      "heat": 18,
+      "reputation": 0,
+      "paysDebt": false,
+      "blurb": "Twice the money, cash, and it never happened. Nothing reaches the crew."
+    },
+    {
+      "id": "museum",
+      "name": "County museum",
+      "priceMultiplier": 0.55,
+      "heat": -6,
+      "reputation": 35,
+      "paysDebt": true,
+      "blurb": "Half what it is worth, and your name back under glass."
+    }
   ]
 }

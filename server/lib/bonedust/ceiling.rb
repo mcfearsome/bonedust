@@ -119,8 +119,11 @@ module Bonedust
       # A first find too, as every other term here assumes its best case -- otherwise the
       # first specimen of a species, the most memorable slab a player digs, is rejected as
       # a forgery. Mirrors ServerCeiling.ceiling; the two move together or golden_spec fails.
+      # And the best price any buyer pays. The fence pays 2.1x, and a ceiling that did not
+      # know would reject the sale the moment a player took the money.
+      best_buyer = constants.buyers.map { |b| b.fetch("priceMultiplier") }.max || 1.0
       multiplier = payout_multiplier * rush_multiplier *
-        (1 + tuning.fetch("gradeBonusS")) * tuning.fetch("firstFindMultiplier")
+        (1 + tuning.fetch("gradeBonusS")) * tuning.fetch("firstFindMultiplier") * best_buyer
       scaled = ((fossil_pay + gems) * multiplier).round
 
       nodules = tuning.fetch("rockNodulesMax") + (site.dig("modifiers", "extraRockNodules") || 0)

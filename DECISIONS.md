@@ -979,3 +979,52 @@ has shown the simulated player outperforming a real one.
 the lookahead test did: careful and average play came out 0.9529 against 0.9539 on Charmouth
 alone, a tenth of a percent wearing the shape of a result. One site's species mix moves
 intactness further than the gap being measured.
+
+## The criminal underworld was already in the premise
+
+"A disgraced paleontologist, in debt to a private collector." Wheeler was never a museum.
+The puzzle section is the one decision in the week that is not a brush stroke: **who gets
+the specimen**, landing between the dig and the results card.
+
+| buyer | pays | heat | crew debt | |
+|---|---|---|---|---|
+| Wheeler | 1.0× | none | full | cannot ever cost you anything |
+| The Munich dealer | 1.55× | +9 | full | the papers are being seen to |
+| A man at the docks | 2.1× | +18 | **nothing** | twice the money, never happened |
+| County museum | 0.55× | **−6** | full | your name back under glass |
+
+Three pressures that do not reduce to one another: money pays the installment, heat gets
+specimens seized, and reputation is the only thing here that is not money — which is what
+*disgraced* means, and the museum is the only one selling it back.
+
+**Heat has a floor.** Nothing is seized below 25, so the first weeks teach what heat is
+before it can cost anything. Past that the chance scales with heat *and* with the specimen:
+a Tyrannosaurus is on a list before it leaves the county and a crinoid is one of thousands,
+so what a fossil is worth and how hard it is to move quietly became the same number. The
+120-species roster now matters a second way.
+
+**Everything is shown before anything is committed** — price, heat added, seizure
+percentage. A seizure the player could not see coming is a tax rather than a decision.
+
+**The seizure roll comes from the run seed and the day**, so it is part of the save.
+Force-quitting to re-roll a confiscated Tyrannosaurus fails for the same reason it fails on
+a crack.
+
+### Why the fence does not simply win
+
+Measured over twenty sales of the same specimen, always to the same buyer: the fence takes
+$12,567 and ends at a 57% seizure chance; Wheeler takes $12,000 and never risks anything.
+Four percent more, for half your finds eventually taken and a crew debt that saw none of it.
+Fencing is worth it early and converges to worse than safe — which is the shape a risk curve
+should have, and `testSellingAlwaysToTheFenceStopsPayingOff` fails if it stops holding.
+
+The economy sweep cannot answer that question. It sells to nobody, which is Wheeler by
+another name, so it measures the baseline and never the choice.
+
+### The ceiling trap, a third time
+
+`ServerCeiling` is a separate `Double` implementation for Ruby parity, so every new payout
+multiplier has to be added to it or legitimate play is rejected as a forgery. The grade
+bonus nearly shipped that way, the first-find bonus nearly shipped that way, and the fence's
+2.1× would have made the third. Three for three is not bad luck — the payout formula and the
+ceiling are two implementations of one rule and nothing enforces that a change reaches both.

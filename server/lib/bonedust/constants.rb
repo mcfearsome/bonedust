@@ -13,7 +13,7 @@ module Bonedust
   class Constants
     DEFAULT_PATH = File.expand_path("../../../shared/constants.json", __dir__)
 
-    attr_reader :tuning, :fossils, :sites, :tools, :charms, :sets
+    attr_reader :tuning, :fossils, :sites, :tools, :charms, :sets, :buyers
 
     def self.load(path = DEFAULT_PATH)
       new(JSON.parse(File.read(path)))
@@ -34,6 +34,9 @@ module Bonedust
       @tools = index(raw.fetch("tools", []))
       @charms = index(raw.fetch("charms", []))
       @sets = raw.fetch("sets", []).map { |s| deep_f32(s) }
+      # Needed for the ceiling: a buyer's priceMultiplier is the last term in what a slab
+      # can legitimately pay, and the fence pays 2.1x.
+      @buyers = raw.fetch("buyers", []).map { |b| deep_f32(b) }
       freeze
     end
 

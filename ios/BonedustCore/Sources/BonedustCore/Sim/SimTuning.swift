@@ -162,6 +162,27 @@ public struct SimTuning: Sendable, Codable, Equatable {
     public var gradeBonusA: Float = 0.12
     public var gradeBonusB: Float = 0.05
 
+    // MARK: Selling
+
+    /// Heat below which nothing is ever seized.
+    ///
+    /// A floor rather than a curve from zero, so the first weeks are never a coin flip and
+    /// a player learns what heat *is* before it can cost them anything.
+    public var heatSafeBelow: Int = 25
+    /// Heat at which the seizure chance reaches its ceiling.
+    public var heatMaximum: Int = 100
+    /// The seizure chance at maximum heat, for an unremarkable specimen.
+    public var seizureChanceAtMaxHeat: Float = 0.35
+    /// Heat shed at the end of each week.
+    public var heatCooledPerRun: Int = 12
+
+    /// A specimen worth this or less draws no extra attention.
+    public var notorietyFloorValue: Int = 120
+    /// A specimen worth this or more is as conspicuous as they get.
+    public var notorietyFullValue: Int = 900
+    /// How much a fully conspicuous specimen multiplies the heat a sale adds.
+    public var notorietyHeatScale: Float = 1.5
+
     // MARK: Contact size
 
     /// The fingertip radius assumed before any touch has been seen, in points.

@@ -169,9 +169,15 @@ public enum ServerCeiling {
         // Assume a first find too, as every other term here assumes its best case. A
         // ceiling that did not would reject the first specimen of a species -- the single
         // most memorable slab a player digs -- as a forgery.
+        // And the best price any buyer pays, as every other term here assumes its best
+        // case. The fence pays 2.1x; a ceiling that did not know would reject the sale the
+        // moment a player took the money, which is the third time this exact shape has come
+        // up -- the grade bonus and the first-find bonus both nearly shipped it.
+        let bestBuyer = catalog.buyers.map { Double($0.priceMultiplier) }.max() ?? 1
         let multiplier = payoutMultiplier * rushMultiplier
             * (1 + Double(tuning.gradeBonusS))
             * Double(tuning.firstFindMultiplier)
+            * bestBuyer
         let scaled = ((fossilPay + gems) * multiplier).rounded()
 
         let nodules = tuning.rockNodulesMax + site.modifiers.extraRockNodules

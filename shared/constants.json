@@ -1,4 +1,42 @@
 {
+  "buyers" : [
+    {
+      "blurb" : "Half what it is worth, and your name back under glass.",
+      "heat" : -6,
+      "id" : "museum",
+      "name" : "County museum",
+      "paysDebt" : true,
+      "priceMultiplier" : 0.55,
+      "reputation" : 35
+    },
+    {
+      "blurb" : "Takes it off your hands and marks the ledger. Asks nothing, ever.",
+      "heat" : 0,
+      "id" : "wheeler",
+      "name" : "Wheeler",
+      "paysDebt" : true,
+      "priceMultiplier" : 1,
+      "reputation" : 0
+    },
+    {
+      "blurb" : "Pays properly. The paperwork is always being seen to.",
+      "heat" : 9,
+      "id" : "dealer",
+      "name" : "The Munich dealer",
+      "paysDebt" : true,
+      "priceMultiplier" : 1.55,
+      "reputation" : 0
+    },
+    {
+      "blurb" : "Twice the money, cash, and it never happened. Nothing reaches the crew.",
+      "heat" : 18,
+      "id" : "fence",
+      "name" : "A man at the docks",
+      "paysDebt" : false,
+      "priceMultiplier" : 2.1,
+      "reputation" : 0
+    }
+  ],
   "charms" : [
     {
       "blurb" : "Cracked bone counts half intact. Collectors like a little history.",
@@ -4952,6 +4990,9 @@
     "gustFloorDepth" : 1,
     "gustPatchesAtFullStrength" : 11,
     "gustRadius" : 6,
+    "heatCooledPerRun" : 12,
+    "heatMaximum" : 100,
+    "heatSafeBelow" : 25,
     "identifyExposure" : 0.25,
     "intactCrackWeight" : 5,
     "layerHardness" : [
@@ -4961,6 +5002,9 @@
       1.7
     ],
     "maxSampleSpeed" : 40,
+    "notorietyFloorValue" : 120,
+    "notorietyFullValue" : 900,
+    "notorietyHeatScale" : 1.5,
     "referenceFrameMillis" : 16.666668,
     "removalRate" : 0.48,
     "rockHardnessMultiplier" : 3.2,
@@ -4968,6 +5012,7 @@
     "rockNodulesMin" : 2,
     "rockRadiusMax" : 10,
     "rockRadiusMin" : 4,
+    "seizureChanceAtMaxHeat" : 0.35,
     "stepFactor" : 0.35,
     "wearColorBlend" : 0.55
   }

@@ -93,6 +93,22 @@ struct RootView: View {
                 recovery
             }
 
+        case .sellSlab:
+            // The slab is bagged but nothing is banked: who takes it decides what it pays,
+            // what it costs in attention, and whether the crew sees any of it.
+            if let record = coordinator.pendingSale,
+               let run = coordinator.run,
+               let fossil = ContentCatalog.shared.fossil(record.fossilID) {
+                SellView(
+                    record: record,
+                    fossil: fossil,
+                    run: run,
+                    onSell: { coordinator.sell(to: $0) }
+                )
+            } else {
+                recovery
+            }
+
         case .slabResults:
             if let record = coordinator.lastRecord,
                let run = coordinator.run,

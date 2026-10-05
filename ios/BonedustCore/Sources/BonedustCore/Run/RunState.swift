@@ -23,6 +23,8 @@ public struct SlabRecord: Sendable, Codable, Equatable {
     /// Issued by the server, when the slab was started online. Nil for an offline
     /// slab, which the ledger credits at 50% (see docs/CREW_LEDGER.md).
     public var serverSlabID: String?
+    /// Who bought it, when a sale happened. Optional on the wire for older saves.
+    public var buyerID: String?
 
     public init(
         day: Int, seed: UInt64, siteID: String, fossilID: String,
@@ -171,6 +173,19 @@ public struct RunState: Sendable, Codable, Equatable {
     /// day four costing more than day five earns, and there is no later payment to take the
     /// remainder out of. `totalEarned - spentOnKit` would then disagree with the sum of what
     /// was really paid, and the number on the results screen has to be the true one.
+    /// Attention, carried across weeks. See `Buyer`.
+    private var heatRaw: Int?
+    public var heat: Int {
+        get { heatRaw ?? 0 }
+        set { heatRaw = max(0, newValue) }
+    }
+    /// Specimens taken before you were paid, this run.
+    private var seizedRaw: Int?
+    public var seized: Int {
+        get { seizedRaw ?? 0 }
+        set { seizedRaw = newValue }
+    }
+
     private var paidToCrewRaw: Int?
     public var paidToCrew: Int {
         get { paidToCrewRaw ?? 0 }
@@ -213,6 +228,8 @@ public struct RunState: Sendable, Codable, Equatable {
         self.spentOnKitRaw = 0
         self.unsettledKitRaw = 0
         self.paidToCrewRaw = 0
+        self.heatRaw = 0
+        self.seizedRaw = 0
         self.slabs = []
         self.phase = .digging(day: 1)
         self.toolIDs = toolIDs
@@ -293,10 +310,60 @@ public struct RunState: Sendable, Codable, Equatable {
     /// Set by `completeSlab` when the slab just bagged bought another day, so the results
     /// card can say so. Cleared on the next slab.
     public private(set) var lastSlabEarnedADay = false
+    /// Set when the last sale was taken, so the results card can say *that*.
+    public private(set) var lastSaleWasSeized = false
 
+    /// What a sale to this buyer would do, with nothing committed.
+    ///
+    /// The results screen shows all of it before the player picks, because a seizure they
+    /// could not see coming is a tax rather than a decision.
+    public func quote(
+        _ record: SlabRecord, buyer: Buyer, tuning: SimTuning = .standard
+    ) -> (price: Int, heat: Int, risk: Float) {
+        (
+            Sale.price(of: record.payout.total, from: buyer),
+            Sale.heatAdded(value: record.payout.total, buyer: buyer, tuning: tuning),
+            Sale.seizureChance(
+                heat: heat, value: record.payout.total, buyer: buyer, tuning: tuning
+            )
+        )
+    }
+
+    /// Banks a finished slab, sold to `buyer`.
+    ///
+    /// Returns what the crew debt should be paid for it, which is zero if the specimen was
+    /// taken or if it went to someone who does not report sales.
     @discardableResult
-    public mutating func completeSlab(_ record: SlabRecord) -> Int {
+    public mutating func completeSlab(
+        _ record: SlabRecord, buyer: Buyer? = nil, tuning: SimTuning = .standard
+    ) -> Int {
         guard case .digging(let day) = phase, day == record.day else { return 0 }
+        var record = record
+        lastSaleWasSeized = false
+
+        if let buyer {
+            // Rolled from the run's own seed and the day, so the outcome is fixed for this
+            // slab. Re-rolling it by force-quitting fails exactly as it does for a crack.
+            var rng = SplitMix64(
+                seed: seed ^ (UInt64(day) &* 0x9E37_79B9_7F4A_7C15) ^ 0x5EED_5A1E
+            )
+            if Sale.isSeized(
+                heat: heat, value: record.payout.total, buyer: buyer,
+                rng: &rng, tuning: tuning
+            ) {
+                lastSaleWasSeized = true
+                seized += 1
+                // Still catalogued: the Collection records what came out of the ground,
+                // whether or not anybody got paid for it.
+                slabs.append(record)
+                heat += Sale.heatAdded(value: record.payout.total, buyer: buyer, tuning: tuning)
+                phase = .results(day: day)
+                return 0
+            }
+            record.payout.total = Sale.price(of: record.payout.total, from: buyer)
+            record.buyerID = buyer.id
+            heat += Sale.heatAdded(value: record.payout.total, buyer: buyer, tuning: tuning)
+        }
         slabs.append(record)
 
         // A museum-quality specimen buys another day's light. Checked before the phase
@@ -310,7 +377,8 @@ public struct RunState: Sendable, Codable, Equatable {
             lastSlabEarnedADay = true
         }
         cash += record.payout.total
-        let payment = max(0, record.payout.total - unsettledKit)
+        let paysDebt = buyer?.paysDebt ?? true
+        let payment = paysDebt ? max(0, record.payout.total - unsettledKit) : 0
         unsettledKit -= record.payout.total
         paidToCrew += payment
         phase = .results(day: day)

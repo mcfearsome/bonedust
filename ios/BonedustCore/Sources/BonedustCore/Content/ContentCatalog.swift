@@ -15,6 +15,8 @@ public struct ContentCatalog: Sendable, Codable {
     public var personalMilestones: [ContributionMilestone]
     /// Permanent, Reputation-priced. See `Upgrade`.
     public var upgrades: [Upgrade]
+    /// Who will take a specimen off you. See `Buyer`.
+    public var buyers: [Buyer]
 
     /// Built once in `init`, because the dig loop looks fossils up by id on every
     /// slab and a linear scan over nineteen entries inside generation is waste.
@@ -24,10 +26,11 @@ public struct ContentCatalog: Sendable, Codable {
     public let toolsByID: [String: Tool]
     public let charmsByID: [String: Charm]
     public let upgradesByID: [String: Upgrade]
+    public let buyersByID: [String: Buyer]
 
     private enum CodingKeys: String, CodingKey {
         case version, fossils, sites, sets, tools, charms, achievements, trails
-        case personalMilestones, upgrades
+        case personalMilestones, upgrades, buyers
     }
 
     public init(
@@ -40,7 +43,8 @@ public struct ContentCatalog: Sendable, Codable {
         achievements: [Achievement] = [],
         trails: [BrushTrail] = [],
         personalMilestones: [ContributionMilestone] = [],
-        upgrades: [Upgrade] = []
+        upgrades: [Upgrade] = [],
+        buyers: [Buyer] = []
     ) {
         self.version = version
         self.fossils = fossils
@@ -53,6 +57,10 @@ public struct ContentCatalog: Sendable, Codable {
         self.personalMilestones = personalMilestones.sorted { $0.amount < $1.amount }
         // Sorted by price so the camp screen reads as a ladder without the view sorting it.
         self.upgrades = upgrades.sorted { $0.reputation < $1.reputation }
+        // Cheapest and safest first, so the results screen reads as a ladder of
+        // temptation rather than an unordered list.
+        self.buyers = buyers.sorted { $0.priceMultiplier < $1.priceMultiplier }
+        self.buyersByID = Dictionary(uniqueKeysWithValues: buyers.map { ($0.id, $0) })
         self.upgradesByID = Dictionary(uniqueKeysWithValues: upgrades.map { ($0.id, $0) })
         self.fossilsByID = Dictionary(uniqueKeysWithValues: fossils.map { ($0.id, $0) })
         self.sitesByID = Dictionary(uniqueKeysWithValues: sites.map { ($0.id, $0) })
@@ -75,7 +83,8 @@ public struct ContentCatalog: Sendable, Codable {
             personalMilestones: try c.decodeIfPresent(
                 [ContributionMilestone].self, forKey: .personalMilestones
             ) ?? [],
-            upgrades: try c.decodeIfPresent([Upgrade].self, forKey: .upgrades) ?? []
+            upgrades: try c.decodeIfPresent([Upgrade].self, forKey: .upgrades) ?? [],
+            buyers: try c.decodeIfPresent([Buyer].self, forKey: .buyers) ?? []
         )
     }
 
@@ -94,6 +103,7 @@ public struct ContentCatalog: Sendable, Codable {
     }
     public func charm(_ id: String) -> Charm? { charmsByID[id] }
     public func upgrade(_ id: String) -> Upgrade? { upgradesByID[id] }
+    public func buyer(_ id: String) -> Buyer? { buyersByID[id] }
 
     /// The tool every run starts with.
     public var startingTool: Tool {

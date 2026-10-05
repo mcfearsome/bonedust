@@ -27,6 +27,11 @@ final class RunCoordinatorTests: XCTestCase {
         engine.tick(delta: Double(engine.totalDaylight) + 1)
         XCTAssertTrue(engine.isFinished)
         coordinator.slabFinished(engine)
+        // A slab is not banked until it is sold, so the flow now has a step between the
+        // dig and the results card. Wheeler is the test default: he pays exactly the
+        // slab's value, draws no heat and cannot seize anything, so every existing
+        // assertion about money and the crew debt still means what it meant.
+        coordinator.sell(to: ContentCatalog.shared.buyer("wheeler")!)
     }
 
     func testFreshCoordinatorOpensOnTheTitle() {

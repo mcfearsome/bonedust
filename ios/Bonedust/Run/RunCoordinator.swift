@@ -16,6 +16,7 @@ final class RunCoordinator {
         case title
         case siteSelect
         case dig
+        case sellSlab
         case slabResults
         case supplyTent
         case runEnd
@@ -337,12 +338,28 @@ final class RunCoordinator {
     // MARK: Slab lifecycle
 
     /// Called when the dig ends, by bagging or by running out of daylight.
+    /// The slab just bagged, waiting on a buyer. Nothing is banked until one is chosen.
+    private(set) var pendingSale: SlabRecord?
+
     func slabFinished(_ engine: DigEngine) {
-        guard var current = run, case .digging(let day) = current.phase else { return }
-        let record = engine.slabRecord(day: day)
-        let crewPayment = current.completeSlab(record)
+        guard let current = run, case .digging(let day) = current.phase else { return }
+        // The sale is a decision, so it happens before anything is recorded: who takes it
+        // changes what it pays, what it costs in attention, and whether the crew sees any
+        // of it. Banking first and asking after would make it an announcement.
+        pendingSale = engine.slabRecord(day: day)
+        screen = .sellSlab
+    }
+
+    /// Sells the pending slab and moves to the results card.
+    func sell(to buyer: Buyer) {
+        guard var current = run, let record = pendingSale,
+              case .digging(let day) = current.phase else { return }
+        let crewPayment = current.completeSlab(record, buyer: buyer)
         run = current
-        lastRecord = record
+        // The banked record carries the sale price and the buyer, which is what the
+        // results card should show -- not what it would have fetched from somebody else.
+        lastRecord = current.slabs.last ?? record
+        pendingSale = nil
         store.save(run: current)
         store.save(slab: nil)
 
@@ -352,6 +369,12 @@ final class RunCoordinator {
         //
         // Queued, not awaited: a slab must never wait on a network, and the queue is
         // durable so nothing is lost either way.
+        // A seized specimen, or one sold at the docks, pays the crew nothing -- and
+        // queueing a zero would spend an attestation on it.
+        guard crewPayment > 0 else {
+            screen = .slabResults
+            return
+        }
         ledger.record(
             record,
             amount: crewPayment,

@@ -17,6 +17,8 @@ public struct SharedConstants: Sendable, Codable, Equatable {
     /// Needed because a completed skeleton set raises the payout ceiling, so the server
     /// has to know the perks exist even though it never tracks who has earned them.
     public var sets: [SkeletonSet]
+    /// The server's ceiling needs the best price any buyer pays.
+    public var buyers: [Buyer]
     public var installments: [Int]
     public var installmentGrowth: Float
 
@@ -28,6 +30,7 @@ public struct SharedConstants: Sendable, Codable, Equatable {
         self.tools = catalog.tools
         self.charms = catalog.charms
         self.sets = catalog.sets
+        self.buyers = catalog.buyers
         self.installments = Installments.table
         self.installmentGrowth = Installments.growth
     }
