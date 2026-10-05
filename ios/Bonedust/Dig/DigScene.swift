@@ -325,7 +325,11 @@ final class DigScene: SKScene {
         if result.cracksStarted > 0 {
             haptics?.crack()
             audio?.playCrack()
-            bloomFracture(at: point)
+            // On what cracked, not on the finger that cracked it: with the air blower the two can
+            // be most of a brush radius apart. One bloom per stroke, at the centre of every cell
+            // it cracked. A result with no cells in it, which only a test can build, has no
+            // position to give, so it falls back to the touch.
+            bloomFracture(at: result.crackCentroid ?? point)
             if !hasReportedCrack {
                 hasReportedCrack = true
                 onFirstCrack?()

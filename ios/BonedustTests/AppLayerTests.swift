@@ -898,7 +898,10 @@ final class DigSceneBackdropTests: XCTestCase {
     /// Brushes the slab until it is almost entirely cleared, so what is on screen is
     /// the pale `matrix` layer. Every site's topsoil is dark, close to the mount's own
     /// colour, so a fresh slab proves nothing about the band.
-    private func clear(_ engine: DigEngine) {
+    ///
+    /// `deltaMillis` is the time each 1.5-cell step takes: 16 is a brisk sweep that cracks some
+    /// bone on the way, 45 is slow enough to crack none.
+    private func clear(_ engine: DigEngine, deltaMillis: Float = 16) {
         _ = engine.brushBegan(at: Vec2(1, 1))
         for _ in 0..<80 {
             var y: Float = 1
@@ -906,7 +909,7 @@ final class DigSceneBackdropTests: XCTestCase {
             while y < 127 {
                 var x: Float = direction > 0 ? 1 : 95
                 while x > 0 && x < 96 {
-                    _ = engine.brushMoved(to: Vec2(x, y), deltaMillis: 16)
+                    _ = engine.brushMoved(to: Vec2(x, y), deltaMillis: deltaMillis)
                     x += direction * 1.5
                 }
                 y += 3
@@ -1217,6 +1220,82 @@ final class DigSceneBackdropTests: XCTestCase {
         fractured.cracksStarted = 1
         scene.apply(fractured, at: Vec2(48, 64), engine: subject)
         XCTAssertEqual(blooms(in: scene).count, 1, "a fracture must bloom exactly once")
+    }
+
+    /// The bloom means "this broke", so it marks what cracked, not the finger that cracked it.
+    /// With the air blower (radius 7.5 cells) the two can be most of a brush radius apart, and
+    /// a bloom on bare matrix beside the bone it is marking points at nothing. Two cracks in
+    /// one stroke are still one alarm, at the centre of every cell they cracked.
+    func testTheBloomMarksTheCrackedCellsAndNotTheFinger() throws {
+        let subject = engine("green_river")
+        let (scene, _) = present(engine: subject, theme: Theme())
+
+        // Two cracks, four cells: (70,30) (71,30) (71,31), and separately (73,34).
+        let cells = [(70, 30), (71, 30), (71, 31), (73, 34)]
+        var fractured = StrokeResult()
+        fractured.cracksStarted = 2
+        fractured.cellsCracked = cells.count
+        fractured.crackedCellSumX = cells.map(\.0).reduce(0, +)
+        fractured.crackedCellSumY = cells.map(\.1).reduce(0, +)
+        let finger = Vec2(60, 40)
+
+        scene.apply(fractured, at: finger, engine: subject)
+
+        XCTAssertEqual(blooms(in: scene).count, 1, "two cracks in one stroke are one alarm")
+        let bloom = try XCTUnwrap(blooms(in: scene).first)
+        let shown = scene.convert(bloom.position, from: try XCTUnwrap(scene.slabNode))
+        // The middle of those four cells is (71.25, 30.25) from the sums, and a cell's centre is
+        // half a cell on from its index: (71.75, 31.75).
+        let cracked = try scenePoint(forGrid: Vec2(71.75, 31.75), in: scene)
+        let touched = try scenePoint(forGrid: finger, in: scene)
+        XCTAssertEqual(shown.x, cracked.x, accuracy: 0.01, "the bloom is not on the cracked cells")
+        XCTAssertEqual(shown.y, cracked.y, accuracy: 0.01)
+        XCTAssertGreaterThan(
+            hypot(shown.x - touched.x, shown.y - touched.y), 20,
+            "the bloom is under the finger, \(touched), not on what cracked"
+        )
+    }
+
+    /// The same through the real thing: air-blower strokes fast over exposed bone, with every
+    /// `StrokeResult` coming from the simulation and handed to the scene as the touch handlers do.
+    /// Each stroke that cracks something blooms exactly once, on the centre of the cells it
+    /// cracked, and the finger is not generally there.
+    func testTheBloomOfARealCrackSitsOnTheCellsItCrackedNotUnderTheFinger() throws {
+        let subject = engine("charmouth")
+        clear(subject, deltaMillis: 45)
+        subject.tool = .airBlower
+        let (scene, _) = present(engine: subject, theme: Theme())
+        let slab = try XCTUnwrap(scene.slabNode)
+
+        _ = subject.brushBegan(at: Vec2(1, 1))
+        var cracks = 0
+        var farthest: Float = 0
+        for y in stride(from: Float(1), through: 127, by: 4) {
+            for x in stride(from: Float(1), through: 95, by: 10) {
+                let point = Vec2(x, y)
+                let result = subject.brushMoved(to: point, deltaMillis: 16)
+                let before = blooms(in: scene).count
+                scene.apply(result, at: point, engine: subject)
+                guard result.cracksStarted > 0 else {
+                    XCTAssertEqual(blooms(in: scene).count, before, "a stroke that cracked nothing bloomed")
+                    continue
+                }
+                cracks += 1
+                XCTAssertEqual(blooms(in: scene).count, before + 1, "one alarm per stroke")
+                let centroid = try XCTUnwrap(result.crackCentroid)
+                let shown = scene.convert(try XCTUnwrap(blooms(in: scene).last).position, from: slab)
+                let expected = try scenePoint(forGrid: centroid, in: scene)
+                XCTAssertEqual(shown.x, expected.x, accuracy: 0.01, "stroke at \(point): not on the cracked cells")
+                XCTAssertEqual(shown.y, expected.y, accuracy: 0.01, "stroke at \(point): not on the cracked cells")
+                farthest = max(farthest, hypot(point.x - centroid.x, point.y - centroid.y))
+            }
+        }
+        subject.brushEnded()
+        XCTAssertGreaterThan(cracks, 3, "the strokes cracked almost nothing, so this proves nothing")
+        XCTAssertGreaterThan(
+            farthest, 2,
+            "the finger was never away from what it cracked, so this could not tell the two apart"
+        )
     }
 }
 

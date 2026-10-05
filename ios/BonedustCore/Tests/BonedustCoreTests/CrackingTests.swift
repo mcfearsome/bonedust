@@ -154,6 +154,50 @@ final class CrackingTests: XCTestCase {
         XCTAssertEqual(counted, sim.crackedBone, "incremental counter drifted from the grid")
     }
 
+    /// The fracture bloom marks what broke, not the finger, so the result has to say where. This
+    /// holds it to the grid itself: the cells that gained the cracked flag during one move are the
+    /// cells `cellsCracked` counts, and `crackCentroid` is their centre, however many separate
+    /// cracks the move started.
+    func testTheCrackCentroidIsTheCentreOfEveryCellTheStrokeCracked() throws {
+        var sim = TestSlab.simulation(TestSlab.boneBlock(exposed: true))
+        let width = SlabGrid.width
+        var x: Float = 32
+        var direction: Float = 1
+        var cracked = 0
+        var severalCracks = 0
+        sim.beginStroke(at: Vec2(x, 64), tool: .airBlower)
+        for _ in 0..<600 {
+            let before = sim.grid.cells.map { $0.flags & SlabGrid.Flag.cracked != 0 }
+            x += direction * 12
+            if x > 60 { x = 60; direction = -1 }
+            if x < 32 { x = 32; direction = 1 }
+            let result = sim.moveStroke(to: Vec2(x, 64), deltaMillis: 16.67, tool: .airBlower)
+
+            var newlyCracked: [(x: Int, y: Int)] = []
+            for (index, cell) in sim.grid.cells.enumerated()
+            where !before[index] && cell.flags & SlabGrid.Flag.cracked != 0 {
+                newlyCracked.append((index % width, index / width))
+            }
+            XCTAssertEqual(newlyCracked.count, result.cellsCracked)
+            guard result.cracksStarted > 0 else {
+                XCTAssertNil(result.crackCentroid, "a stroke that cracked nothing has no crack position")
+                continue
+            }
+            cracked += 1
+            if result.cracksStarted > 1 { severalCracks += 1 }
+            let centroid = try XCTUnwrap(result.crackCentroid)
+            let count = Float(newlyCracked.count)
+            XCTAssertEqual(centroid.x, Float(newlyCracked.map(\.x).reduce(0, +)) / count + 0.5, accuracy: 1e-4)
+            XCTAssertEqual(centroid.y, Float(newlyCracked.map(\.y).reduce(0, +)) / count + 0.5, accuracy: 1e-4)
+        }
+        sim.endStroke()
+        XCTAssertGreaterThan(cracked, 5, "too few cracks for this to prove anything")
+        XCTAssertGreaterThan(
+            severalCracks, 0,
+            "no move ever started two cracks, so the centroid was never an average of separate cracks"
+        )
+    }
+
     func testFineBrushCracksLessThanTheAirBlower() {
         // ck is 0.35 vs 2.6, and vs is 2.2 vs 0.75, so at the same speed the blower
         // should be dramatically worse.
