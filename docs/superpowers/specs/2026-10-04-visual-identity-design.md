@@ -171,7 +171,11 @@ that, so the two meanings separate by **motion** rather than hue:
 
 - **Damage** — a transient `stamp` ink-bleed blooms at the fracture point over
   ~200ms, then settles into a permanent diagonal hatch (`earth8` at 0.5, 2px
-  spacing) over the fractured cells. Fast enough to read preattentively, and it
+  spacing) over the fractured cells. The fracture point is the centre of the
+  cells that stroke cracked, not the finger: with the air blower the two can be
+  most of a brush radius apart, and a bloom that points at bare matrix beside
+  the bone it is marking points at nothing. One bloom per stroke, however many
+  cracks it started. Fast enough to read preattentively, and it
   leaves a record on the page. Under **Reduce Motion** the bloom does not scale:
   it fades in place. A sudden expanding shape at the point of attention is
   exactly what that setting exists to suppress, and the hatch carries the

@@ -24,8 +24,25 @@ public struct StrokeResult: Sendable, Equatable {
     public var distance: Float = 0
     /// First cell index where a crack began this stroke, for a located haptic.
     public var firstCrackCell: Int?
+    /// The sums of the x and y of every cell this stroke cracked. Two scalars for the same reason
+    /// as the counters above: a list of positions would allocate on every touch event. Read them
+    /// through `crackCentroid`.
+    public var crackedCellSumX = 0
+    public var crackedCellSumY = 0
 
     public init() {}
+
+    /// The centre of every cell this stroke cracked, in grid units, or `nil` if it cracked none.
+    ///
+    /// One position per stroke however many cracks it started, so a single alarm can mark what
+    /// broke rather than the finger that broke it: with the air blower the two can be most of a
+    /// brush radius apart. The `+ 0.5` puts it in the middle of the cells, like a touch point,
+    /// instead of on the corner of the cell an index names.
+    public var crackCentroid: Vec2? {
+        guard cellsCracked > 0 else { return nil }
+        let count = Float(cellsCracked)
+        return Vec2(Float(crackedCellSumX) / count + 0.5, Float(crackedCellSumY) / count + 0.5)
+    }
 
     /// Which layer the dust should be tinted as: whichever gave up the most cells.
     public var dominantLayer: UInt8? {
