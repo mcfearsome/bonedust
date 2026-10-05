@@ -33,6 +33,8 @@ make bench         # worst-case frame for the brush loop.
 make project       # regenerate ios/Bonedust.xcodeproj from project.yml.
 make app           # build the app for a simulator.
 make test-app      # app-layer tests.
+make test-ui       # real touches against the real app, ~20s. Why it exists: ios/BonedustUITests/README.md.
+make ui-capture    # the same driver as a camera: screenshots, a marker log and a screen recording.
 make constants     # regenerate shared/constants.json after a tuning change.
 ./scripts/verify-ios.sh   # compile every iOS source without needing a simulator.
 ```

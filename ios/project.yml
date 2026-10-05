@@ -74,6 +74,21 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
 
+  # Real touches against the real app. Black-box, so it depends on the app target only to launch
+  # it, and not on BonedustCore. See BonedustUITests/README.md for why it exists.
+  BonedustUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: BonedustUITests
+        excludes:
+          - "**/*.md"
+    dependencies:
+      - target: Bonedust
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+
 schemes:
   Bonedust:
     build:
@@ -86,3 +101,15 @@ schemes:
       config: Debug
       targets:
         - BonedustTests
+
+  # A scheme of its own, so `Bonedust` (which `make app` and `make test-app` use) neither builds
+  # nor runs the UI tests. They are real-time and need a simulator: `make test-ui`.
+  BonedustUI:
+    build:
+      targets:
+        Bonedust: all
+        BonedustUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - BonedustUITests
