@@ -1,32 +1,33 @@
-# Display font
+# Fonts
 
-`Typography.display` currently returns **SF Pro, black weight, expanded width**.
-That is a stand-in, not the intended face.
+Two bundled faces in three files, all SIL OFL-1.1. The licence only requires that
+the fonts themselves stay OFL and are not sold on their own, so shipping them in a
+paid app is fine. Each family's licence text is kept beside its files
+(`OFL-RubikDirt.txt`, `OFL-CourierPrime.txt`); keep them together if a file moves.
 
-## Dropping in Rubik Dirt
+| File | Used by | Role |
+|---|---|---|
+| `RubikDirt-Regular.ttf` | `Typography.display`, `Typography.label` | Wordmark, large headings, small-caps field labels |
+| `CourierPrime-Regular.ttf` | `Typography.number` | Every number that changes while you watch it |
+| `CourierPrime-Bold.ttf` | `Typography.number` at semibold and heavier | The same numbers when they need weight: the real Bold outlines, not a smeared Regular |
 
-Rubik Dirt is licensed **OFL-1.1**, so bundling it in a paid app is fine — the
-licence only requires that the font itself stay OFL and not be sold on its own.
+Body text is SF Pro via `Typography.ui` and is deliberately not a custom face:
+it gets Dynamic Type right for free, and a notebook's body text should be
+neutral. The character lives in the display face and the numerals.
 
-1. Download `RubikDirt-Regular.ttf` from Google Fonts.
-2. Put it in this directory. XcodeGen picks it up with the rest of `Resources`.
-3. Add to `ios/project.yml` under the `Bonedust` target's `info.properties`:
+## Adding or replacing a face
 
-   ```yaml
-   UIAppFonts:
-     - RubikDirt-Regular.ttf
-   ```
+1. Put the `.ttf` in this directory, with its OFL text file beside it.
+2. List it under `UIAppFonts` in the `Bonedust` target's `info.properties` in
+   `ios/project.yml`.
+3. Run `xcodegen generate`.
+4. Point the matching constant in `UI/DesignTokens.swift` at the PostScript name
+   (`Typography.displayFace`, `Typography.numberFace` or `Typography.numberBoldFace`).
 
-4. In `UI/DesignTokens.swift`, change `Typography.display` to:
+`FontRegistrationTests` fails loudly if a face is missing, so you will know.
 
-   ```swift
-   static func display(_ size: CGFloat, relativeTo style: Font.TextStyle = .largeTitle) -> Font {
-       .custom("RubikDirt-Regular", size: size, relativeTo: style)
-   }
-   ```
+## Fallbacks
 
-   `Font.custom(_:size:relativeTo:)` keeps Dynamic Type working, which matters
-   because §7 requires it everywhere outside the slab.
-
-That is the only change needed. Display type is used for the wordmark and large
-headings only, so nothing else has to move.
+Every `Typography` accessor falls back to the system face it used before these
+fonts existed — SF Pro Black Expanded for display, SF Mono for numerals. A
+missing file changes how the app looks; it never blanks a label or crashes.

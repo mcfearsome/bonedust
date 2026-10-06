@@ -26,6 +26,12 @@
 	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>RubikDirt-Regular.ttf</string>
+		<string>CourierPrime-Regular.ttf</string>
+		<string>CourierPrime-Bold.ttf</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Bonedust listens for your breath while you are digging. Audio is never recorded, saved, or sent anywhere - only how loud and how breathy the last moment was.</string>
 	<key>UILaunchScreen</key>

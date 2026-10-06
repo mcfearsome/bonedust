@@ -388,11 +388,13 @@ public struct SlabSimulation: Sendable {
                     guard probability > 0, rng.nextUnit() < probability else { continue }
 
                     let length = rng.nextInt(walkMin, through: walkMax)
-                    let marked = SlabSimulation.propagateCrack(
+                    let crack = SlabSimulation.propagateCrack(
                         from: i, length: length, cells: cells, rng: &rng, dirty: &dirty
                     )
-                    crackedBone += marked
-                    result.cellsCracked += marked
+                    crackedBone += crack.cells
+                    result.cellsCracked += crack.cells
+                    result.crackedCellSumX += crack.sumX
+                    result.crackedCellSumY += crack.sumY
                     result.cracksStarted += 1
                     if result.firstCrackCell == nil { result.firstCrackCell = i }
                 }
@@ -509,10 +511,10 @@ public struct SlabSimulation: Sendable {
             for origin in crackSeeds {
                 guard cells[origin].flags & crackedFlag == 0 else { continue }
                 let length = rng.nextInt(tuning.crackWalkMin, through: tuning.crackWalkMax)
-                let marked = SlabSimulation.propagateCrack(
+                let crack = SlabSimulation.propagateCrack(
                     from: origin, length: length, cells: cells, rng: &rng, dirty: &dirty
                 )
-                result.crackedCells += marked
+                result.crackedCells += crack.cells
                 result.cracksStarted += 1
             }
         }
@@ -528,6 +530,14 @@ public struct SlabSimulation: Sendable {
         return result
     }
 
+    /// What one crack marked: how many cells, and the sums of their x and y, so the stroke can say
+    /// where it broke something without allocating a list of cells.
+    private struct Crack {
+        var cells = 0
+        var sumX = 0
+        var sumY = 0
+    }
+
     /// A crack is a random walk across adjacent bone cells, marking each one.
     ///
     /// The walk is not restricted to *exposed* bone, per §3. That is deliberate:
@@ -539,16 +549,18 @@ public struct SlabSimulation: Sendable {
         cells: UnsafeMutableBufferPointer<SlabGrid.Cell>,
         rng: inout SplitMix64,
         dirty: inout DirtyRegion
-    ) -> Int {
+    ) -> Crack {
         let width = SlabGrid.width
         let height = SlabGrid.height
         let boneFlag = SlabGrid.Flag.bone
         let crackedFlag = SlabGrid.Flag.cracked
 
-        var marked = 0
+        var crack = Crack()
         var current = origin
         cells[current].flags |= crackedFlag
-        marked += 1
+        crack.cells += 1
+        crack.sumX += current % width
+        crack.sumY += current / width
         dirty.insert(x: current % width, y: current / width)
 
         var candidates: [Int] = []
@@ -568,10 +580,12 @@ public struct SlabSimulation: Sendable {
             guard !candidates.isEmpty else { break }
             let next = candidates[rng.nextInt(below: candidates.count)]
             cells[next].flags |= crackedFlag
-            marked += 1
+            crack.cells += 1
+            crack.sumX += next % width
+            crack.sumY += next / width
             dirty.insert(x: next % width, y: next / width)
             current = next
         }
-        return marked
+        return crack
     }
 }
