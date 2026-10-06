@@ -205,7 +205,18 @@ public struct RunState: Sendable, Codable, Equatable {
     public var startedAt: Date
 
     public static let toolSlots = 3
-    public static let charmSlots = 4
+
+    /// How many charms a belt holds.
+    ///
+    /// Five, not four. Four slots with twenty-nine charms meant the belt filled before a
+    /// build could find its second half, and a build layer is only a build layer if the
+    /// pieces have room to meet — three charms reading flawless slabs is a plan at five
+    /// slots and a sacrifice at four. The fifth slot is also what makes the cost charms
+    /// playable: `heavy_hand` gets worse per charm carried, which is a real decision only
+    /// when carrying it does not mean giving up the combo.
+    ///
+    /// Exported through `SharedConstants`, because the payout ceiling multiplies by it.
+    public static let charmSlots = 5
 
     public init(
         seed: UInt64,
@@ -506,16 +517,54 @@ public struct RunState: Sendable, Codable, Equatable {
         Loadout.resolve(toolIDs: toolIDs, charmIDs: charmIDs, catalog: catalog)
     }
 
+    /// Everything a charm can read about this run, as of `day`.
+    ///
+    /// The single place this is built. There were two, and the one the dig screen used
+    /// filled in only the day and the site -- so `charmCount`, `toolCount` and
+    /// `bankedGems` were all zero and every scaling charm in the game silently did
+    /// nothing while its price and its blurb promised otherwise.
+    public func charmContext(
+        forDay day: Int, catalog: ContentCatalog = .shared
+    ) -> CharmContext {
+        // Flawless means nothing cracked, which is what the intact figure says at 1.
+        let flawless = slabs.filter { $0.payout.intact >= 0.999 }.count
+        var streak = 0
+        for slab in slabs.reversed() {
+            guard slab.payout.intact >= 0.999 else { break }
+            streak += 1
+        }
+        let crackedCells = slabs.reduce(0) { total, slab in
+            // intact = 1 - cracked/bone * weight, inverted back to a cell count. The
+            // record does not carry the raw number and adding it would change the wire
+            // format for something derivable.
+            let lost = max(0, 1 - slab.payout.intact)
+            return total + Int((lost / SimTuning.standard.intactCrackWeight * 600).rounded())
+        }
+        return CharmContext(
+            day: day,
+            charmCount: charmIDs.count,
+            toolCount: toolIDs.count,
+            siteID: siteID,
+            tier: tier,
+            bankedGems: slabs.reduce(0) { $0 + $1.wholeGems },
+            flawlessSlabs: flawless,
+            crackedCells: crackedCells,
+            speciesThisRun: Set(slabs.map(\.fossilID)).count,
+            heat: heat,
+            quietSales: slabs.filter { id in
+                guard let buyerID = id.buyerID else { return false }
+                return catalog.buyer(buyerID)?.paysDebt == false
+            }.count,
+            daysRemaining: max(0, totalDays - day + 1),
+            intactStreak: streak
+        )
+    }
+
     /// Everything the player's kit and the site contribute, for a given day.
     public func modifiers(
         forDay day: Int, extra: ModifierSet = ModifierSet(), catalog: ContentCatalog = .shared
     ) -> ModifierSet {
-        let context = CharmContext(
-            day: day,
-            siteID: siteID,
-            tier: tier,
-            bankedGems: slabs.reduce(0) { $0 + $1.wholeGems }
-        )
+        let context = charmContext(forDay: day, catalog: catalog)
         var sets = [loadout(catalog: catalog).modifiers(context: context), extra]
         if let site = catalog.site(siteForSlab(onDay: day, catalog: catalog)) {
             sets.append(site.modifiers.modifierSet)

@@ -21,6 +21,17 @@ public struct SharedConstants: Sendable, Codable, Equatable {
     public var buyers: [Buyer]
     public var installments: [Int]
     public var installmentGrowth: Float
+    /// How many charms and tools a belt holds.
+    ///
+    /// Exported rather than redeclared because the ceiling multiplies by them: a charm
+    /// paying per charm carried is bounded by a full belt, so the server needs the same
+    /// number the client does. Ruby had `CHARM_SLOTS = 4` written out by hand beside
+    /// Swift's `RunState.charmSlots = 4`, which is a trap of exactly the kind this file
+    /// exists to prevent — widening the belt in Swift alone would have made an honest
+    /// five-charm run read as forgery, with the ledger rejecting the payment and no
+    /// error pointing at the cause.
+    public var charmSlots: Int
+    public var toolSlots: Int
 
     public init(tuning: SimTuning, catalog: ContentCatalog) {
         self.schema = 1
@@ -33,5 +44,7 @@ public struct SharedConstants: Sendable, Codable, Equatable {
         self.buyers = catalog.buyers
         self.installments = Installments.table
         self.installmentGrowth = Installments.growth
+        self.charmSlots = RunState.charmSlots
+        self.toolSlots = RunState.toolSlots
     }
 }

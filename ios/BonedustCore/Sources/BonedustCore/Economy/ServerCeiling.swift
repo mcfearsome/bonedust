@@ -145,7 +145,28 @@ public enum ServerCeiling {
                 payoutMultiplier *= 1 + Double(step) * Double(RunState.toolSlots)
             case .payoutPerBankedGem(let step):
                 payoutMultiplier *= 1 + Double(step) * Double(tuning.gemsMax * 5)
-            case .safeSpeedPerDay, .none:
+            // A scaling charm's ceiling is whatever the longest, luckiest, most reckless
+            // run could reach. These bounds are deliberately beyond what is playable --
+            // a ceiling too generous rejects nobody, and one too tight accuses a real
+            // player of forging the best week they ever had.
+            case .payoutPerFlawless(let step), .payoutPerIntactStreak(let step):
+                payoutMultiplier *= 1 + Double(step) * Double(RunLength.maximumDays)
+            case .payoutPerSpecies(let step):
+                payoutMultiplier *= 1 + Double(step) * Double(RunLength.maximumDays)
+            case .payoutPerCrackedCell(let step):
+                // Every bone cell on the slab, cracked. Nobody does this on purpose and
+                // the bound has to cover them if they do.
+                payoutMultiplier *= 1 + Double(step)
+                    * Double(SlabGrid.width * SlabGrid.height / 3)
+            case .payoutPerHeat(let step):
+                payoutMultiplier *= 1 + Double(step) * Double(tuning.heatMaximum)
+            case .payoutPerQuietSale(let step):
+                payoutMultiplier *= 1 + Double(step) * Double(RunLength.maximumDays)
+            case .gemsPerBankedGem(let step):
+                gemMultiplier *= 1 + Double(step) * Double(tuning.gemsMax * 5)
+            // Neither of these touches money, so neither can inflate a payout.
+            case .safeSpeedPerDay, .safeSpeedPerDayRemaining, .daylightPerFlawless,
+                 .crackPerCharm, .none:
                 break
             }
         }

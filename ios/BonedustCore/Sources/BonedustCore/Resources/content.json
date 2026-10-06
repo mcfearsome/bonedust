@@ -2722,20 +2722,24 @@
       "id": "compound_interest",
       "name": "Compound interest",
       "price": 60,
-      "blurb": "Two percent more on everything, for each charm you are carrying.",
+      "blurb": "Every charm on the belt makes the rest worth more.",
       "scaling": {
         "kind": "payoutPerCharm",
-        "value": 0.02
+        "value": 0.07
       }
     },
     {
       "id": "cretaceous_permit",
       "name": "Cretaceous permit",
       "price": 95,
-      "blurb": "Every third slab comes out of Hell Creek, wherever you happen to be.",
+      "blurb": "Paperwork that turns a pocketed gem into a declared one.",
       "slabRule": {
         "everyNthDay": 3,
         "siteID": "hell_creek"
+      },
+      "scaling": {
+        "kind": "payoutPerBankedGem",
+        "value": 0.08
       }
     },
     {
@@ -2827,6 +2831,139 @@
       "blurb": "Gems pay treble. The Collector pretends not to notice.",
       "modifiers": {
         "gemMultiplier": 3
+      }
+    },
+    {
+      "id": "curators_streak",
+      "name": "Curator's streak",
+      "price": 85,
+      "blurb": "He pays for a run of clean work, and stops the day you break one.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "payoutPerIntactStreak",
+        "value": 0.14
+      }
+    },
+    {
+      "id": "reputation_precedes",
+      "name": "Reputation precedes you",
+      "price": 110,
+      "blurb": "A clean week is worth more than a good one.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "payoutPerFlawless",
+        "value": 0.1
+      }
+    },
+    {
+      "id": "salvage_rights",
+      "name": "Salvage rights",
+      "price": 80,
+      "blurb": "Broken is still bone, and bone is still money.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "payoutPerCrackedCell",
+        "value": 0.0022
+      }
+    },
+    {
+      "id": "restorers_putty",
+      "name": "Restorer's putty",
+      "price": 95,
+      "blurb": "Nobody checks the back of a mounted specimen.",
+      "modifiers": {
+        "crackedIntactCredit": 0.65
+      }
+    },
+    {
+      "id": "field_notebook",
+      "name": "Field notebook",
+      "price": 75,
+      "blurb": "Each species you log is another page he will pay for.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "payoutPerSpecies",
+        "value": 0.09
+      }
+    },
+    {
+      "id": "no_questions",
+      "name": "No questions",
+      "price": 90,
+      "blurb": "The more they are looking for you, the more your name is worth down there.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "payoutPerHeat",
+        "value": 0.007
+      }
+    },
+    {
+      "id": "back_door_buyer",
+      "name": "Back-door buyer",
+      "price": 105,
+      "blurb": "Every quiet sale makes the next one easier to arrange.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "payoutPerQuietSale",
+        "value": 0.13
+      }
+    },
+    {
+      "id": "jewellers_loupe",
+      "name": "Jeweller's loupe",
+      "price": 100,
+      "blurb": "One in the tray makes you better at spotting the next.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "gemsPerBankedGem",
+        "value": 0.3
+      }
+    },
+    {
+      "id": "heavy_hand",
+      "name": "Heavy hand",
+      "price": 60,
+      "blurb": "Quick work. Every charm on your belt makes it a little quicker, and a little worse.",
+      "modifiers": {
+        "rockHardnessMultiplier": 0.7,
+        "safeSpeedMultiplier": 1.15
+      },
+      "scaling": {
+        "kind": "crackPerCharm",
+        "value": 0.18
+      }
+    },
+    {
+      "id": "front_loaded",
+      "name": "Front-loaded",
+      "price": 70,
+      "blurb": "Hurry at the start of a week. You can be careful when there is less of it left.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "safeSpeedPerDayRemaining",
+        "value": 0.06
+      }
+    },
+    {
+      "id": "last_light",
+      "name": "Last light",
+      "price": 95,
+      "blurb": "Clean work buys the light to do more of it. Four seconds a slab, every slab you don't break.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "daylightPerFlawless",
+        "value": 4.0
+      }
+    },
+    {
+      "id": "full_belt",
+      "name": "Full belt",
+      "price": 80,
+      "blurb": "A man carrying every tool he owns looks like he knows what he's doing, and gets paid like it.",
+      "modifiers": {},
+      "scaling": {
+        "kind": "payoutPerTool",
+        "value": 0.06
       }
     }
   ],

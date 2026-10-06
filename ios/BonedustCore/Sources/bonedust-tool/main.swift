@@ -261,6 +261,61 @@ case "golden":
         Data("wrote \(derivations.count) derivations to \(path)\n".utf8)
     )
 
+    // Ceilings *with charms on the belt*, which the derivation fixture above cannot reach.
+    //
+    // `derive` passes `claimedCharms: []`, so all 250 rows carry an empty belt and the
+    // gate was reporting "250 derivations match Swift exactly" while never once exercising
+    // a charm. Fourteen scaling rules had been ported into Ruby by hand, each with its own
+    // bound, and not one of them was covered -- a mirrored switch with a typo'd bound would
+    // have passed this suite and then rejected an honest payment in the field, which is the
+    // one failure §6 exists to prevent.
+    //
+    // Every rule gets a row of its own, and then full belts, because the rules compose
+    // multiplicatively and a per-rule test cannot catch an error in how they combine.
+    let charmCatalog = ContentCatalog.shared
+    let scalingCharms = charmCatalog.charms.filter { $0.scaling != nil }.map(\.id).sorted()
+    let flatCharms = charmCatalog.charms.filter { $0.scaling == nil }.map(\.id).sorted()
+    var belts: [[String]] = [[]]
+    belts += scalingCharms.map { [$0] }
+    belts += flatCharms.map { [$0] }
+    // Full belts: every window of charmSlots over the scaling charms, so each rule appears
+    // beside several others, plus a deliberate overfull claim to pin the cap.
+    for start in scalingCharms.indices {
+        let window = (0..<RunState.charmSlots).map {
+            scalingCharms[(start + $0) % scalingCharms.count]
+        }
+        belts.append(window)
+    }
+    belts.append(scalingCharms)
+    belts.append(scalingCharms + flatCharms)
+
+    struct CharmedCeiling: Encodable {
+        var seed: UInt64
+        var siteID: String
+        var charms: [String]
+        var ceiling: Int
+    }
+    var charmed: [CharmedCeiling] = []
+    for site in charmCatalog.sites {
+        for (index, belt) in belts.enumerated() {
+            let seed: UInt64 = 0xCEE1_0000 ^ (UInt64(index) &* 0x9E37_79B9_7F4A_7C15)
+            let derived = ServerCeiling.derive(seed: seed, site: site)
+            guard let fossil = charmCatalog.fossil(derived.fossilID) else { continue }
+            charmed.append(CharmedCeiling(
+                seed: seed, siteID: site.id, charms: belt,
+                ceiling: ServerCeiling.ceiling(
+                    fossil: fossil, instances: derived.instances, site: site,
+                    claimedCharms: belt, catalog: charmCatalog
+                )
+            ))
+        }
+    }
+    let charmedPath = (path as NSString).deletingLastPathComponent + "/ceilings.json"
+    try goldenEncoder.encode(charmed).write(to: URL(fileURLWithPath: charmedPath))
+    FileHandle.standardError.write(
+        Data("wrote \(charmed.count) charmed ceilings to \(charmedPath)\n".utf8)
+    )
+
 case "sizes":
     // Bone cells per species, smallest first. A fossil that rasterises to a few dozen
     // cells is five specks on an empty slab however correct its silhouette is.

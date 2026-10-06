@@ -23,6 +23,42 @@ public enum CharmScaling: Sendable, Codable, Equatable {
     case safeSpeedPerDay(Float)
     /// +value payout multiplier per whole gem already banked this run.
     case payoutPerBankedGem(Float)
+    /// +value payout per slab bagged unbroken this run. Care that compounds.
+    case payoutPerFlawless(Float)
+    /// +value payout per consecutive unbroken slab. Compounds harder and breaks harder.
+    case payoutPerIntactStreak(Float)
+    /// +value payout per distinct species this run. Pays for digging widely.
+    case payoutPerSpecies(Float)
+    /// +value payout per bone cell cracked this run. Pays for the damage, not despite it.
+    case payoutPerCrackedCell(Float)
+    /// +value payout per point of heat carried. The reward for selling badly.
+    case payoutPerHeat(Float)
+    /// +value payout per specimen sold quietly.
+    case payoutPerQuietSale(Float)
+    /// +value gem multiplier per gem already banked. Gems that feed gems.
+    case gemsPerBankedGem(Float)
+    /// +value seconds of daylight per slab bagged unbroken this run.
+    case daylightPerFlawless(Float)
+    /// +value safe speed per day still to come. Fast early, careful late.
+    case safeSpeedPerDayRemaining(Float)
+    /// x(1 + value) crack chance per charm carried. A cost that scales with the build,
+    /// for charms strong enough to want one.
+    case crackPerCharm(Float)
+
+    /// Every rule a charm can carry.
+    ///
+    /// Hand-kept beside the decoder, and checked against it both ways by
+    /// `CharmEngineTests`: every name here must decode, and every name here must be used
+    /// by at least one charm. A rule the content never names is a rule that does not
+    /// exist, and it reads as a shipped feature from the code alone — `payoutPerTool` and
+    /// `daylightPerFlawless` sat here fully plumbed through both payout ceilings, in Swift
+    /// and in Ruby, with no charm in the game able to produce either one.
+    public static let allKinds = [
+        "payoutPerCharm", "payoutPerTool", "payoutPerBankedGem", "payoutPerFlawless",
+        "payoutPerIntactStreak", "payoutPerSpecies", "payoutPerCrackedCell",
+        "payoutPerHeat", "payoutPerQuietSale", "gemsPerBankedGem", "daylightPerFlawless",
+        "safeSpeedPerDay", "safeSpeedPerDayRemaining", "crackPerCharm",
+    ]
 
     // Written as {"kind": "payoutPerCharm", "value": 0.02}. The synthesized form for
     // an enum with associated values nests under "_0", which is not something to ask a
@@ -37,6 +73,16 @@ public enum CharmScaling: Sendable, Codable, Equatable {
         case "payoutPerCharm": self = .payoutPerCharm(value)
         case "payoutPerTool": self = .payoutPerTool(value)
         case "safeSpeedPerDay": self = .safeSpeedPerDay(value)
+        case "payoutPerFlawless": self = .payoutPerFlawless(value)
+        case "payoutPerIntactStreak": self = .payoutPerIntactStreak(value)
+        case "payoutPerSpecies": self = .payoutPerSpecies(value)
+        case "payoutPerCrackedCell": self = .payoutPerCrackedCell(value)
+        case "payoutPerHeat": self = .payoutPerHeat(value)
+        case "payoutPerQuietSale": self = .payoutPerQuietSale(value)
+        case "gemsPerBankedGem": self = .gemsPerBankedGem(value)
+        case "daylightPerFlawless": self = .daylightPerFlawless(value)
+        case "safeSpeedPerDayRemaining": self = .safeSpeedPerDayRemaining(value)
+        case "crackPerCharm": self = .crackPerCharm(value)
         case "payoutPerBankedGem": self = .payoutPerBankedGem(value)
         default:
             throw DecodingError.dataCorrupted(.init(
@@ -46,22 +92,47 @@ public enum CharmScaling: Sendable, Codable, Equatable {
         }
     }
 
+    /// The name the content uses for this rule, and the only place that string is written.
+    ///
+    /// The encoder used to repeat it beside every case, forty lines in which a case could
+    /// quietly write its neighbour's name and nothing would notice until a charm loaded
+    /// back as the wrong rule.
+    public var kindName: String {
+        switch self {
+        case .payoutPerCharm: "payoutPerCharm"
+        case .payoutPerTool: "payoutPerTool"
+        case .payoutPerBankedGem: "payoutPerBankedGem"
+        case .payoutPerFlawless: "payoutPerFlawless"
+        case .payoutPerIntactStreak: "payoutPerIntactStreak"
+        case .payoutPerSpecies: "payoutPerSpecies"
+        case .payoutPerCrackedCell: "payoutPerCrackedCell"
+        case .payoutPerHeat: "payoutPerHeat"
+        case .payoutPerQuietSale: "payoutPerQuietSale"
+        case .gemsPerBankedGem: "gemsPerBankedGem"
+        case .daylightPerFlawless: "daylightPerFlawless"
+        case .safeSpeedPerDay: "safeSpeedPerDay"
+        case .safeSpeedPerDayRemaining: "safeSpeedPerDayRemaining"
+        case .crackPerCharm: "crackPerCharm"
+        }
+    }
+
+    /// How much the rule pays per unit of whatever it counts.
+    public var step: Float {
+        switch self {
+        case .payoutPerCharm(let v), .payoutPerTool(let v), .payoutPerBankedGem(let v),
+            .payoutPerFlawless(let v), .payoutPerIntactStreak(let v),
+            .payoutPerSpecies(let v), .payoutPerCrackedCell(let v), .payoutPerHeat(let v),
+            .payoutPerQuietSale(let v), .gemsPerBankedGem(let v),
+            .daylightPerFlawless(let v), .safeSpeedPerDay(let v),
+            .safeSpeedPerDayRemaining(let v), .crackPerCharm(let v):
+            v
+        }
+    }
+
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: Keys.self)
-        switch self {
-        case .payoutPerCharm(let value):
-            try container.encode("payoutPerCharm", forKey: .kind)
-            try container.encode(value, forKey: .value)
-        case .payoutPerTool(let value):
-            try container.encode("payoutPerTool", forKey: .kind)
-            try container.encode(value, forKey: .value)
-        case .safeSpeedPerDay(let value):
-            try container.encode("safeSpeedPerDay", forKey: .kind)
-            try container.encode(value, forKey: .value)
-        case .payoutPerBankedGem(let value):
-            try container.encode("payoutPerBankedGem", forKey: .kind)
-            try container.encode(value, forKey: .value)
-        }
+        try container.encode(kindName, forKey: .kind)
+        try container.encode(step, forKey: .value)
     }
 
     func apply(to set: inout ModifierSet, context: CharmContext) {
@@ -74,6 +145,26 @@ public enum CharmScaling: Sendable, Codable, Equatable {
             set.safeSpeedMultiplier *= 1 + step * Float(max(0, context.day - 1))
         case .payoutPerBankedGem(let step):
             set.payoutMultiplier *= 1 + step * Float(context.bankedGems)
+        case .payoutPerFlawless(let step):
+            set.payoutMultiplier *= 1 + step * Float(context.flawlessSlabs)
+        case .payoutPerIntactStreak(let step):
+            set.payoutMultiplier *= 1 + step * Float(context.intactStreak)
+        case .payoutPerSpecies(let step):
+            set.payoutMultiplier *= 1 + step * Float(context.speciesThisRun)
+        case .payoutPerCrackedCell(let step):
+            set.payoutMultiplier *= 1 + step * Float(context.crackedCells)
+        case .payoutPerHeat(let step):
+            set.payoutMultiplier *= 1 + step * Float(context.heat)
+        case .payoutPerQuietSale(let step):
+            set.payoutMultiplier *= 1 + step * Float(context.quietSales)
+        case .gemsPerBankedGem(let step):
+            set.gemMultiplier *= 1 + step * Float(context.bankedGems)
+        case .daylightPerFlawless(let step):
+            set.daylightDelta += step * Float(context.flawlessSlabs)
+        case .safeSpeedPerDayRemaining(let step):
+            set.safeSpeedMultiplier *= 1 + step * Float(max(0, context.daysRemaining))
+        case .crackPerCharm(let step):
+            set.crackMultiplier *= 1 + step * Float(context.charmCount)
         }
     }
 }
@@ -108,9 +199,31 @@ public struct CharmContext: Sendable, Equatable {
     public var tier: Int
     public var bankedGems: Int
 
+    // What follows is the difference between a modifier and a build. A charm that reads
+    // only its own value is a percentage; a charm that reads the *run* can be set up for,
+    // played around, and combined -- and two charms reading the same counter stack into
+    // something neither does alone.
+    //
+    /// Slabs bagged this run with nothing cracked.
+    public var flawlessSlabs: Int = 0
+    /// Bone cells cracked this run. The thing most charms want less of, and a few want more.
+    public var crackedCells: Int = 0
+    /// Distinct species bagged this run.
+    public var speciesThisRun: Int = 0
+    /// Attention carried. Pays for charms that like trouble.
+    public var heat: Int = 0
+    /// Specimens sold to someone who does not report the sale.
+    public var quietSales: Int = 0
+    /// Days still to come, including today.
+    public var daysRemaining: Int = 1
+    /// Consecutive unbroken slabs ending with the last one bagged.
+    public var intactStreak: Int = 0
+
     public init(
         day: Int = 1, charmCount: Int = 0, toolCount: Int = 1,
-        siteID: String = "", tier: Int = 1, bankedGems: Int = 0
+        siteID: String = "", tier: Int = 1, bankedGems: Int = 0,
+        flawlessSlabs: Int = 0, crackedCells: Int = 0, speciesThisRun: Int = 0,
+        heat: Int = 0, quietSales: Int = 0, daysRemaining: Int = 1, intactStreak: Int = 0
     ) {
         self.day = day
         self.charmCount = charmCount
@@ -118,6 +231,13 @@ public struct CharmContext: Sendable, Equatable {
         self.siteID = siteID
         self.tier = tier
         self.bankedGems = bankedGems
+        self.flawlessSlabs = flawlessSlabs
+        self.crackedCells = crackedCells
+        self.speciesThisRun = speciesThisRun
+        self.heat = heat
+        self.quietSales = quietSales
+        self.daysRemaining = daysRemaining
+        self.intactStreak = intactStreak
     }
 }
 

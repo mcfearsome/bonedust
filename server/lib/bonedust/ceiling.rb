@@ -17,8 +17,11 @@ module Bonedust
   # flip a cell on a boundary and fail an exact comparison for no benefit. The ceiling
   # does not need them, so they are not ported and not tested.
   module Ceiling
-    CHARM_SLOTS = 4
-    TOOL_SLOTS = 3
+    # Mirrors RunLength.maximumDays. A scaling charm's ceiling is whatever the longest,
+    # luckiest, most reckless run could reach, and the Swift side bounds these the same way
+    # -- the two switches move together or golden_spec fails.
+    MAX_DAYS = 12
+    SLAB_CELLS = 96 * 128
 
     module_function
 
@@ -71,7 +74,7 @@ module Bonedust
     # proportionate, not paranoid.
     def ceiling(fossil:, instances:, site:, claimed_charms:, constants: Bonedust.constants)
       tuning = constants.tuning
-      charms = claimed_charms.first(CHARM_SLOTS).filter_map { |id| constants.charm(id) }
+      charms = claimed_charms.first(constants.charm_slots).filter_map { |id| constants.charm(id) }
 
       payout_multiplier = 1.0
       gem_multiplier = 1.0
@@ -98,10 +101,23 @@ module Bonedust
 
         value = scaling.fetch("value").to_f
         case scaling.fetch("kind")
-        when "payoutPerCharm" then payout_multiplier *= 1 + value * CHARM_SLOTS
-        when "payoutPerTool" then payout_multiplier *= 1 + value * TOOL_SLOTS
+        when "payoutPerCharm" then payout_multiplier *= 1 + value * constants.charm_slots
+        when "payoutPerTool" then payout_multiplier *= 1 + value * constants.tool_slots
         when "payoutPerBankedGem"
           payout_multiplier *= 1 + value * (tuning.fetch("gemsMax") * 5)
+        when "payoutPerFlawless", "payoutPerIntactStreak", "payoutPerSpecies",
+             "payoutPerQuietSale"
+          payout_multiplier *= 1 + value * MAX_DAYS
+        when "payoutPerCrackedCell"
+          # Every bone cell on the slab, cracked. Nobody does that on purpose, and the
+          # bound has to cover them if they do.
+          payout_multiplier *= 1 + value * (SLAB_CELLS / 3)
+        when "payoutPerHeat"
+          payout_multiplier *= 1 + value * tuning.fetch("heatMaximum")
+        when "gemsPerBankedGem"
+          gem_multiplier *= 1 + value * (tuning.fetch("gemsMax") * 5)
+        # safeSpeedPerDay, safeSpeedPerDayRemaining, daylightPerFlawless and crackPerCharm
+        # touch no money, so none can inflate a payout.
         end
       end
       # Assume every skeleton set is complete.

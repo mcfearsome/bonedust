@@ -42,6 +42,13 @@ public struct PlayerPolicy: Sendable {
     /// coming and slow *before* you reach it. Zero lookahead models someone who has
     /// not learned to read the slab.
     public var lookaheadSamples: Float
+    /// Fraction of cash the player invests anyway when the installment looks unreachable.
+    ///
+    /// Separate from `spendingAggression` because it models the opposite situation. That
+    /// one is "how much of my surplus will I give up"; this one is "the projection says I
+    /// lose, so holding cash is worth nothing and kit is the only move left." A player
+    /// who hoards while behind loses with money in their pocket.
+    public var desperationSpend: Float
 
     public init(
         clearingSpeed: Float = 3.2,
@@ -51,7 +58,8 @@ public struct PlayerPolicy: Sendable {
         toolID: String = BrushTool.brush.id,
         passOverlap: Float = 0.8,
         lookaheadSamples: Float = 3,
-        spendingAggression: Float = 0.8
+        spendingAggression: Float = 0.8,
+        desperationSpend: Float = 0.5
     ) {
         self.clearingSpeed = clearingSpeed
         self.cautionFactor = cautionFactor
@@ -61,6 +69,7 @@ public struct PlayerPolicy: Sendable {
         self.passOverlap = passOverlap
         self.lookaheadSamples = lookaheadSamples
         self.spendingAggression = spendingAggression
+        self.desperationSpend = desperationSpend
     }
 
     /// The reference player the balance target is stated against: moderately quick,
@@ -71,13 +80,13 @@ public struct PlayerPolicy: Sendable {
     /// already under the brush, and buying on impulse.
     public static let reckless = PlayerPolicy(
         clearingSpeed: 5.5, cautionFactor: 1.6, bagAtExposure: 0.9,
-        lookaheadSamples: 0, spendingAggression: 1.0
+        lookaheadSamples: 0, spendingAggression: 1.0, desperationSpend: 0.9
     )
 
     /// Someone who has, and who looks well ahead.
     public static let careful = PlayerPolicy(
         clearingSpeed: 2.2, cautionFactor: 0.6, lookaheadSamples: 6,
-        spendingAggression: 0.6
+        spendingAggression: 0.6, desperationSpend: 0.35
     )
 
     /// The M2 baseline: never visits the tent. Kept so the effect of the shop can be
@@ -388,7 +397,26 @@ public enum EconomySimulator {
         // remaining slabs had to be average or better just to recover.
         let reserve = Int(Float(run.installment) * 0.15)
         let spendable = run.cash + expected - run.installment - reserve
-        var budget = min(run.cash, Int(Float(max(0, spendable)) * policy.spendingAggression))
+        let cushioned = Int(Float(max(0, spendable)) * policy.spendingAggression)
+
+        // A floor, because "spend what I will not need" inverts under pressure.
+        //
+        // Projected behind the installment, `spendable` goes to zero and the model buys
+        // nothing at all -- so it earns less, and falls further behind. That made the
+        // simulator unable to measure a hard tier: raising tier 8's note from $2,600 to
+        // $3,400 *lowered* mean income from $3,053 to $2,435 and dropped the win rate to
+        // 11%, and almost none of that was the ramp. It was the shopper refusing to buy
+        // a $60 charm while $3,400 behind.
+        //
+        // No player does that. Being behind is the reason to buy the tool, because kit is
+        // the only thing that raises income and hoarding cash that is already short
+        // cannot. So when the projection says the installment will be missed, the model
+        // invests a slice of its cash instead of holding all of it -- which is the actual
+        // decision a player facing an impossible note makes, and the only one that can
+        // still win.
+        let behind = run.cash + expected < run.installment
+        let desperate = behind ? Int(Float(run.cash) * policy.desperationSpend) : 0
+        var budget = min(run.cash, max(cushioned, desperate))
 
         // Cheapest first, so a visit buys two useful things rather than one expensive
         // one. Tools before charms: a brush that stops the cracking is worth more than

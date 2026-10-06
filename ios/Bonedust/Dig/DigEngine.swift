@@ -116,6 +116,10 @@ final class DigEngine {
         catalog: ContentCatalog = .shared,
         tuning: SimTuning = .standard,
         extraModifiers: ModifierSet = ModifierSet(),
+        /// What the charms can read about the run. Required rather than defaulted: the
+        /// default was an empty context, and an empty context silently switches off every
+        /// scaling charm in the game.
+        charmContext: CharmContext = CharmContext(),
         tool: BrushTool? = nil
     ) {
         let generated = SlabGenerator.generate(
@@ -125,7 +129,7 @@ final class DigEngine {
 
         var composed = ModifierSet.combining([
             site.modifiers.modifierSet,
-            loadout.modifiers(context: CharmContext(day: day, siteID: site.id)),
+            loadout.modifiers(context: charmContext),
             extraModifiers,
         ])
         // Fossil fragility multiplies the site's. A Knightia at Green River is the
@@ -162,13 +166,14 @@ final class DigEngine {
         site: Site,
         loadout: Loadout = Loadout(),
         catalog: ContentCatalog = .shared,
-        extraModifiers: ModifierSet = ModifierSet()
+        extraModifiers: ModifierSet = ModifierSet(),
+        charmContext: CharmContext = CharmContext()
     ) {
         let simulation = restored.simulation
         let fossil = catalog.fossil(simulation.layout.fossilID) ?? catalog.fossils[0]
         var composed = ModifierSet.combining([
             site.modifiers.modifierSet,
-            loadout.modifiers(context: CharmContext(day: restored.day, siteID: site.id)),
+            loadout.modifiers(context: charmContext),
             extraModifiers,
         ])
         composed.crackMultiplier *= fossil.crackMultiplier

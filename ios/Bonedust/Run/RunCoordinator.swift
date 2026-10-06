@@ -298,7 +298,8 @@ final class RunCoordinator {
             do {
                 let restored = try snapshot.restore(catalog: catalog, tuning: .standard)
                 let engine = DigEngine(
-                    restored: restored, site: site, loadout: loadout, extraModifiers: extra
+                    restored: restored, site: site, loadout: loadout, extraModifiers: extra,
+                    charmContext: run.charmContext(forDay: day, catalog: catalog)
                 )
                 engine.isFirstFind = firstFind
                 digEngine = engine
@@ -319,7 +320,10 @@ final class RunCoordinator {
             day: day,
             loadout: loadout,
             catalog: catalog,
-            extraModifiers: extra
+            extraModifiers: extra,
+            // Built from the run, so a charm that pays per flawless slab or per gem banked
+            // can actually see them. This used to be an empty context.
+            charmContext: run.charmContext(forDay: day, catalog: catalog)
         )
         engine.isFirstFind = firstFind
         digEngine = engine

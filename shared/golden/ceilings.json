@@ -1,0 +1,2327 @@
+[
+  {
+    "ceiling" : 382,
+    "charms" : [
+
+    ],
+    "seed" : 3470852096,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 5060,
+    "charms" : [
+      "back_door_buyer"
+    ],
+    "seed" : 11400714820168416277,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 3147,
+    "charms" : [
+      "compound_interest"
+    ],
+    "seed" : 4354685561478707242,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 1556,
+    "charms" : [
+      "cretaceous_permit"
+    ],
+    "seed" : 15755400385155462207,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 1076,
+    "charms" : [
+      "curators_streak"
+    ],
+    "seed" : 8709371126495113300,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 631,
+    "charms" : [
+      "field_notebook"
+    ],
+    "seed" : 1663341876395469929,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 2331,
+    "charms" : [
+      "front_loaded"
+    ],
+    "seed" : 13064056691482421374,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 1287,
+    "charms" : [
+      "full_belt"
+    ],
+    "seed" : 6018027441411875987,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 500,
+    "charms" : [
+      "heavy_hand"
+    ],
+    "seed" : 17418742256431718568,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 1099,
+    "charms" : [
+      "jewellers_loupe"
+    ],
+    "seed" : 10372713006399184061,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 303,
+    "charms" : [
+      "last_light"
+    ],
+    "seed" : 3326683747705280722,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 1252,
+    "charms" : [
+      "no_questions"
+    ],
+    "seed" : 14727398571348481255,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 736,
+    "charms" : [
+      "patient_hand"
+    ],
+    "seed" : 7681369312725881084,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 710,
+    "charms" : [
+      "reputation_precedes"
+    ],
+    "seed" : 635340062622043409,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 4021,
+    "charms" : [
+      "salvage_rights"
+    ],
+    "seed" : 12036054877675440422,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 303,
+    "charms" : [
+      "authentic_damage"
+    ],
+    "seed" : 4990025627642643771,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 598,
+    "charms" : [
+      "collectors_eye"
+    ],
+    "seed" : 16390740442658292048,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 734,
+    "charms" : [
+      "collectors_loupe"
+    ],
+    "seed" : 9344711192625757541,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 1028,
+    "charms" : [
+      "diamond_sieve"
+    ],
+    "seed" : 2298681933969602938,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 2528,
+    "charms" : [
+      "fine_motor"
+    ],
+    "seed" : 13699396757575054735,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 445,
+    "charms" : [
+      "gem_cradle"
+    ],
+    "seed" : 6653367498952454564,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 343,
+    "charms" : [
+      "long_shadows"
+    ],
+    "seed" : 18054082322595917241,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 769,
+    "charms" : [
+      "night_owl"
+    ],
+    "seed" : 11008053063902013902,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 398,
+    "charms" : [
+      "provenance_papers"
+    ],
+    "seed" : 3962023813332346339,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 776,
+    "charms" : [
+      "restorers_putty"
+    ],
+    "seed" : 15362738628352188920,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 394,
+    "charms" : [
+      "rock_hound"
+    ],
+    "seed" : 8316709378281905677,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 7067,
+    "charms" : [
+      "rush_job"
+    ],
+    "seed" : 1270680119659305506,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 677,
+    "charms" : [
+      "steady_hands"
+    ],
+    "seed" : 12671394943268951607,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 598,
+    "charms" : [
+      "steady_lamp"
+    ],
+    "seed" : 5625365684608602700,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 2434,
+    "charms" : [
+      "union_card"
+    ],
+    "seed" : 17026080508285619809,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 29978,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook"
+    ],
+    "seed" : 9980051249595910774,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 7088,
+    "charms" : [
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded"
+    ],
+    "seed" : 2934021999525365387,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 6869,
+    "charms" : [
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt"
+    ],
+    "seed" : 14334736814612316832,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 2383,
+    "charms" : [
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand"
+    ],
+    "seed" : 7288707564512542389,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 2745,
+    "charms" : [
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe"
+    ],
+    "seed" : 242678305885878986,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 1900,
+    "charms" : [
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light"
+    ],
+    "seed" : 11643393129529210591,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 3704,
+    "charms" : [
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions"
+    ],
+    "seed" : 4597363870839370484,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 5583,
+    "charms" : [
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand"
+    ],
+    "seed" : 15998078694512062217,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 5213,
+    "charms" : [
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes"
+    ],
+    "seed" : 8952049435856038686,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 29043,
+    "charms" : [
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 1906020185756264243,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 25287,
+    "charms" : [
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer"
+    ],
+    "seed" : 13306735000838890312,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 135469,
+    "charms" : [
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest"
+    ],
+    "seed" : 6260705750739115869,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 134031,
+    "charms" : [
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit"
+    ],
+    "seed" : 17661420565792643954,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 163274,
+    "charms" : [
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak"
+    ],
+    "seed" : 10615391315755784071,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 30965,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 3569362057065943964,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 120703,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "authentic_damage",
+      "collectors_eye",
+      "collectors_loupe",
+      "diamond_sieve",
+      "fine_motor",
+      "gem_cradle",
+      "long_shadows",
+      "night_owl",
+      "provenance_papers",
+      "restorers_putty",
+      "rock_hound",
+      "rush_job",
+      "steady_hands",
+      "steady_lamp",
+      "union_card"
+    ],
+    "seed" : 14970076880709275569,
+    "siteID" : "charmouth"
+  },
+  {
+    "ceiling" : 776,
+    "charms" : [
+
+    ],
+    "seed" : 3470852096,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 14233,
+    "charms" : [
+      "back_door_buyer"
+    ],
+    "seed" : 11400714820168416277,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 914,
+    "charms" : [
+      "compound_interest"
+    ],
+    "seed" : 4354685561478707242,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 1966,
+    "charms" : [
+      "cretaceous_permit"
+    ],
+    "seed" : 15755400385155462207,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 1393,
+    "charms" : [
+      "curators_streak"
+    ],
+    "seed" : 8709371126495113300,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 917,
+    "charms" : [
+      "field_notebook"
+    ],
+    "seed" : 1663341876395469929,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 874,
+    "charms" : [
+      "front_loaded"
+    ],
+    "seed" : 13064056691482421374,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 613,
+    "charms" : [
+      "full_belt"
+    ],
+    "seed" : 6018027441411875987,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 244,
+    "charms" : [
+      "heavy_hand"
+    ],
+    "seed" : 17418742256431718568,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 1000,
+    "charms" : [
+      "jewellers_loupe"
+    ],
+    "seed" : 10372713006399184061,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 776,
+    "charms" : [
+      "last_light"
+    ],
+    "seed" : 3326683747705280722,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 4833,
+    "charms" : [
+      "no_questions"
+    ],
+    "seed" : 14727398571348481255,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 835,
+    "charms" : [
+      "patient_hand"
+    ],
+    "seed" : 7681369312725881084,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 1577,
+    "charms" : [
+      "reputation_precedes"
+    ],
+    "seed" : 635340062622043409,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 6386,
+    "charms" : [
+      "salvage_rights"
+    ],
+    "seed" : 12036054877675440422,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 520,
+    "charms" : [
+      "authentic_damage"
+    ],
+    "seed" : 4990025627642643771,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 559,
+    "charms" : [
+      "collectors_eye"
+    ],
+    "seed" : 16390740442658292048,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 462,
+    "charms" : [
+      "collectors_loupe"
+    ],
+    "seed" : 9344711192625757541,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 693,
+    "charms" : [
+      "diamond_sieve"
+    ],
+    "seed" : 2298681933969602938,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 441,
+    "charms" : [
+      "fine_motor"
+    ],
+    "seed" : 13699396757575054735,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 1469,
+    "charms" : [
+      "gem_cradle"
+    ],
+    "seed" : 6653367498952454564,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 362,
+    "charms" : [
+      "long_shadows"
+    ],
+    "seed" : 18054082322595917241,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 734,
+    "charms" : [
+      "night_owl"
+    ],
+    "seed" : 11008053063902013902,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 398,
+    "charms" : [
+      "provenance_papers"
+    ],
+    "seed" : 3962023813332346339,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 461,
+    "charms" : [
+      "restorers_putty"
+    ],
+    "seed" : 15362738628352188920,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 532,
+    "charms" : [
+      "rock_hound"
+    ],
+    "seed" : 8316709378281905677,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 1610,
+    "charms" : [
+      "rush_job"
+    ],
+    "seed" : 1270680119659305506,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 244,
+    "charms" : [
+      "steady_hands"
+    ],
+    "seed" : 12671394943268951607,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 441,
+    "charms" : [
+      "steady_lamp"
+    ],
+    "seed" : 5625365684608602700,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 386,
+    "charms" : [
+      "union_card"
+    ],
+    "seed" : 17026080508285619809,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 36881,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook"
+    ],
+    "seed" : 9980051249595910774,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 10940,
+    "charms" : [
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded"
+    ],
+    "seed" : 2934021999525365387,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 4175,
+    "charms" : [
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt"
+    ],
+    "seed" : 14334736814612316832,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 3160,
+    "charms" : [
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand"
+    ],
+    "seed" : 7288707564512542389,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 4049,
+    "charms" : [
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe"
+    ],
+    "seed" : 242678305885878986,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 1343,
+    "charms" : [
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light"
+    ],
+    "seed" : 11643393129529210591,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 2559,
+    "charms" : [
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions"
+    ],
+    "seed" : 4597363870839370484,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 2437,
+    "charms" : [
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand"
+    ],
+    "seed" : 15998078694512062217,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 4182,
+    "charms" : [
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes"
+    ],
+    "seed" : 8952049435856038686,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 17986,
+    "charms" : [
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 1906020185756264243,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 272493,
+    "charms" : [
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer"
+    ],
+    "seed" : 13306735000838890312,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 29072,
+    "charms" : [
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest"
+    ],
+    "seed" : 6260705750739115869,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 149616,
+    "charms" : [
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit"
+    ],
+    "seed" : 17661420565792643954,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 201245,
+    "charms" : [
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak"
+    ],
+    "seed" : 10615391315755784071,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 18145,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 3569362057065943964,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 67452,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "authentic_damage",
+      "collectors_eye",
+      "collectors_loupe",
+      "diamond_sieve",
+      "fine_motor",
+      "gem_cradle",
+      "long_shadows",
+      "night_owl",
+      "provenance_papers",
+      "restorers_putty",
+      "rock_hound",
+      "rush_job",
+      "steady_hands",
+      "steady_lamp",
+      "union_card"
+    ],
+    "seed" : 14970076880709275569,
+    "siteID" : "wheeler"
+  },
+  {
+    "ceiling" : 5116,
+    "charms" : [
+
+    ],
+    "seed" : 3470852096,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1887,
+    "charms" : [
+      "back_door_buyer"
+    ],
+    "seed" : 11400714820168416277,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 3164,
+    "charms" : [
+      "compound_interest"
+    ],
+    "seed" : 4354685561478707242,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 2735,
+    "charms" : [
+      "cretaceous_permit"
+    ],
+    "seed" : 15755400385155462207,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 2651,
+    "charms" : [
+      "curators_streak"
+    ],
+    "seed" : 8709371126495113300,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 2516,
+    "charms" : [
+      "field_notebook"
+    ],
+    "seed" : 1663341876395469929,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1147,
+    "charms" : [
+      "front_loaded"
+    ],
+    "seed" : 13064056691482421374,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1279,
+    "charms" : [
+      "full_belt"
+    ],
+    "seed" : 6018027441411875987,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1651,
+    "charms" : [
+      "heavy_hand"
+    ],
+    "seed" : 17418742256431718568,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1947,
+    "charms" : [
+      "jewellers_loupe"
+    ],
+    "seed" : 10372713006399184061,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1336,
+    "charms" : [
+      "last_light"
+    ],
+    "seed" : 3326683747705280722,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1842,
+    "charms" : [
+      "no_questions"
+    ],
+    "seed" : 14727398571348481255,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1084,
+    "charms" : [
+      "patient_hand"
+    ],
+    "seed" : 7681369312725881084,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 3354,
+    "charms" : [
+      "reputation_precedes"
+    ],
+    "seed" : 635340062622043409,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 5802,
+    "charms" : [
+      "salvage_rights"
+    ],
+    "seed" : 12036054877675440422,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1903,
+    "charms" : [
+      "authentic_damage"
+    ],
+    "seed" : 4990025627642643771,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 958,
+    "charms" : [
+      "collectors_eye"
+    ],
+    "seed" : 16390740442658292048,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1282,
+    "charms" : [
+      "collectors_loupe"
+    ],
+    "seed" : 9344711192625757541,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1392,
+    "charms" : [
+      "diamond_sieve"
+    ],
+    "seed" : 2298681933969602938,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1210,
+    "charms" : [
+      "fine_motor"
+    ],
+    "seed" : 13699396757575054735,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1436,
+    "charms" : [
+      "gem_cradle"
+    ],
+    "seed" : 6653367498952454564,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1903,
+    "charms" : [
+      "long_shadows"
+    ],
+    "seed" : 18054082322595917241,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 522,
+    "charms" : [
+      "night_owl"
+    ],
+    "seed" : 11008053063902013902,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 880,
+    "charms" : [
+      "provenance_papers"
+    ],
+    "seed" : 3962023813332346339,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1210,
+    "charms" : [
+      "restorers_putty"
+    ],
+    "seed" : 15362738628352188920,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 5526,
+    "charms" : [
+      "rock_hound"
+    ],
+    "seed" : 8316709378281905677,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 2311,
+    "charms" : [
+      "rush_job"
+    ],
+    "seed" : 1270680119659305506,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1115,
+    "charms" : [
+      "steady_hands"
+    ],
+    "seed" : 12671394943268951607,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 989,
+    "charms" : [
+      "steady_lamp"
+    ],
+    "seed" : 5625365684608602700,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 1927,
+    "charms" : [
+      "union_card"
+    ],
+    "seed" : 17026080508285619809,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 60588,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook"
+    ],
+    "seed" : 9980051249595910774,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 19353,
+    "charms" : [
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded"
+    ],
+    "seed" : 2934021999525365387,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 16916,
+    "charms" : [
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt"
+    ],
+    "seed" : 14334736814612316832,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 6506,
+    "charms" : [
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand"
+    ],
+    "seed" : 7288707564512542389,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 6247,
+    "charms" : [
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe"
+    ],
+    "seed" : 242678305885878986,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 3970,
+    "charms" : [
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light"
+    ],
+    "seed" : 11643393129529210591,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 4853,
+    "charms" : [
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions"
+    ],
+    "seed" : 4597363870839370484,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 3149,
+    "charms" : [
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand"
+    ],
+    "seed" : 15998078694512062217,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 12582,
+    "charms" : [
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes"
+    ],
+    "seed" : 8952049435856038686,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 39393,
+    "charms" : [
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 1906020185756264243,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 100845,
+    "charms" : [
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer"
+    ],
+    "seed" : 13306735000838890312,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 154411,
+    "charms" : [
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest"
+    ],
+    "seed" : 6260705750739115869,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 376533,
+    "charms" : [
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit"
+    ],
+    "seed" : 17661420565792643954,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 291615,
+    "charms" : [
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak"
+    ],
+    "seed" : 10615391315755784071,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 101611,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 3569362057065943964,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 32187,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "authentic_damage",
+      "collectors_eye",
+      "collectors_loupe",
+      "diamond_sieve",
+      "fine_motor",
+      "gem_cradle",
+      "long_shadows",
+      "night_owl",
+      "provenance_papers",
+      "restorers_putty",
+      "rock_hound",
+      "rush_job",
+      "steady_hands",
+      "steady_lamp",
+      "union_card"
+    ],
+    "seed" : 14970076880709275569,
+    "siteID" : "green_river"
+  },
+  {
+    "ceiling" : 3586,
+    "charms" : [
+
+    ],
+    "seed" : 3470852096,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 3385,
+    "charms" : [
+      "back_door_buyer"
+    ],
+    "seed" : 11400714820168416277,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1510,
+    "charms" : [
+      "compound_interest"
+    ],
+    "seed" : 4354685561478707242,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 2025,
+    "charms" : [
+      "cretaceous_permit"
+    ],
+    "seed" : 15755400385155462207,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 2633,
+    "charms" : [
+      "curators_streak"
+    ],
+    "seed" : 8709371126495113300,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 6800,
+    "charms" : [
+      "field_notebook"
+    ],
+    "seed" : 1663341876395469929,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 779,
+    "charms" : [
+      "front_loaded"
+    ],
+    "seed" : 13064056691482421374,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 2362,
+    "charms" : [
+      "full_belt"
+    ],
+    "seed" : 6018027441411875987,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 2318,
+    "charms" : [
+      "heavy_hand"
+    ],
+    "seed" : 17418742256431718568,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 4954,
+    "charms" : [
+      "jewellers_loupe"
+    ],
+    "seed" : 10372713006399184061,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1662,
+    "charms" : [
+      "last_light"
+    ],
+    "seed" : 3326683747705280722,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1824,
+    "charms" : [
+      "no_questions"
+    ],
+    "seed" : 14727398571348481255,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 801,
+    "charms" : [
+      "patient_hand"
+    ],
+    "seed" : 7681369312725881084,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 2461,
+    "charms" : [
+      "reputation_precedes"
+    ],
+    "seed" : 635340062622043409,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 11197,
+    "charms" : [
+      "salvage_rights"
+    ],
+    "seed" : 12036054877675440422,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1503,
+    "charms" : [
+      "authentic_damage"
+    ],
+    "seed" : 4990025627642643771,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 2590,
+    "charms" : [
+      "collectors_eye"
+    ],
+    "seed" : 16390740442658292048,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 6155,
+    "charms" : [
+      "collectors_loupe"
+    ],
+    "seed" : 9344711192625757541,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1114,
+    "charms" : [
+      "diamond_sieve"
+    ],
+    "seed" : 2298681933969602938,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 869,
+    "charms" : [
+      "fine_motor"
+    ],
+    "seed" : 13699396757575054735,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 3478,
+    "charms" : [
+      "gem_cradle"
+    ],
+    "seed" : 6653367498952454564,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 2047,
+    "charms" : [
+      "long_shadows"
+    ],
+    "seed" : 18054082322595917241,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1353,
+    "charms" : [
+      "night_owl"
+    ],
+    "seed" : 11008053063902013902,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1305,
+    "charms" : [
+      "provenance_papers"
+    ],
+    "seed" : 3962023813332346339,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 4084,
+    "charms" : [
+      "restorers_putty"
+    ],
+    "seed" : 15362738628352188920,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 2374,
+    "charms" : [
+      "rock_hound"
+    ],
+    "seed" : 8316709378281905677,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1661,
+    "charms" : [
+      "rush_job"
+    ],
+    "seed" : 1270680119659305506,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1164,
+    "charms" : [
+      "steady_hands"
+    ],
+    "seed" : 12671394943268951607,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 4084,
+    "charms" : [
+      "steady_lamp"
+    ],
+    "seed" : 5625365684608602700,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 3900,
+    "charms" : [
+      "union_card"
+    ],
+    "seed" : 17026080508285619809,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 59424,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook"
+    ],
+    "seed" : 9980051249595910774,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 23213,
+    "charms" : [
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded"
+    ],
+    "seed" : 2934021999525365387,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 35003,
+    "charms" : [
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt"
+    ],
+    "seed" : 14334736814612316832,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 7655,
+    "charms" : [
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand"
+    ],
+    "seed" : 7288707564512542389,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 7824,
+    "charms" : [
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe"
+    ],
+    "seed" : 242678305885878986,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 3441,
+    "charms" : [
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light"
+    ],
+    "seed" : 11643393129529210591,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 5759,
+    "charms" : [
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions"
+    ],
+    "seed" : 4597363870839370484,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 7036,
+    "charms" : [
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand"
+    ],
+    "seed" : 15998078694512062217,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 10737,
+    "charms" : [
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes"
+    ],
+    "seed" : 8952049435856038686,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 29161,
+    "charms" : [
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 1906020185756264243,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 513019,
+    "charms" : [
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer"
+    ],
+    "seed" : 13306735000838890312,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 293657,
+    "charms" : [
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest"
+    ],
+    "seed" : 6260705750739115869,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 346805,
+    "charms" : [
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit"
+    ],
+    "seed" : 17661420565792643954,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 318764,
+    "charms" : [
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak"
+    ],
+    "seed" : 10615391315755784071,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 39011,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 3569362057065943964,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 93446,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "authentic_damage",
+      "collectors_eye",
+      "collectors_loupe",
+      "diamond_sieve",
+      "fine_motor",
+      "gem_cradle",
+      "long_shadows",
+      "night_owl",
+      "provenance_papers",
+      "restorers_putty",
+      "rock_hound",
+      "rush_job",
+      "steady_hands",
+      "steady_lamp",
+      "union_card"
+    ],
+    "seed" : 14970076880709275569,
+    "siteID" : "hell_creek"
+  },
+  {
+    "ceiling" : 1695,
+    "charms" : [
+
+    ],
+    "seed" : 3470852096,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 13638,
+    "charms" : [
+      "back_door_buyer"
+    ],
+    "seed" : 11400714820168416277,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1212,
+    "charms" : [
+      "compound_interest"
+    ],
+    "seed" : 4354685561478707242,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 3563,
+    "charms" : [
+      "cretaceous_permit"
+    ],
+    "seed" : 15755400385155462207,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1852,
+    "charms" : [
+      "curators_streak"
+    ],
+    "seed" : 8709371126495113300,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 2789,
+    "charms" : [
+      "field_notebook"
+    ],
+    "seed" : 1663341876395469929,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 455,
+    "charms" : [
+      "front_loaded"
+    ],
+    "seed" : 13064056691482421374,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 5520,
+    "charms" : [
+      "full_belt"
+    ],
+    "seed" : 6018027441411875987,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 691,
+    "charms" : [
+      "heavy_hand"
+    ],
+    "seed" : 17418742256431718568,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1500,
+    "charms" : [
+      "jewellers_loupe"
+    ],
+    "seed" : 10372713006399184061,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1459,
+    "charms" : [
+      "last_light"
+    ],
+    "seed" : 3326683747705280722,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1024,
+    "charms" : [
+      "no_questions"
+    ],
+    "seed" : 14727398571348481255,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1400,
+    "charms" : [
+      "patient_hand"
+    ],
+    "seed" : 7681369312725881084,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 2365,
+    "charms" : [
+      "reputation_precedes"
+    ],
+    "seed" : 635340062622043409,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 14309,
+    "charms" : [
+      "salvage_rights"
+    ],
+    "seed" : 12036054877675440422,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 455,
+    "charms" : [
+      "authentic_damage"
+    ],
+    "seed" : 4990025627642643771,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 573,
+    "charms" : [
+      "collectors_eye"
+    ],
+    "seed" : 16390740442658292048,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1066,
+    "charms" : [
+      "collectors_loupe"
+    ],
+    "seed" : 9344711192625757541,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 3048,
+    "charms" : [
+      "diamond_sieve"
+    ],
+    "seed" : 2298681933969602938,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 602,
+    "charms" : [
+      "fine_motor"
+    ],
+    "seed" : 13699396757575054735,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1228,
+    "charms" : [
+      "gem_cradle"
+    ],
+    "seed" : 6653367498952454564,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 3378,
+    "charms" : [
+      "long_shadows"
+    ],
+    "seed" : 18054082322595917241,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 595,
+    "charms" : [
+      "night_owl"
+    ],
+    "seed" : 11008053063902013902,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 890,
+    "charms" : [
+      "provenance_papers"
+    ],
+    "seed" : 3962023813332346339,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 455,
+    "charms" : [
+      "restorers_putty"
+    ],
+    "seed" : 15362738628352188920,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 989,
+    "charms" : [
+      "rock_hound"
+    ],
+    "seed" : 8316709378281905677,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 5309,
+    "charms" : [
+      "rush_job"
+    ],
+    "seed" : 1270680119659305506,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 1902,
+    "charms" : [
+      "steady_hands"
+    ],
+    "seed" : 12671394943268951607,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 986,
+    "charms" : [
+      "steady_lamp"
+    ],
+    "seed" : 5625365684608602700,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 2694,
+    "charms" : [
+      "union_card"
+    ],
+    "seed" : 17026080508285619809,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 108573,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook"
+    ],
+    "seed" : 9980051249595910774,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 13521,
+    "charms" : [
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded"
+    ],
+    "seed" : 2934021999525365387,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 14849,
+    "charms" : [
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt"
+    ],
+    "seed" : 14334736814612316832,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 7071,
+    "charms" : [
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand"
+    ],
+    "seed" : 7288707564512542389,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 15859,
+    "charms" : [
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe"
+    ],
+    "seed" : 242678305885878986,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 4035,
+    "charms" : [
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light"
+    ],
+    "seed" : 11643393129529210591,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 3306,
+    "charms" : [
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions"
+    ],
+    "seed" : 4597363870839370484,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 3755,
+    "charms" : [
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand"
+    ],
+    "seed" : 15998078694512062217,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 8041,
+    "charms" : [
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes"
+    ],
+    "seed" : 8952049435856038686,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 43565,
+    "charms" : [
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 1906020185756264243,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 63406,
+    "charms" : [
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer"
+    ],
+    "seed" : 13306735000838890312,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 68334,
+    "charms" : [
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest"
+    ],
+    "seed" : 6260705750739115869,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 452354,
+    "charms" : [
+      "reputation_precedes",
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit"
+    ],
+    "seed" : 17661420565792643954,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 273389,
+    "charms" : [
+      "salvage_rights",
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak"
+    ],
+    "seed" : 10615391315755784071,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 334891,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights"
+    ],
+    "seed" : 3569362057065943964,
+    "siteID" : "night_dig"
+  },
+  {
+    "ceiling" : 27217,
+    "charms" : [
+      "back_door_buyer",
+      "compound_interest",
+      "cretaceous_permit",
+      "curators_streak",
+      "field_notebook",
+      "front_loaded",
+      "full_belt",
+      "heavy_hand",
+      "jewellers_loupe",
+      "last_light",
+      "no_questions",
+      "patient_hand",
+      "reputation_precedes",
+      "salvage_rights",
+      "authentic_damage",
+      "collectors_eye",
+      "collectors_loupe",
+      "diamond_sieve",
+      "fine_motor",
+      "gem_cradle",
+      "long_shadows",
+      "night_owl",
+      "provenance_papers",
+      "restorers_putty",
+      "rock_hound",
+      "rush_job",
+      "steady_hands",
+      "steady_lamp",
+      "union_card"
+    ],
+    "seed" : 14970076880709275569,
+    "siteID" : "night_dig"
+  }
+]

@@ -30,8 +30,30 @@ public enum Installments {
     /// The middle stays lumpy on purpose. Mean income jumps from about $720 at tier 3 to
     /// $1,170 at tier 4 because a site unlocks there, so smooth win rates would need a
     /// ramp that jumps to match. A difficulty curve that lurches to flatten a graph is
-    /// fitting the model player rather than the game.
-    public static let table = [500, 600, 850, 1150, 1600, 1850, 2200, 2600]
+    /// fitting the model player rather than the game. Tier 7 is lumpy for the same reason
+    /// and harder: mean income climbs 42% there against tier 6, so the note climbs with
+    /// it or the week is free.
+    ///
+    /// The top three rungs were refitted after the curve was found to **invert** — tiers
+    /// 6, 7 and 8 measured 42%, 50% and 62%, so the game got easier the deeper it went,
+    /// which is the exact failure the paragraph above warns about. Two things were wrong.
+    /// The ramp did not track the tier 7 income jump, and the simulated shopper refused to
+    /// buy anything once it was projected behind, so raising a note *lowered* income and
+    /// the measurement was worthless (see `PlayerPolicy.desperationSpend`). With the
+    /// shopper fixed the ladder measures monotone, which is the only property that
+    /// actually matters past tier 5:
+    ///
+    ///     tier  1     2     3     4     5     6     7     8
+    ///     win  65.0% 57.3% 50.8% 34.9% 34.1% 33.3% 33.3% 20.0%
+    ///
+    /// Refitted once more when the belt widened to five charms, which lifted tier 6 from
+    /// 32.7% to 40% on its own — the fifth slot is worth most where a player can already
+    /// afford to fill it, so widening the belt is a difficulty change and not only a
+    /// content one.
+    ///
+    /// Tiers 6 to 8 have no stated target — §9 fixes only tier 1 near 70% and tier 5 near
+    /// 30%, and both land. Past that the requirement is that it never gets easier.
+    public static let table = [500, 600, 850, 1150, 1600, 2200, 3250, 3450]
     public static let growth: Float = 1.22
 
     /// `tier` is 1-based: tier 1 is a player's first run.

@@ -37,12 +37,19 @@ module Bonedust
       # Needed for the ceiling: a buyer's priceMultiplier is the last term in what a slab
       # can legitimately pay, and the fence pays 2.1x.
       @buyers = raw.fetch("buyers", []).map { |b| deep_f32(b) }
+      # Read, not redeclared. These bound the per-charm and per-tool ceilings, so a belt
+      # that widens on the client has to widen here in the same commit or honest play is
+      # rejected as forgery.
+      @charm_slots = raw.fetch("charmSlots")
+      @tool_slots = raw.fetch("toolSlots")
       freeze
     end
 
     def fossil(id) = @fossils[id]
     def site(id) = @sites[id]
     def charm(id) = @charms[id]
+    def charm_slots = @charm_slots
+    def tool_slots = @tool_slots
 
     def schema = @raw["schema"]
 

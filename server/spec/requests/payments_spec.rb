@@ -125,11 +125,25 @@ RSpec.describe "POST /v1/payments", type: :request do
     slab = issue_slab
     issue = SlabIssue.find_by!(slab_id: slab["slab_id"])
     expect(issue.ceiling_for(%w[provenance_papers gem_cradle])).to be > issue.base_ceiling
-    # Claiming more charms than there are slots must not keep raising it.
-    four = issue.ceiling_for(%w[provenance_papers gem_cradle compound_interest collectors_loupe])
-    six = issue.ceiling_for(%w[provenance_papers gem_cradle compound_interest collectors_loupe
-                               diamond_sieve steady_lamp])
-    expect(six).to eq(four)
+
+    # The cap is read, not written out. This spec used to name four charms and assert that
+    # a fifth and sixth changed nothing, which tested the number 4 rather than the cap --
+    # so widening the belt to five slots failed it, with the fifth charm counting exactly
+    # as it should.
+    slots = Bonedust.constants.charm_slots
+    ids = Bonedust.constants.charms.keys
+    full = ids.first(slots)
+    overfull = ids.first(slots + 3)
+    expect(full.size).to eq(slots)
+    expect(overfull.size).to be > slots
+
+    # Vacuous unless the charms past the cap would have raised it had they counted.
+    overfull.drop(slots).each do |id|
+      expect(issue.ceiling_for([id])).to be > issue.base_ceiling,
+                                         "#{id} does not raise the ceiling on its own, so " \
+                                         "dropping it past the cap proves nothing"
+    end
+    expect(issue.ceiling_for(overfull)).to eq(issue.ceiling_for(full))
   end
 
   it "rate limits an install to 120 payments an hour" do

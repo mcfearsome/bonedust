@@ -37,6 +37,7 @@
       "reputation" : 0
     }
   ],
+  "charmSlots" : 5,
   "charms" : [
     {
       "blurb" : "Cracked bone counts half intact. Collectors like a little history.",
@@ -177,7 +178,7 @@
       "reputationRequired" : 0
     },
     {
-      "blurb" : "Two percent more on everything, for each charm you are carrying.",
+      "blurb" : "Every charm on the belt makes the rest worth more.",
       "id" : "compound_interest",
       "modifiers" : {
         "crackMultiplier" : 1,
@@ -200,11 +201,11 @@
       "reputationRequired" : 0,
       "scaling" : {
         "kind" : "payoutPerCharm",
-        "value" : 0.02
+        "value" : 0.07
       }
     },
     {
-      "blurb" : "Every third slab comes out of Hell Creek, wherever you happen to be.",
+      "blurb" : "Paperwork that turns a pocketed gem into a declared one.",
       "id" : "cretaceous_permit",
       "modifiers" : {
         "crackMultiplier" : 1,
@@ -225,6 +226,10 @@
       "pool" : "shop",
       "price" : 95,
       "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerBankedGem",
+        "value" : 0.08
+      },
       "slabRule" : {
         "everyNthDay" : 3,
         "siteID" : "hell_creek"
@@ -440,6 +445,326 @@
       "pool" : "vault",
       "price" : 125,
       "reputationRequired" : 0
+    },
+    {
+      "blurb" : "He pays for a run of clean work, and stops the day you break one.",
+      "id" : "curators_streak",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Curator's streak",
+      "pool" : "shop",
+      "price" : 85,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerIntactStreak",
+        "value" : 0.14
+      }
+    },
+    {
+      "blurb" : "A clean week is worth more than a good one.",
+      "id" : "reputation_precedes",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Reputation precedes you",
+      "pool" : "shop",
+      "price" : 110,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerFlawless",
+        "value" : 0.1
+      }
+    },
+    {
+      "blurb" : "Broken is still bone, and bone is still money.",
+      "id" : "salvage_rights",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Salvage rights",
+      "pool" : "shop",
+      "price" : 80,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerCrackedCell",
+        "value" : 0.0022
+      }
+    },
+    {
+      "blurb" : "Nobody checks the back of a mounted specimen.",
+      "id" : "restorers_putty",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0.65,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Restorer's putty",
+      "pool" : "shop",
+      "price" : 95,
+      "reputationRequired" : 0
+    },
+    {
+      "blurb" : "Each species you log is another page he will pay for.",
+      "id" : "field_notebook",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Field notebook",
+      "pool" : "shop",
+      "price" : 75,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerSpecies",
+        "value" : 0.09
+      }
+    },
+    {
+      "blurb" : "The more they are looking for you, the more your name is worth down there.",
+      "id" : "no_questions",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "No questions",
+      "pool" : "shop",
+      "price" : 90,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerHeat",
+        "value" : 0.007
+      }
+    },
+    {
+      "blurb" : "Every quiet sale makes the next one easier to arrange.",
+      "id" : "back_door_buyer",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Back-door buyer",
+      "pool" : "shop",
+      "price" : 105,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerQuietSale",
+        "value" : 0.13
+      }
+    },
+    {
+      "blurb" : "One in the tray makes you better at spotting the next.",
+      "id" : "jewellers_loupe",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Jeweller's loupe",
+      "pool" : "shop",
+      "price" : 100,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "gemsPerBankedGem",
+        "value" : 0.3
+      }
+    },
+    {
+      "blurb" : "Quick work. Every charm on your belt makes it a little quicker, and a little worse.",
+      "id" : "heavy_hand",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 0.7,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1.15
+      },
+      "name" : "Heavy hand",
+      "pool" : "shop",
+      "price" : 60,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "crackPerCharm",
+        "value" : 0.18
+      }
+    },
+    {
+      "blurb" : "Hurry at the start of a week. You can be careful when there is less of it left.",
+      "id" : "front_loaded",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Front-loaded",
+      "pool" : "shop",
+      "price" : 70,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "safeSpeedPerDayRemaining",
+        "value" : 0.06
+      }
+    },
+    {
+      "blurb" : "Clean work buys the light to do more of it. Four seconds a slab, every slab you don't break.",
+      "id" : "last_light",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Last light",
+      "pool" : "shop",
+      "price" : 95,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "daylightPerFlawless",
+        "value" : 4
+      }
+    },
+    {
+      "blurb" : "A man carrying every tool he owns looks like he knows what he's doing, and gets paid like it.",
+      "id" : "full_belt",
+      "modifiers" : {
+        "crackMultiplier" : 1,
+        "crackedIntactCredit" : 0,
+        "daylightDelta" : 0,
+        "flatBonus" : 0,
+        "gemMultiplier" : 1,
+        "identifyExposure" : 0.25,
+        "payoutMultiplier" : 1,
+        "revealSeconds" : 0,
+        "rockHardnessMultiplier" : 1,
+        "rockNodulePayout" : 0,
+        "rushMultiplier" : 1,
+        "rushThreshold" : 20,
+        "safeSpeedMultiplier" : 1
+      },
+      "name" : "Full belt",
+      "pool" : "shop",
+      "price" : 80,
+      "reputationRequired" : 0,
+      "scaling" : {
+        "kind" : "payoutPerTool",
+        "value" : 0.06
+      }
     }
   ],
   "fossils" : [
@@ -4366,9 +4691,9 @@
     850,
     1150,
     1600,
-    1850,
     2200,
-    2600
+    3250,
+    3450
   ],
   "schema" : 1,
   "sets" : [
@@ -4954,6 +5279,7 @@
       }
     }
   ],
+  "toolSlots" : 3,
   "tools" : [
     {
       "blurb" : "The one you already own. Honest, middling, forgiving enough.",
