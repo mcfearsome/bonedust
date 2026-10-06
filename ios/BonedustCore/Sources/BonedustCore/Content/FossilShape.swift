@@ -72,12 +72,65 @@ public struct ShapeParams: Sendable, Codable, Equatable {
     /// width. They all rasterised to exactly 371 cells, which is the tell -- a claw, an
     /// oyster, a turtle scute and a skull dome cannot plausibly be the same size.
     public var sweep: Float = 1.6
+    // The names the content actually uses. Four generators read `ribs`, `aspect` and
+    // `thickness` while every fossil of theirs specifies `rays`/`spread`, `depth`/`tail`,
+    // `veins`/`width` or `segments`/`width`/`taper` -- so about thirty-nine species drew
+    // with identical default proportions and nothing errored, because every default is
+    // plausible. Four trilobites measuring exactly 34x16 is what gave it away.
+    //
+    // Resolved rather than renamed: the content reads better for it (a leaf has veins, a
+    // trilobite has segments) and renaming forty entries risks missing one silently.
+    public var rays: Int?
+    public var spread: Float?
+    public var depth: Float?
+    public var tail: Float?
+    public var veins: Int?
+    public var width: Float?
+    public var segments: Int?
+    public var taper: Float?
+
+    /// How many repeated features: ribs, rays, veins or segments, whichever the shape calls
+    /// them.
+    public var featureCount: Int { rays ?? veins ?? segments ?? ribs }
+    /// How deep or wide the body is, whichever the shape calls it.
+    public var bodyDepth: Float { depth ?? width ?? aspect }
 
     public init() {}
 }
 
 /// A fossil's outline, as data. Expands deterministically — no PRNG — so the Ruby
 /// port in §6 can reproduce the identical bone mask from the same spec.
+extension ShapeParams {
+    /// Each generator takes its content's own vocabulary and maps it onto the fields the
+    /// drawing code uses. `spread` and `taper` have no existing home, so they ride on
+    /// `bend`, which none of these four shapes reads.
+    var resolvedFan: ShapeParams {
+        var out = self
+        out.ribs = featureCount
+        if let spread { out.bend = spread }
+        return out
+    }
+    var resolvedFish: ShapeParams {
+        var out = self
+        out.aspect = bodyDepth
+        if let tail { out.bend = tail }
+        return out
+    }
+    var resolvedLeaf: ShapeParams {
+        var out = self
+        out.ribs = featureCount
+        out.aspect = bodyDepth
+        return out
+    }
+    var resolvedSegmented: ShapeParams {
+        var out = self
+        out.ribs = featureCount
+        out.aspect = bodyDepth
+        if let taper { out.bend = taper }
+        return out
+    }
+}
+
 public struct FossilShapeSpec: Sendable, Codable, Equatable {
     public enum Kind: String, Sendable, Codable {
         case spiral          // ammonite
@@ -133,6 +186,8 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
         case .cluster: return Self.cluster(params)
         }
     }
+
+    // MARK: - Generators
 
     // MARK: - Creatures
     //
@@ -663,6 +718,7 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
     /// transverse strokes with matrix gaps between them, because every bone cell
     /// renders the same colour — segmentation has to be an absence of bone.
     private static func segmentedBody(_ p: ShapeParams) -> [ShapePrimitive] {
+        let p = p.resolvedSegmented
         var out: [ShapePrimitive] = [
             .ellipse(center: Vec2(-0.72, 0), radii: Vec2(0.3, p.aspect * 1.25), rotation: 0),
             .ellipse(center: Vec2(0.8, 0), radii: Vec2(0.22, p.aspect * 0.78), rotation: 0),
@@ -682,6 +738,7 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
 
     /// Brachiopod: a ribbed shell fanning out from a hinge.
     private static func fan(_ p: ShapeParams) -> [ShapePrimitive] {
+        let p = p.resolvedFan
         let hinge = Vec2(0, -0.85)
         var out: [ShapePrimitive] = []
         let n = max(3, p.ribs)
@@ -705,6 +762,7 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
     /// wide, which is exactly why this fossil is crack-prone — few bone cells, so
     /// each cracked cell costs a lot of `intact`.
     private static func fish(_ p: ShapeParams) -> [ShapePrimitive] {
+        let p = p.resolvedFish
         var out: [ShapePrimitive] = [
             .ellipse(center: Vec2(-0.1, 0), radii: Vec2(0.78, p.aspect), rotation: 0)
         ]
@@ -734,6 +792,7 @@ public struct FossilShapeSpec: Sendable, Codable, Equatable {
     /// Leaf blade with a midrib and angled veins. Deliberately the thinnest shape
     /// in the game.
     private static func leaf(_ p: ShapeParams) -> [ShapePrimitive] {
+        let p = p.resolvedLeaf
         var out: [ShapePrimitive] = [
             .ellipse(center: .zero, radii: Vec2(0.92, p.aspect), rotation: 0)
         ]

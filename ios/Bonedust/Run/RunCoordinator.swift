@@ -79,11 +79,18 @@ final class RunCoordinator {
         catalog.sites.filter { site in
             switch site.unlock {
             case .start: return true
-            case .reputation(let needed): return meta.reputation >= needed
-            case .crewMilestone:
-                // From the cached ledger: once the crew reaches a milestone it stays
-                // reached, so going offline cannot take Hell Creek away again.
+            // Lifetime, not the balance. Camp spends Reputation, so gating on what is in
+            // hand meant buying an upgrade could lock a site you had already earned.
+            case .reputation(let needed): return meta.lifetimeReputation >= needed
+            case .crewMilestone(let needed):
+                // Either the crew gets there or you do, which is the same rule the item
+                // pools already use. A purely shared gate meant every dinosaur in the game
+                // sat behind a number one player cannot move -- "i've never seen a fish or
+                // leaf", and they would never have seen a Tyrannosaurus either.
+                //
+                // Cached from the ledger, so going offline cannot take Hell Creek away.
                 return ledger.hasUnlockedSite(site.id)
+                    || meta.lifetimeContribution >= SiteUnlock.soloUnlock(forCrewMilestone: needed)
             }
         }
     }

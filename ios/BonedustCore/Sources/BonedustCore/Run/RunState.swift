@@ -566,6 +566,20 @@ public struct MetaProgress: Sendable, Codable, Equatable {
 
     public var schema: Int
     public var reputation: Int
+    /// Every point of Reputation ever earned, never spent.
+    ///
+    /// Site unlocks read this rather than the balance. Camp spends Reputation, and gating
+    /// on the balance meant buying an upgrade could take Green River away again -- a
+    /// progression gate that runs backwards is not a gate, it is a trap.
+    ///
+    /// Optional on the wire; an older save falls back to its current balance, which is
+    /// exact for anyone who has not yet bought anything and the best available guess for
+    /// anyone who has.
+    private var lifetimeReputationRaw: Int?
+    public var lifetimeReputation: Int {
+        get { max(lifetimeReputationRaw ?? reputation, reputation) }
+        set { lifetimeReputationRaw = newValue }
+    }
     /// Tier the next run starts at.
     public var nextTier: Int
     public var runsCompleted: Int
@@ -633,6 +647,7 @@ public struct MetaProgress: Sendable, Codable, Equatable {
     public init() {
         self.schema = MetaProgress.currentSchema
         self.reputation = 0
+        self.lifetimeReputationRaw = 0
         self.nextTier = 1
         self.runsCompleted = 0
         self.runsFailed = 0
@@ -757,6 +772,7 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         for set in collection.completedSets(catalog: catalog) where !known.contains(set.id) {
             completedSetIDs.append(set.id)
             reputation += set.reputationBonus
+            lifetimeReputation += set.reputationBonus
             rewards.reputationFromSets += set.reputationBonus
             rewards.completedSets.append(set.id)
         }
@@ -764,6 +780,7 @@ public struct MetaProgress: Sendable, Codable, Equatable {
         switch run.phase {
         case .succeeded(let reputationEarned, _):
             reputation += reputationEarned
+            lifetimeReputation += reputationEarned
             rewards.reputationFromCash = reputationEarned
             runsCompleted += 1
             currentStreak += 1

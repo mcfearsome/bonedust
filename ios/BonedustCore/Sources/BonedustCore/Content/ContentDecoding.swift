@@ -29,6 +29,7 @@ extension ShapeParams {
     public enum CodingKeys: String, CodingKey {
         case turns, growth, thickness, taperFrom, taperTo, bend, count, jitter, ribs, aspect
         case knobEnds, chain, root, process, sweep
+        case rays, spread, depth, tail, veins, width, segments, taper
     }
 }
 
@@ -111,6 +112,14 @@ extension ShapeParams {
         root = try c.value(.root, base.root)
         process = try c.value(.process, base.process)
         sweep = try c.value(.sweep, base.sweep)
+        rays = try c.decodeIfPresent(Int.self, forKey: .rays)
+        spread = try c.decodeIfPresent(Float.self, forKey: .spread)
+        depth = try c.decodeIfPresent(Float.self, forKey: .depth)
+        tail = try c.decodeIfPresent(Float.self, forKey: .tail)
+        veins = try c.decodeIfPresent(Int.self, forKey: .veins)
+        width = try c.decodeIfPresent(Float.self, forKey: .width)
+        segments = try c.decodeIfPresent(Int.self, forKey: .segments)
+        taper = try c.decodeIfPresent(Float.self, forKey: .taper)
         taperTo = try c.value(.taperTo, base.taperTo)
         bend = try c.value(.bend, base.bend)
         count = try c.value(.count, base.count)

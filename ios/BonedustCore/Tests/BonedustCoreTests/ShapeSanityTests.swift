@@ -54,4 +54,62 @@ final class ShapeSanityTests: XCTestCase {
         print("  smallest \(smallest.id) at \(smallest.cells) cells")
         print("  largest  \(largest.id) at \(largest.cells) cells")
     }
+
+    /// Two fossils of the same shape with different parameters must not draw identically.
+    ///
+    /// This is the bug that kept hiding. `crescent` read `taperFrom`/`taperTo`/`bend` while
+    /// every crescent in the content specified `thickness`/`sweep`; `segmentedBody` read
+    /// `aspect`/`ribs` while every trilobite specified `segments`/`width`/`taper`. Nothing
+    /// errored, because a missing key decodes to a plausible default — so twelve crescents
+    /// and ten trilobites all drew as the same animal.
+    ///
+    /// Each time, the tell was a number being *exactly* equal when it had no business
+    /// being: four trilobites at 34x16, twelve crescents at 371 cells. That is a test.
+    func testFossilsOfAKindWithDifferentParametersDrawDifferently() {
+        let catalog = ContentCatalog.shared
+        var byShape: [String: [(id: String, params: ShapeParams, cells: Int, box: String)]] = [:]
+
+        for fossil in catalog.fossils {
+            var grid = SlabGrid()
+            for i in 0..<SlabGrid.cellCount { grid.cells[i].depth = 0 }
+            let cells = ShapeRasterizer.rasterize(
+                fossil.shape.expand(),
+                transform: ShapeTransform(
+                    scale: fossil.shape.spanCells / 2, rotation: 0,
+                    center: Vec2(Float(SlabGrid.width) / 2, Float(SlabGrid.height) / 2)
+                ),
+                flag: SlabGrid.Flag.bone, into: &grid
+            )
+            var minX = SlabGrid.width, maxX = -1, minY = SlabGrid.height, maxY = -1
+            for y in 0..<SlabGrid.height {
+                for x in 0..<SlabGrid.width where grid.isBone(SlabGrid.index(x, y)) {
+                    minX = min(minX, x); maxX = max(maxX, x)
+                    minY = min(minY, y); maxY = max(maxY, y)
+                }
+            }
+            byShape[fossil.shape.kind.rawValue, default: []].append(
+                (fossil.id, fossil.shape.params, cells, "\(maxX - minX)x\(maxY - minY)")
+            )
+        }
+
+        for (kind, members) in byShape where members.count > 1 {
+            for i in 0..<members.count {
+                for j in (i + 1)..<members.count {
+                    let a = members[i], b = members[j]
+                    guard a.params != b.params else { continue }
+                    // Same span *and* same footprint from different parameters means the
+                    // generator is not reading them.
+                    let sameSpan = catalog.fossil(a.id)?.shape.spanCells
+                        == catalog.fossil(b.id)?.shape.spanCells
+                    guard sameSpan else { continue }
+                    XCTAssertFalse(
+                        a.cells == b.cells && a.box == b.box,
+                        "\(kind): \(a.id) and \(b.id) have different parameters and draw "
+                            + "identically (\(a.cells) cells, \(a.box)) — the generator is "
+                            + "reading names the content does not use"
+                    )
+                }
+            }
+        }
+    }
 }

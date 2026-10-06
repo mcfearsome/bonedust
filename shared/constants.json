@@ -499,12 +499,12 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
-          "taperFrom" : 0.106,
-          "taperTo" : 0.0154,
+          "taperFrom" : 0.159,
+          "taperTo" : 0.0231,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 112
+        "spanCells" : 96
       }
     },
     {
@@ -632,10 +632,10 @@
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.1464,
+          "thickness" : 0.2196,
           "turns" : 2.6
         },
-        "spanCells" : 94
+        "spanCells" : 81
       }
     },
     {
@@ -758,8 +758,8 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
-          "taperFrom" : 0.25,
-          "taperTo" : 0.0417,
+          "taperFrom" : 0.2895,
+          "taperTo" : 0.0483,
           "thickness" : 0.1,
           "turns" : 2.6
         },
@@ -1208,11 +1208,14 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "segments" : 11,
           "sweep" : 1.6,
+          "taper" : 0.3,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "width" : 0.34
         },
         "spanCells" : 44
       }
@@ -1238,8 +1241,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 7,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 0.6,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -1298,6 +1303,7 @@
           "bend" : 0.22,
           "chain" : 0,
           "count" : 7,
+          "depth" : 0.55,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
@@ -1305,6 +1311,7 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
+          "tail" : 0.3,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -1330,6 +1337,7 @@
           "bend" : 0.22,
           "chain" : 0,
           "count" : 7,
+          "depth" : 0.3,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
@@ -1337,6 +1345,7 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
+          "tail" : 0.34,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -1372,7 +1381,9 @@
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.045,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "veins" : 7,
+          "width" : 0.74
         },
         "spanCells" : 64
       }
@@ -1422,7 +1433,7 @@
       "shape" : {
         "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.3477,
+          "aspect" : 0.3825,
           "bend" : 0.04,
           "chain" : 0,
           "count" : 7,
@@ -1435,7 +1446,7 @@
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.046,
+          "thickness" : 0.0506,
           "turns" : 2.6
         },
         "spanCells" : 74
@@ -1838,7 +1849,7 @@
       "shape" : {
         "kind" : "skull",
         "params" : {
-          "aspect" : 0.2062,
+          "aspect" : 0.2388,
           "bend" : 0.1,
           "chain" : 0,
           "count" : 7,
@@ -1851,7 +1862,7 @@
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.0371,
+          "thickness" : 0.043,
           "turns" : 2.6
         },
         "spanCells" : 87
@@ -1911,8 +1922,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 11,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 0.85,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -1948,7 +1961,7 @@
           "sweep" : 1.2,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.38,
+          "thickness" : 0.418,
           "turns" : 2.6
         },
         "spanCells" : 52
@@ -2101,17 +2114,17 @@
           "count" : 7,
           "growth" : 0.085,
           "jitter" : 0.1,
-          "knobEnds" : 1.4,
+          "knobEnds" : 2.1,
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
-          "taperFrom" : 0.1016,
-          "taperTo" : 0.0407,
+          "taperFrom" : 0.1524,
+          "taperTo" : 0.0611,
           "thickness" : 0.1,
           "turns" : 2.6
         },
-        "spanCells" : 92
+        "spanCells" : 79
       }
     },
     {
@@ -2137,13 +2150,16 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "segments" : 9,
           "sweep" : 1.6,
+          "taper" : 0.26,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "width" : 0.42
         },
-        "spanCells" : 42
+        "spanCells" : 34
       }
     },
     {
@@ -2169,13 +2185,16 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "segments" : 10,
           "sweep" : 1.6,
+          "taper" : 0.3,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "width" : 0.36
         },
-        "spanCells" : 42
+        "spanCells" : 34
       }
     },
     {
@@ -2201,13 +2220,16 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "segments" : 3,
           "sweep" : 1.6,
+          "taper" : 0.1,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "width" : 0.5
         },
-        "spanCells" : 41
+        "spanCells" : 34
       }
     },
     {
@@ -2233,11 +2255,14 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "segments" : 12,
           "sweep" : 1.6,
+          "taper" : 0.33,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "width" : 0.34
         },
         "spanCells" : 46
       }
@@ -2265,11 +2290,14 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "segments" : 13,
           "sweep" : 1.6,
+          "taper" : 0.28,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "width" : 0.4
         },
         "spanCells" : 56
       }
@@ -2297,13 +2325,16 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "segments" : 3,
           "sweep" : 1.6,
+          "taper" : 0.12,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "width" : 0.48
         },
-        "spanCells" : 42
+        "spanCells" : 34
       }
     },
     {
@@ -2332,7 +2363,7 @@
           "sweep" : 1.5,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.3,
+          "thickness" : 0.4034,
           "turns" : 2.6
         },
         "spanCells" : 50
@@ -2359,8 +2390,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 9,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 0.9,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -2391,8 +2424,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 7,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 0.75,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -2415,7 +2450,7 @@
       "shape" : {
         "kind" : "cluster",
         "params" : {
-          "aspect" : 0.3,
+          "aspect" : 0.3882,
           "bend" : 0.22,
           "chain" : 0,
           "count" : 11,
@@ -2428,7 +2463,7 @@
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.05,
+          "thickness" : 0.0647,
           "turns" : 2.6
         },
         "spanCells" : 82
@@ -2455,8 +2490,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 13,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 1,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -2493,7 +2530,9 @@
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "veins" : 4,
+          "width" : 0.9
         },
         "spanCells" : 60
       }
@@ -2553,11 +2592,14 @@
           "process" : 0,
           "ribs" : 9,
           "root" : 0,
+          "segments" : 7,
           "sweep" : 1.6,
+          "taper" : 0.5,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "width" : 0.26
         },
         "spanCells" : 58
       }
@@ -2611,6 +2653,7 @@
           "bend" : 0.22,
           "chain" : 0,
           "count" : 7,
+          "depth" : 0.34,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
@@ -2618,6 +2661,7 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
+          "tail" : 0.32,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2643,6 +2687,7 @@
           "bend" : 0.22,
           "chain" : 0,
           "count" : 7,
+          "depth" : 0.4,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
@@ -2650,6 +2695,7 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
+          "tail" : 0.3,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2675,6 +2721,7 @@
           "bend" : 0.22,
           "chain" : 0,
           "count" : 7,
+          "depth" : 0.36,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
@@ -2682,6 +2729,7 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
+          "tail" : 0.28,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2707,6 +2755,7 @@
           "bend" : 0.22,
           "chain" : 0,
           "count" : 7,
+          "depth" : 0.26,
           "growth" : 0.085,
           "jitter" : 0.1,
           "knobEnds" : 0,
@@ -2714,6 +2763,7 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
+          "tail" : 0.3,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.1,
@@ -2775,8 +2825,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 6,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 0.85,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -2807,8 +2859,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 5,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 0.6,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -2845,7 +2899,9 @@
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.03,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "veins" : 15,
+          "width" : 0.4
         },
         "spanCells" : 58
       }
@@ -2877,7 +2933,9 @@
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.04,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "veins" : 9,
+          "width" : 0.3
         },
         "spanCells" : 62
       }
@@ -2909,7 +2967,9 @@
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.045,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "veins" : 7,
+          "width" : 0.95
         },
         "spanCells" : 58
       }
@@ -2935,8 +2995,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 15,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 0.7,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -2967,8 +3029,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 8,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 1.2,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -3127,8 +3191,10 @@
           "jitter" : 0.1,
           "knobEnds" : 0,
           "process" : 0,
+          "rays" : 5,
           "ribs" : 9,
           "root" : 0,
+          "spread" : 0.7,
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
@@ -3183,7 +3249,7 @@
       "shape" : {
         "kind" : "toothRow",
         "params" : {
-          "aspect" : 0.3,
+          "aspect" : 0.3474,
           "bend" : 0.03,
           "chain" : 0,
           "count" : 7,
@@ -3196,7 +3262,7 @@
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.04,
+          "thickness" : 0.0463,
           "turns" : 2.6
         },
         "spanCells" : 80
@@ -3226,8 +3292,8 @@
           "ribs" : 9,
           "root" : 0,
           "sweep" : 1.6,
-          "taperFrom" : 0.1645,
-          "taperTo" : 0.0353,
+          "taperFrom" : 0.2129,
+          "taperTo" : 0.0457,
           "thickness" : 0.1,
           "turns" : 2.6
         },
@@ -3343,7 +3409,7 @@
       "shape" : {
         "kind" : "skull",
         "params" : {
-          "aspect" : 0.165,
+          "aspect" : 0.2017,
           "bend" : 0.06,
           "chain" : 0,
           "count" : 7,
@@ -3356,7 +3422,7 @@
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.0309,
+          "thickness" : 0.0378,
           "turns" : 2.6
         },
         "spanCells" : 95
@@ -3420,7 +3486,7 @@
           "sweep" : 1.6,
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
-          "thickness" : 0.3,
+          "thickness" : 0.3143,
           "turns" : 2.6
         },
         "spanCells" : 56
@@ -3581,7 +3647,9 @@
           "taperFrom" : 0.16,
           "taperTo" : 0.015,
           "thickness" : 0.05,
-          "turns" : 2.6
+          "turns" : 2.6,
+          "veins" : 8,
+          "width" : 0.8
         },
         "spanCells" : 66
       }

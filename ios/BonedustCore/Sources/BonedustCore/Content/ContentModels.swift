@@ -103,6 +103,19 @@ public enum SiteUnlock: Sendable, Codable, Equatable {
     case reputation(Int)
     case crewMilestone(Int)
 
+    /// What one digger has to have paid, on their own, to open a crew-gated site.
+    ///
+    /// The crew debt is $2.4 billion across everybody, so a site gated at $250,000 of it is
+    /// unreachable for one person and invisible during development -- which is how every
+    /// dinosaur in the game came to sit behind a number a single player cannot move.
+    ///
+    /// A thousandth of the crew figure, floored, so the ladder keeps its order: the crew
+    /// opens a site for everybody long before any individual gets there, and somebody
+    /// playing alone still gets there eventually.
+    public static func soloUnlock(forCrewMilestone crew: Int) -> Int {
+        max(2_000, crew / 1_000)
+    }
+
     public var label: String {
         switch self {
         case .start: return "Available"
