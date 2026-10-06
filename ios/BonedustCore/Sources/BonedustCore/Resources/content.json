@@ -28,10 +28,10 @@
       "note": "Thin as a pencil. Treat it like one.",
       "shape": {
         "kind": "taper",
-        "spanCells": 112,
+        "spanCells": 96,
         "params": {
-          "taperFrom": 0.106,
-          "taperTo": 0.0154,
+          "taperFrom": 0.159,
+          "taperTo": 0.0231,
           "bend": 0.06
         }
       }
@@ -100,10 +100,10 @@
       "note": "A stack of tiny discs. Blow on it wrong and it is gravel.",
       "shape": {
         "kind": "discs",
-        "spanCells": 94,
+        "spanCells": 81,
         "params": {
           "count": 14,
-          "thickness": 0.1464,
+          "thickness": 0.2196,
           "jitter": 0.1,
           "chain": 1.0
         }
@@ -176,8 +176,8 @@
         "kind": "taper",
         "spanCells": 62,
         "params": {
-          "taperFrom": 0.25,
-          "taperTo": 0.0417
+          "taperFrom": 0.2895,
+          "taperTo": 0.0483
         }
       }
     },
@@ -547,8 +547,8 @@
         "spanCells": 74,
         "params": {
           "ribs": 8,
-          "thickness": 0.046,
-          "aspect": 0.3477,
+          "thickness": 0.0506,
+          "aspect": 0.3825,
           "bend": 0.04
         }
       }
@@ -774,10 +774,10 @@
         "kind": "skull",
         "spanCells": 87,
         "params": {
-          "aspect": 0.2062,
+          "aspect": 0.2388,
           "bend": 0.1,
           "ribs": 14,
-          "thickness": 0.0371
+          "thickness": 0.043
         }
       },
       "crackMultiplier": 1.25
@@ -831,7 +831,7 @@
         "kind": "crescent",
         "spanCells": 52,
         "params": {
-          "thickness": 0.38,
+          "thickness": 0.418,
           "sweep": 1.2
         }
       },
@@ -919,12 +919,12 @@
       "note": "A nautilus that never bothered coiling.",
       "shape": {
         "kind": "taper",
-        "spanCells": 92,
+        "spanCells": 79,
         "params": {
-          "taperFrom": 0.1016,
-          "taperTo": 0.0407,
+          "taperFrom": 0.1524,
+          "taperTo": 0.0611,
           "bend": 0.02,
-          "knobEnds": 1.4
+          "knobEnds": 2.1
         }
       },
       "crackMultiplier": 1.1
@@ -938,7 +938,7 @@
       "note": "Broad-brimmed and placid. A good first trilobite.",
       "shape": {
         "kind": "segmentedBody",
-        "spanCells": 42,
+        "spanCells": 34,
         "params": {
           "segments": 9,
           "width": 0.42,
@@ -955,7 +955,7 @@
       "note": "Small, neat, and easy to snap across the middle.",
       "shape": {
         "kind": "segmentedBody",
-        "spanCells": 42,
+        "spanCells": 34,
         "params": {
           "segments": 10,
           "width": 0.36,
@@ -973,7 +973,7 @@
       "note": "Two plates and a hinge. Barely a fingernail.",
       "shape": {
         "kind": "segmentedBody",
-        "spanCells": 41,
+        "spanCells": 34,
         "params": {
           "segments": 3,
           "width": 0.5,
@@ -1027,7 +1027,7 @@
       "note": "A thumbnail with ambitions.",
       "shape": {
         "kind": "segmentedBody",
-        "spanCells": 42,
+        "spanCells": 34,
         "params": {
           "segments": 3,
           "width": 0.48,
@@ -1047,7 +1047,7 @@
         "kind": "crescent",
         "spanCells": 50,
         "params": {
-          "thickness": 0.3,
+          "thickness": 0.4034,
           "sweep": 1.5
         }
       },
@@ -1101,8 +1101,8 @@
         "spanCells": 82,
         "params": {
           "count": 11,
-          "aspect": 0.3,
-          "thickness": 0.05
+          "aspect": 0.3882,
+          "thickness": 0.0647
         }
       },
       "crackMultiplier": 1.2
@@ -1529,8 +1529,8 @@
         "spanCells": 80,
         "params": {
           "ribs": 10,
-          "thickness": 0.04,
-          "aspect": 0.3,
+          "thickness": 0.0463,
+          "aspect": 0.3474,
           "bend": 0.03
         }
       },
@@ -1547,8 +1547,8 @@
         "kind": "taper",
         "spanCells": 78,
         "params": {
-          "taperFrom": 0.1645,
-          "taperTo": 0.0353,
+          "taperFrom": 0.2129,
+          "taperTo": 0.0457,
           "bend": 0.2
         }
       },
@@ -1620,10 +1620,10 @@
         "kind": "skull",
         "spanCells": 95,
         "params": {
-          "aspect": 0.165,
+          "aspect": 0.2017,
           "bend": 0.06,
           "ribs": 16,
-          "thickness": 0.0309
+          "thickness": 0.0378
         }
       },
       "crackMultiplier": 1.3
@@ -1656,7 +1656,7 @@
         "kind": "crescent",
         "spanCells": 56,
         "params": {
-          "thickness": 0.3,
+          "thickness": 0.3143,
           "sweep": 1.6
         }
       },

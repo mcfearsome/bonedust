@@ -277,7 +277,19 @@ case "sizes":
             ),
             flag: SlabGrid.Flag.bone, into: &grid
         )
-        sizes.append((fossil.id, fossil.shape.kind.rawValue, cells))
+        // How much of its own bounding box the shape actually fills, and how wide it is
+        // at its narrowest useful measure. A long hairline passes a cell count and reads
+        // as a scratch.
+        var minX = SlabGrid.width, maxX = -1, minY = SlabGrid.height, maxY = -1
+        for y in 0..<SlabGrid.height {
+            for x in 0..<SlabGrid.width where grid.isBone(SlabGrid.index(x, y)) {
+                minX = min(minX, x); maxX = max(maxX, x)
+                minY = min(minY, y); maxY = max(maxY, y)
+            }
+        }
+        let boxW = max(1, maxX - minX + 1), boxH = max(1, maxY - minY + 1)
+        let fill = maxX < 0 ? 0 : cells * 100 / (boxW * boxH)
+        sizes.append((fossil.id, "\(fossil.shape.kind.rawValue)\t\(fill)%fill\t\(boxW)x\(boxH)", cells))
     }
     sizes.sort { $0.2 < $1.2 }
     let total = SlabGrid.width * SlabGrid.height
