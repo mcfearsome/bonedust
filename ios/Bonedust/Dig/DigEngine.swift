@@ -55,6 +55,10 @@ final class DigEngine {
     /// going fast costs nothing — and a meter that said otherwise sent careful players into
     /// the one strategy that cannot pay an installment.
     private(set) var isBrushOverBone = false
+    /// Written per touch sample, read once a frame. Same reason as `contact`: this drives
+    /// the speed meter's colour and its wording, and a dozen samples a frame crossing the
+    /// edge of a fossil made both strobe.
+    @ObservationIgnored private var overBoneNow = false
     /// Brush size from how much finger is on the glass. See `ContactScale`.
     @ObservationIgnored private(set) var contact = ContactScale()
     /// Published so the speed meter reads against the brush actually in use -- a broad
@@ -63,12 +67,17 @@ final class DigEngine {
     private(set) var contactScale: Float = 1
 
     /// Folds in a touch's contact radius, in points.
+    ///
+    /// Deliberately publishes nothing. This runs once per *coalesced sample* -- a dozen or
+    /// more per frame on a fast drag -- and `safeSpeed` drives the speed meter's full scale
+    /// and the position of its notch. Updating it per sample rescaled the meter continuously
+    /// and invalidated the HUD mid-frame, which reads as the whole screen flickering under
+    /// the finger.
+    ///
+    /// The published mirror is refreshed in `publish()`, once a frame, which is the entire
+    /// reason that method exists.
     func noteContact(radius: Float) {
-        let scale = contact.accept(radius: radius)
-        if scale != contactScale {
-            contactScale = scale
-            safeSpeed = sim.safeSpeed(for: contact.applied(to: tool))
-        }
+        contact.accept(radius: radius)
     }
 
     /// The tool as the finger is holding it right now.
@@ -327,14 +336,14 @@ final class DigEngine {
     func brushBegan(at point: Vec2) -> StrokeResult {
         startDaylightIfNeeded()
         guard !isFinished else { return StrokeResult() }
-        isBrushOverBone = isOverBone(point)
+        overBoneNow = isOverBone(point)
         return record(sim.beginStroke(at: point, tool: effectiveTool))
     }
 
     @discardableResult
     func brushMoved(to point: Vec2, deltaMillis: Float) -> StrokeResult {
         guard !isFinished else { return StrokeResult() }
-        isBrushOverBone = isOverBone(point)
+        overBoneNow = isOverBone(point)
         return record(sim.moveStroke(to: point, deltaMillis: deltaMillis, tool: effectiveTool))
     }
 
@@ -358,6 +367,7 @@ final class DigEngine {
     func brushEnded() {
         sim.endStroke()
         // Finger up: there is no brush, so it is not over anything.
+        overBoneNow = false
         isBrushOverBone = false
     }
 
@@ -413,6 +423,14 @@ final class DigEngine {
     /// Copies the handful of values the HUD binds to out of the simulation, writing
     /// only what changed so SwiftUI does not invalidate on every frame.
     func publish(force: Bool = false) {
+        // Contact scale is a HUD scalar like any other: one update a frame, and only when
+        // it has actually moved.
+        if force || overBoneNow != isBrushOverBone { isBrushOverBone = overBoneNow }
+        let scale = contact.lastScale
+        if force || abs(scale - contactScale) > 0.01 {
+            contactScale = scale
+            safeSpeed = sim.safeSpeed(for: contact.applied(to: tool))
+        }
         let exposure = Int((sim.exposure * 100).rounded())
         if force || exposure != exposurePercent { exposurePercent = exposure }
 

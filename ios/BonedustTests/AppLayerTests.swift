@@ -68,7 +68,16 @@ final class DigEngineTests: XCTestCase {
 
     func testPublishedReadoutsTrackTheSimulation() {
         let subject = engine()
-        XCTAssertTrue(sweepUntilBoneShows(subject), "the sweep never reached bone")
+        // Until the readout has something to say, not until the first bone cell appears.
+        // Fossils are 450 to 4,000 cells now, so one exposed cell is 0% after rounding --
+        // the sweep had worked and the assertion was reading a number that had not moved.
+        XCTAssertTrue(
+            sweepSlab(subject, coverings: 12, until: {
+                subject.publish()
+                return subject.exposurePercent >= 5
+            }),
+            "the sweep never exposed enough of the fossil to read"
+        )
         subject.publish()
         XCTAssertGreaterThan(subject.exposurePercent, 0)
         XCTAssertEqual(subject.intactPercent, 100, "a slow sweep should not crack anything")

@@ -1076,3 +1076,38 @@ rock but cracks exposed bone", and a grade that pays for speed is an argument ag
 Two tests had the old shape written in: a run is no longer five slabs, because `RunLength`
 scales a week with the tier and an S-grade slab earns another, so asserting five was
 asserting that neither feature works.
+
+## Three hyolith clusters in one week
+
+A species that was the **only member of its shape kind took the whole kind's share** — 13%
+of every draw at Wheeler, against 1.3% for each of ten trilobites. Fixing "spirals dominate"
+by giving each shape kind an equal share created "any lone-kind species dominates", which is
+the same bug wearing different clothes.
+
+Weights now start from an equal share per kind and then **cap any single species at 6%**,
+redistributing the excess to everything under the cap. Top species is 6.5% at both Wheeler
+and Charmouth, down from 13%.
+
+Wheeler's `segmentedBody` share rises to 37% as a result, which is fine: that is ten
+different trilobite species at 3.7% each, and Wheeler Shale genuinely is mostly trilobites.
+
+## Flickering under the finger
+
+`noteContact` ran once per *coalesced touch sample* — a dozen or more per frame on a fast
+drag — and mutated `safeSpeed`, which the speed meter uses for its full scale and the
+position of its notch. The meter rescaled continuously and the HUD invalidated mid-frame.
+`isBrushOverBone` had the same shape and drives the meter's colour and wording, so crossing
+the edge of a fossil strobed the label.
+
+Both are HUD scalars now, refreshed in `publish()` once a frame, which is the entire reason
+that method exists. The raw values are tracked in `@ObservationIgnored` storage and read at
+the frame boundary.
+
+This is the same lesson as `isIdentified` earlier: the engine has a live half and a published
+half, and anything SwiftUI watches belongs in the published half, updated once. Writing to an
+observed property from inside the touch loop is a frame-rate-dependent render storm.
+
+`testPublishedReadoutsTrackTheSimulation` stopped at the first exposed bone cell, which was
+fine when fossils were 118 cells and is not now that they are 450 to 4,000 — one cell of a
+3,000-cell fossil is 0% after rounding, so the sweep had worked and the assertion was reading
+a number that had not moved.
