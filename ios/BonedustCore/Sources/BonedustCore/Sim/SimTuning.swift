@@ -252,8 +252,17 @@ public struct SimTuning: Sendable, Codable, Equatable {
     /// How far a worn cell lerps toward the next layer down, at `wear == 1`.
     public var wearColorBlend: Float = 0.55
     /// Tint of depth-1 sandstone toward bone when bone sits underneath — the tell.
+    /// This is the shipped tell: it keeps a specimen's internal structure, so a
+    /// fin's rays still read through it. See spec §7a.
     public var boneTellTint: Float = 0.20
-    /// Per-cell brightness jitter, ±this fraction.
+    /// The tell as a pattern instead of a tint: how far a stippled cell goes toward
+    /// bone. Built and wired to a debug slider, but off by default: the dots say
+    /// "something is here" and lose the shape (spec §7a). Both constants stay live,
+    /// so the overlay can A/B them without a rebuild. For the stipple, set this to
+    /// 0.60 and `boneTellTint` to 0.
+    public var boneTellStipple: Float = 0
+    /// Per-cell brightness jitter, ±this fraction, applied in three steps: darker,
+    /// unchanged, lighter.
     public var cellNoise: Float = 0.07
 
     public init() {}

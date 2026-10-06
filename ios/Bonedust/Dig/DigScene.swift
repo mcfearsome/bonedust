@@ -1,6 +1,22 @@
 import BonedustCore
 import SpriteKit
+import SwiftUI
 import UIKit
+
+extension SKColor {
+    /// `Earth` is plain bytes so BonedustCore stays free of UIKit; this is the scene's
+    /// way back out of them. The scene's own backdrop reads `Ink`, which already holds
+    /// the ramp as `Color`, so this is for the one-off colours drawn from `Earth`
+    /// directly, such as the fracture bloom.
+    convenience init(_ rgb: RGB8) {
+        self.init(
+            red: CGFloat(rgb.r) / 255,
+            green: CGFloat(rgb.g) / 255,
+            blue: CGFloat(rgb.b) / 255,
+            alpha: 1
+        )
+    }
+}
 
 /// The slab, on screen and under the finger.
 ///
@@ -19,7 +35,10 @@ final class DigScene: SKScene {
     weak var engine: DigEngine?
     var haptics: HapticEngine?
     var audio: DigAudio?
-    /// Suppresses particle bursts, per §7.
+    /// The palette the page is drawn in. A scene has no SwiftUI environment, so the
+    /// view hands it over; `configureRenderer()` then sets its light level.
+    var theme: Theme?
+    /// Suppresses particle bursts, per §7, and the fracture bloom's growth.
     var reducedMotion = false
     /// Cosmetic brush trail (§5). The default tints dust by the layer coming off, per §3;
     /// any earned trail overrides that with its own colour, which is the whole point of
@@ -35,22 +54,52 @@ final class DigScene: SKScene {
     var orientationProbe = false
 
     private var renderer = SlabRenderer()
-    private var slabNode: SKSpriteNode?
+    private(set) var slabNode: SKSpriteNode?
     private var slabTexture: SKMutableTexture?
+    /// The mount behind the slab. `private(set)` so a test can read its layer and
+    /// geometry; only this class builds it.
+    private(set) var mountNode: SKSpriteNode?
+    /// The palette the backdrop is drawn in. Kept so that a rebuild on resize
+    /// repaints in the same colours instead of falling back to day.
+    private var appliedInk = Ink.day
     private var dust: SKEmitterNode?
     private var lastUpdateTime: TimeInterval = 0
     private var lastTouchTimestamp: TimeInterval?
     private var hasReportedCrack = false
     private var pendingFullRedraw = true
 
+    // MARK: Construction
+
+    // `scaleMode` is this class's own invariant, so every initialiser sets it. It has to be set
+    // before the scene is presented. Set later, in `didMove`, it does nothing: the scene's size
+    // is fixed by then and SpriteKit stretches the scene to the view instead, so every length in
+    // scene units is wrong by the view's width, and `slabSize` is `max(0, 1 - 12)`, a slab with
+    // no area that `gridPoint(for:)` will not map a touch onto. A caller that had to remember to
+    // set it would hand that bug back the first time someone else built a scene.
+
+    override init() {
+        super.init()
+        scaleMode = .resizeFill
+    }
+
+    override init(size: CGSize) {
+        super.init(size: size)
+        scaleMode = .resizeFill
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        scaleMode = .resizeFill
+    }
+
     // MARK: Setup
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
-        scaleMode = .resizeFill
-        backgroundColor = SKColor(red: 0x22 / 255, green: 0x18 / 255, blue: 0x13 / 255, alpha: 1)
+        backgroundColor = SKColor(appliedInk.page)
         view.isMultipleTouchEnabled = false
         configureRenderer()
+        buildBackdrop()
         buildSlab()
     }
 
@@ -60,6 +109,12 @@ final class DigScene: SKScene {
         renderer.tuning = engine.sim.tuning
         renderer.lightLevel = engine.site.modifiers.lightLevel
         renderer.orientationProbe = orientationProbe
+        // One light level dims the slab and the page together. It is static per site
+        // and read once, here; there is no stream to observe.
+        if let theme {
+            theme.lightLevel = engine.site.modifiers.lightLevel
+            applyTheme(ink: theme.ink)
+        }
         pendingFullRedraw = true
     }
 
@@ -72,7 +127,7 @@ final class DigScene: SKScene {
         let node = SKSpriteNode(texture: texture)
         node.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         node.position = CGPoint(x: size.width / 2, y: size.height / 2)
-        node.size = size
+        node.size = slabSize
         node.zPosition = 0
         addChild(node)
         slabNode = node
@@ -80,10 +135,72 @@ final class DigScene: SKScene {
         pendingFullRedraw = true
     }
 
+    /// The scene less the mount's margin on every side.
+    ///
+    /// The scene is exactly the slab's card, and an `SKView` draws nothing past its own
+    /// edge. A slab that filled the scene would cover the whole backdrop, and a mount
+    /// "extending past" it would be clipped away, so the slab is inset and the mount
+    /// fills the space it leaves. `gridPoint(for:)` and `emitDust` both read the
+    /// slab node's size, so touches and dust follow the inset without any change.
+    private var slabSize: CGSize {
+        let inset = Measure.mountMargin * 2
+        return CGSize(
+            width: max(0, size.width - inset),
+            height: max(0, size.height - inset)
+        )
+    }
+
     override func didChangeSize(_ oldSize: CGSize) {
         super.didChangeSize(oldSize)
-        slabNode?.size = size
+        slabNode?.size = slabSize
         slabNode?.position = CGPoint(x: size.width / 2, y: size.height / 2)
+
+        // The mount is sized from the slab, so it follows the resize.
+        buildBackdrop()
+    }
+
+    // MARK: Backdrop
+
+    /// The mount, behind the slab at `-1`. The slab sits at `0` and the dust emitter
+    /// at `1`.
+    ///
+    /// The page and its dot grid used to be built here as well, and were unreachable:
+    /// this scene is exactly the slab's card and the mount fills all of it, so both
+    /// sat behind an opaque panel. They are `NotebookPage` in `DigView` now, which is
+    /// where the page the card sits on belongs. The mount stays because it is
+    /// reachable and load-bearing: it is what stops a cleared slab from vanishing
+    /// into that page.
+    ///
+    /// Rebuilt on resize rather than resized in place: a resize happens about twice
+    /// in a session.
+    func buildBackdrop() {
+        mountNode?.removeFromParent()
+        mountNode = nil
+
+        // The slab plus the margin on every side. Never optional, and Increase
+        // Contrast makes it more necessary, not less.
+        let inset = Measure.mountMargin * 2
+        let slab = slabSize
+        let mount = SKSpriteNode(
+            color: SKColor(appliedInk.mount),
+            size: CGSize(width: slab.width + inset, height: slab.height + inset)
+        )
+        mount.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        mount.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        mount.zPosition = -1
+        addChild(mount)
+        mountNode = mount
+    }
+
+    /// Repaints the scene's page colour and the mount in `ink`.
+    ///
+    /// Named `applyTheme` rather than `apply` because `DigScene` already has a
+    /// `apply(_:at:engine:)` for stroke results, and two unrelated methods
+    /// called `apply` on one scene is a trap for whoever reads this next.
+    func applyTheme(ink: Ink) {
+        appliedInk = ink
+        backgroundColor = SKColor(ink.page)
+        mountNode?.color = SKColor(ink.mount)
     }
 
     // MARK: Frame
@@ -235,7 +352,9 @@ final class DigScene: SKScene {
 
     // MARK: Feedback routing
 
-    private func apply(_ result: StrokeResult, at point: Vec2, engine: DigEngine) {
+    /// Internal rather than private so a test can hand it a `StrokeResult`. The touch
+    /// handlers that normally call it need a real `UITouch`, which a test cannot build.
+    func apply(_ result: StrokeResult, at point: Vec2, engine: DigEngine) {
         lastStrokeDidWork = result.didAnything
         lastRemovedLayer = result.dominantLayer ?? lastRemovedLayer
         lastBrushWasOverBone = engine.isOverBone(point)
@@ -243,6 +362,11 @@ final class DigScene: SKScene {
         if result.cracksStarted > 0 {
             haptics?.crack()
             audio?.playCrack()
+            // On what cracked, not on the finger that cracked it: with the air blower the two can
+            // be most of a brush radius apart. One bloom per stroke, at the centre of every cell
+            // it cracked. A result with no cells in it, which only a test can build, has no
+            // position to give, so it falls back to the touch.
+            bloomFracture(at: result.crackCentroid ?? point)
             hasReportedCrack = true
             onCrack?()
             if let cell = result.firstCrackCell { emitCrackBurst(at: cell) }
@@ -288,6 +412,53 @@ final class DigScene: SKScene {
         // bare matrix throws dust and a stroke over bone barely does.
         emitter.particleBirthRate = min(260, CGFloat(result.layersRemoved) * 9)
     }
+
+    /// A red ink bleed at the point of fracture.
+    ///
+    /// This is the *motion* half of spec §5. It exists for 200ms and then it is gone,
+    /// which is what lets the same red sit flat and permanent on a button without the
+    /// two reading as the same thing. The lasting record is the hatch, in SlabRenderer.
+    ///
+    /// Under Reduce Motion it fades in place and does not grow. An expanding shape at
+    /// the point of attention is exactly what that setting exists to suppress, and
+    /// nothing is lost: the hatch carries the information either way.
+    ///
+    /// Either source counts. `DigView` hands the scene the in-app toggle and the system
+    /// setting already combined, but only once, when the dig starts, so the system
+    /// flag is read live here as well: switching Reduce Motion on mid-dig takes effect
+    /// at the next fracture instead of the next slab. It is a parameter, not a read in
+    /// the body, so a test can drive both branches. The default is the real setting.
+    func bloomFracture(
+        at point: Vec2, systemReduceMotion: Bool = UIAccessibility.isReduceMotionEnabled
+    ) {
+        // A child of the slab, placed with the same grid-to-node conversion as
+        // `emitDust`. Task 6 inset the slab by `mountMargin` so the mount can show
+        // around it, so anything positioned against the scene instead lands up to 6pt
+        // off, which is more than the bloom's own 4pt radius.
+        guard let slab = slabNode else { return }
+        let bloom = SKShapeNode(circleOfRadius: 4)
+        bloom.fillColor = SKColor(Earth.stamp)
+        bloom.strokeColor = .clear
+        bloom.alpha = 0.9
+        bloom.position = CGPoint(
+            x: (CGFloat(point.x) / CGFloat(SlabGrid.width) - 0.5) * slab.size.width,
+            y: (0.5 - CGFloat(point.y) / CGFloat(SlabGrid.height)) * slab.size.height
+        )
+        bloom.zPosition = 2
+        slab.addChild(bloom)
+        let fade = SKAction.fadeOut(withDuration: 0.2)
+        let reduced = reducedMotion || systemReduceMotion
+        bloom.run(
+            .sequence([
+                reduced ? fade : .group([.scale(to: 5, duration: 0.2), fade]),
+                .removeFromParent(),
+            ]),
+            withKey: DigScene.bloomActionKey
+        )
+    }
+
+    /// The key the bloom's fade runs under, so a test can read its duration back.
+    static let bloomActionKey = "bloom"
 
     /// A short, sharp burst where bone broke.
     ///

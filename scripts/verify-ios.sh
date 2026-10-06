@@ -56,4 +56,12 @@ xcrun -sdk iphonesimulator swiftc \
   -F "$PLATFORM/Developer/Library/Frameworks" \
   $(find ios/BonedustTests -name '*.swift')
 
+echo "==> BonedustUITests"
+xcrun -sdk iphonesimulator swiftc \
+  -target "$TARGET" -sdk "$SDK" \
+  -swift-version 5 -typecheck \
+  -I "$PLATFORM/Developer/usr/lib" \
+  -F "$PLATFORM/Developer/Library/Frameworks" \
+  $(find ios/BonedustUITests -name '*.swift')
+
 echo "==> every iOS source compiles"

@@ -17,6 +17,7 @@ struct DigView: View {
     @State private var hintHasBeenShown = false
 
     @Environment(GameSettings.self) private var settings
+    @Environment(\.theme) private var theme
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
     @Environment(\.scenePhase) private var scenePhase
 
@@ -38,6 +39,8 @@ struct DigView: View {
         onBagged: @escaping (DigEngine) -> Void = { _ in }
     ) {
         _engine = State(initialValue: engine)
+        // No size and no scale mode here: `DigScene` makes itself `.resizeFill` in every
+        // initialiser, so it takes its size from this view whoever builds it.
         _scene = State(initialValue: DigScene())
         self.day = day
         self.totalDays = totalDays
@@ -65,7 +68,13 @@ struct DigView: View {
         }
         .padding(.horizontal, Measure.gutter)
         .padding(.bottom, 10)
-        .background(Ink.ground.ignoresSafeArea())
+        // The slab is width-limited at 3:4, so the stack is shorter than the screen and
+        // floats a little inside the safe area. `ignoresSafeArea` only extends an edge that
+        // touches the safe area, so without this the page stops short and leaves a white
+        // band above and below it. Filling the screen changes nothing else: the stack is
+        // centred in it, which is where the hosting view already put it.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(NotebookPage())
         .onAppear(perform: start)
         .onDisappear(perform: stop)
         .onChange(of: scenePhase) { _, phase in
@@ -102,7 +111,7 @@ struct DigView: View {
             } label: {
                 Image(systemName: "slider.horizontal.3")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(Ink.muted)
+                    .foregroundStyle(theme.ink.muted)
                     .frame(width: 34, height: 34)
             }
             .accessibilityLabel("Tuning")
@@ -110,10 +119,10 @@ struct DigView: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text("Day \(day) of \(totalDays)")
                     .font(Typography.ui(.subheadline, weight: .semibold))
-                    .foregroundStyle(Ink.ivory)
+                    .foregroundStyle(theme.ink.ink)
                 Text(engine.site.name)
                     .font(Typography.ui(.caption2))
-                    .foregroundStyle(Ink.muted)
+                    .foregroundStyle(theme.ink.muted)
                     .lineLimit(1)
             }
 
@@ -122,23 +131,23 @@ struct DigView: View {
             HStack(spacing: 4) {
                 Text("$\(cash)")
                     .font(Typography.number(.footnote, weight: .semibold))
-                    .foregroundStyle(cash >= installment ? Ink.safe : Ink.ivory)
+                    .foregroundStyle(cash >= installment ? theme.ink.safe : theme.ink.ink)
                 Text("/")
                     .font(Typography.number(.footnote))
-                    .foregroundStyle(Ink.hairline)
+                    .foregroundStyle(theme.ink.hairline)
                 Text("$\(installment)")
                     .font(Typography.number(.footnote))
-                    .foregroundStyle(Ink.muted)
+                    .foregroundStyle(theme.ink.muted)
             }
             .monospacedDigit()
             .padding(.horizontal, 9)
             .padding(.vertical, 5)
             .background(
                 RoundedRectangle(cornerRadius: Measure.cardRadius)
-                    .fill(Ink.raised)
+                    .fill(theme.ink.raised)
                     .overlay(
                         RoundedRectangle(cornerRadius: Measure.cardRadius)
-                            .stroke(Ink.hairline, lineWidth: Measure.hairline)
+                            .stroke(theme.ink.hairline, lineWidth: Measure.hairline)
                     )
             )
             .accessibilityElement(children: .ignore)
@@ -160,7 +169,7 @@ struct DigView: View {
         .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: Measure.cardRadius)
-                .stroke(Ink.hairline, lineWidth: Measure.hairline)
+                .stroke(theme.ink.hairline, lineWidth: Measure.hairline)
         )
         .overlay(alignment: .topLeading) { specimenChip }
         .overlay(alignment: .bottom) { hint }
@@ -179,7 +188,7 @@ struct DigView: View {
             Text("\(engine.specimenCode) · \(engine.specimenName.uppercased())")
                 .font(Typography.label(.caption2))
                 .tracking(1.0)
-                .foregroundStyle(Ink.ivory)
+                .foregroundStyle(theme.ink.ink)
             SpecimenRule().frame(width: 92)
             // Identifying a fossil early is only worth paying for if the name tells you
             // something you can act on. These two lines are that: whether the slab is worth
@@ -189,19 +198,19 @@ struct DigView: View {
                     Text("NEVER CATALOGUED · PAYS MORE")
                         .font(Typography.label(.caption2))
                         .tracking(0.9)
-                        .foregroundStyle(Ink.accent)
+                        .foregroundStyle(theme.ink.stamp)
                 }
                 Text(engine.fragilityNote)
                     .font(Typography.label(.caption2))
                     .tracking(0.9)
                     .foregroundStyle(
-                        engine.fossil.crackMultiplier > 1.15 ? Ink.danger : Ink.muted
+                        engine.fossil.crackMultiplier > 1.15 ? theme.ink.stamp : theme.ink.muted
                     )
             }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
-        .background(Ink.ground.opacity(0.76))
+        .background(theme.ink.page.opacity(0.76))
         .clipShape(RoundedRectangle(cornerRadius: 3))
         .padding(8)
         .accessibilityHidden(true)
@@ -213,10 +222,10 @@ struct DigView: View {
         if showHint {
             Text("Go slow over bone.")
                 .font(Typography.ui(.footnote, weight: .semibold))
-                .foregroundStyle(Ink.ground)
+                .foregroundStyle(theme.ink.page)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 7)
-                .background(Ink.accent)
+                .background(theme.ink.stamp)
                 .clipShape(Capsule())
                 .padding(.bottom, 14)
                 .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
@@ -234,12 +243,12 @@ struct DigView: View {
                     Text(tool.name)
                         .font(Typography.label(.caption2))
                         .tracking(0.8)
-                        .foregroundStyle(Ink.muted)
+                        .foregroundStyle(theme.ink.muted)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 4)
                         .overlay(
                             RoundedRectangle(cornerRadius: 3)
-                                .stroke(Ink.hairline, lineWidth: Measure.hairline)
+                                .stroke(theme.ink.hairline, lineWidth: Measure.hairline)
                         )
                 }
                 Spacer()
@@ -252,18 +261,22 @@ struct DigView: View {
     private var readouts: some View {
         HStack(spacing: 10) {
             Readout(label: "Exposed", value: "\(engine.exposurePercent)%")
+            // This used to be three colours, ink, accent and danger. The last two are
+            // one `stamp` now, so what separates "some damage" from "badly broken" is
+            // motion: below 60 the number pulses. Red in motion, spec §5. With Reduce
+            // Motion on it does not pulse, and the number is what is left to say it.
             Readout(
                 label: "Intact",
                 value: "\(engine.intactPercent)%",
-                tint: engine.intactPercent >= 90 ? Ink.ivory
-                    : engine.intactPercent >= 60 ? Ink.accent : Ink.danger
+                tint: engine.intactPercent >= 90 ? nil : theme.ink.stamp,
+                isAlarmed: engine.intactPercent < 60
             )
             Readout(label: "Est. value", value: "$\(engine.estimatedValue)")
             if engine.wholeGems > 0 {
                 Readout(
                     label: engine.wholeGems == 1 ? "Gem" : "Gems",
                     value: "\(engine.wholeGems)",
-                    tint: Ink.gem
+                    tint: theme.ink.gem
                 )
             }
         }
@@ -293,10 +306,10 @@ struct DigView: View {
         } label: {
             Text("Bag it")
                 .font(Typography.ui(.headline, weight: .bold))
-                .foregroundStyle(Ink.ground)
+                .foregroundStyle(theme.ink.page)
                 .frame(maxWidth: .infinity)
                 .scaledControlHeight(52)
-                .background(Ink.accent)
+                .background(theme.ink.stamp)
                 .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
         }
         .accessibilityLabel("Bag it")
@@ -327,6 +340,10 @@ struct DigView: View {
 
     private func start() {
         scene.engine = engine
+        // Before `configureRenderer()`, which is what reads it: a dig on a dim site
+        // lights the whole page from there, once, because `lightLevel` is static per
+        // site. Without this line the night palette is only ever reached in tests.
+        scene.theme = theme
         scene.haptics = haptics
         scene.audio = audio
         scene.reducedMotion = reduceMotion
@@ -373,6 +390,8 @@ struct DigView: View {
 /// One tool slot.
 struct ToolButton: View {
 
+    @Environment(\.theme) private var theme
+
     let tool: BrushTool
     let isSelected: Bool
     let action: () -> Void
@@ -396,14 +415,14 @@ struct ToolButton: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
-            .foregroundStyle(isSelected ? Ink.ground : Ink.muted)
+            .foregroundStyle(isSelected ? theme.ink.page : theme.ink.muted)
             .frame(maxWidth: .infinity)
             .scaledControlHeight(52)
-            .background(isSelected ? Ink.ivory : Ink.raised)
+            .background(isSelected ? theme.ink.ink : theme.ink.raised)
             .clipShape(RoundedRectangle(cornerRadius: Measure.cardRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: Measure.cardRadius)
-                    .stroke(isSelected ? Color.clear : Ink.hairline, lineWidth: Measure.hairline)
+                    .stroke(isSelected ? Color.clear : theme.ink.hairline, lineWidth: Measure.hairline)
             )
         }
         .accessibilityLabel(tool.name)

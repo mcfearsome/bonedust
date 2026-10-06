@@ -9,6 +9,9 @@ import SwiftUI
 struct RootView: View {
 
     @State private var settings = GameSettings()
+    /// The one palette the whole app reads. A dig on a dim site flips it through
+    /// `DigScene.configureRenderer()`, so this is also where it is put back.
+    @State private var theme = Theme()
     @State private var coordinator: RunCoordinator
     @State private var gameCenter = GameCenterService()
     @State private var showSettings = false
@@ -24,9 +27,22 @@ struct RootView: View {
     var body: some View {
         content
             .environment(settings)
+            .environment(\.theme, theme)
             .onAppear(perform: connectGameCenter)
-            .preferredColorScheme(.dark)
-            .tint(Ink.accent)
+            // The page is cream by day and lamp-lit at night, and the status bar and
+            // system controls follow it. Forced dark, the clock is white on cream.
+            .preferredColorScheme(theme.ink == .night ? .dark : .light)
+            .tint(theme.ink.stamp)
+            // A dig on a dim site lights the page from `DigScene.configureRenderer()`. This is
+            // the other half: the dig opens in its own light instead of flashing the day page
+            // first, and the day comes back when it ends. Every other screen is lit by no site
+            // and reads the day palette (the migration shim in DesignTokens), so a night scheme
+            // left behind would put light controls and a white clock on a cream page.
+            .onChange(of: coordinator.screen, initial: true) { _, screen in
+                theme.lightLevel = screen == .dig
+                    ? coordinator.digEngine?.site.modifiers.lightLevel ?? 1
+                    : 1
+            }
             .sheet(isPresented: $showSettings) {
                 SettingsView(
                     settings: settings,
@@ -184,12 +200,12 @@ struct RootView: View {
         VStack(spacing: 14) {
             Text("That dig got away from us.")
                 .font(Typography.ui(.headline))
-                .foregroundStyle(Ink.ivory)
+                .foregroundStyle(theme.ink.ink)
             Button("Back to the title") { coordinator.showTitle() }
                 .font(Typography.ui(.subheadline, weight: .semibold))
-                .foregroundStyle(Ink.accent)
+                .foregroundStyle(theme.ink.stamp)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Ink.ground.ignoresSafeArea())
+        .background(theme.ink.page.ignoresSafeArea())
     }
 }

@@ -45,6 +45,12 @@ targets:
         CFBundleDisplayName: Bonedust
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
+        # Bundle-relative: Resources/Fonts is flattened into the bundle root. Bold is
+        # listed on purpose, Typography.number picks it by name for semibold and up.
+        UIAppFonts:
+          - RubikDirt-Regular.ttf
+          - CourierPrime-Regular.ttf
+          - CourierPrime-Bold.ttf
         UILaunchScreen:
           UIColorName: LaunchBackground
         UIRequiresFullScreen: true
@@ -101,6 +107,21 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
 
+  # Real touches against the real app. Black-box, so it depends on the app target only to launch
+  # it, and not on BonedustCore. See BonedustUITests/README.md for why it exists.
+  BonedustUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: BonedustUITests
+        excludes:
+          - "**/*.md"
+    dependencies:
+      - target: Bonedust
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+
 schemes:
   Bonedust:
     build:
@@ -113,3 +134,15 @@ schemes:
       config: Debug
       targets:
         - BonedustTests
+
+  # A scheme of its own, so `Bonedust` (which `make app` and `make test-app` use) neither builds
+  # nor runs the UI tests. They are real-time and need a simulator: `make test-ui`.
+  BonedustUI:
+    build:
+      targets:
+        Bonedust: all
+        BonedustUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - BonedustUITests
